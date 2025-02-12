@@ -1,12 +1,80 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import Navbar from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+
+const features = [
+  {
+    title: "Video Consultations",
+    description: "Connect with doctors face-to-face from the comfort of your home",
+    icon: "🎥",
+  },
+  {
+    title: "Instant Messaging",
+    description: "Quick chat with healthcare professionals for minor concerns",
+    icon: "💬",
+  },
+  {
+    title: "Appointment Scheduling",
+    description: "Book and manage appointments with ease",
+    icon: "📅",
+  },
+];
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <section className="pt-32 pb-16 px-4 animate-fade-down">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            Healthcare at Your Fingertips
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Connect with qualified doctors instantly through secure video calls and chat.
+            Get the care you need, when you need it.
+          </p>
+          <Button asChild size="lg" className="h-12 px-8">
+            <Link to="/signup">Get Started</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 px-4 animate-fade-up">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 px-4 bg-primary text-white">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+          <p className="text-xl mb-8 opacity-90">
+            Join thousands of patients who trust TeleMediBuddy for their healthcare needs.
+          </p>
+          <Button
+            variant="secondary"
+            size="lg"
+            asChild
+            className="h-12 px-8 text-primary"
+          >
+            <Link to="/signup">Sign Up Now</Link>
+          </Button>
+        </div>
+      </section>
     </div>
   );
 };
