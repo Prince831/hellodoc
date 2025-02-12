@@ -27,56 +27,26 @@ const SymptomChecker = () => {
     setIsAnalyzing(true);
 
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) {
-        toast({
-          title: "Please sign in",
-          description: "You need to be signed in to use the symptom checker",
-          variant: "destructive",
-        });
-        navigate("/login");
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
         body: {
           symptoms,
-          userId: user.data.user.id,
         },
       });
 
       if (error) throw error;
 
-      let actionText = "Based on your symptoms, we recommend:";
-      let actionColor = "text-blue-600";
-
-      switch (data.recommendedAction) {
-        case "self_care":
-          actionText += " self-care at home";
-          actionColor = "text-green-600";
-          break;
-        case "virtual_consultation":
-          actionText += " scheduling a virtual consultation";
-          actionColor = "text-blue-600";
-          break;
-        case "emergency":
-          actionText += " seeking immediate medical attention";
-          actionColor = "text-red-600";
-          break;
-      }
-
       toast({
         title: "Analysis Complete",
-        description: "We've analyzed your symptoms and provided recommendations.",
+        description: "We'll find the best doctors for your symptoms.",
       });
 
-      setSymptoms("");
-      navigate("/dashboard", { 
+      // Navigate to home with the symptoms and analysis
+      navigate("/home", { 
         state: { 
+          symptoms,
           analysis: data.analysis,
-          recommendations: data.recommendations,
-          actionText,
-          actionColor
+          recommendedAction: data.recommendedAction,
+          recommendations: data.recommendations
         } 
       });
     } catch (error) {
@@ -92,13 +62,11 @@ const SymptomChecker = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
-      <Navbar />
-      <div className="max-w-4xl mx-auto px-4 pt-32 pb-16">
+      <div className="max-w-4xl mx-auto px-4 pt-16 pb-16">
         <Card className="p-6">
-          <h1 className="text-3xl font-bold mb-6">AI Symptom Checker</h1>
+          <h1 className="text-3xl font-bold mb-6">What brings you in today?</h1>
           <p className="text-gray-600 mb-6">
-            Describe your symptoms in detail below, and our AI will analyze them to provide
-            recommendations. Remember, this is not a replacement for professional medical advice.
+            Please describe your symptoms in detail, and we'll help you find the right specialist.
           </p>
           
           <div className="space-y-4">
@@ -114,7 +82,7 @@ const SymptomChecker = () => {
               disabled={isAnalyzing || !symptoms.trim()}
               className="w-full"
             >
-              {isAnalyzing ? "Analyzing Symptoms..." : "Analyze Symptoms"}
+              {isAnalyzing ? "Analyzing..." : "Find Specialists"}
             </Button>
           </div>
           
