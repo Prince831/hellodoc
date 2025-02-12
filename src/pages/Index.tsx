@@ -6,6 +6,11 @@ import { Link } from "react-router-dom";
 
 const features = [
   {
+    title: "AI Symptom Checker",
+    description: "Get instant AI-powered analysis of your symptoms and recommendations",
+    icon: "🤖",
+  },
+  {
     title: "Video Consultations",
     description: "Connect with doctors face-to-face from the comfort of your home",
     icon: "🎥",
@@ -14,11 +19,6 @@ const features = [
     title: "Instant Messaging",
     description: "Quick chat with healthcare professionals for minor concerns",
     icon: "💬",
-  },
-  {
-    title: "Appointment Scheduling",
-    description: "Book and manage appointments with ease",
-    icon: "📅",
   },
 ];
 
@@ -37,9 +37,14 @@ const Index = () => {
             Connect with qualified doctors instantly through secure video calls and chat.
             Get the care you need, when you need it.
           </p>
-          <Button asChild size="lg" className="h-12 px-8">
-            <Link to="/signup">Get Started</Link>
-          </Button>
+          <div className="flex justify-center gap-4">
+            <Button asChild size="lg" className="h-12 px-8">
+              <Link to="/signup">Get Started</Link>
+            </Button>
+            <Button asChild size="lg" variant="secondary" className="h-12 px-8">
+              <Link to="/symptom-checker">Try AI Symptom Checker</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
