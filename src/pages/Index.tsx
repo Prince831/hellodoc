@@ -63,7 +63,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of patients who trust TeleMediBuddy for their healthcare needs.
+            Join thousands of patients who trust Hello Doc for their healthcare needs.
           </p>
           <Button
             variant="secondary"
