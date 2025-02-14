@@ -2,11 +2,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
+import { Phone } from "lucide-react";
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
@@ -40,7 +39,6 @@ const SymptomChecker = () => {
         description: "We'll find the best doctors for your symptoms.",
       });
 
-      // Navigate to home with the symptoms and analysis
       navigate("/home", { 
         state: { 
           symptoms,
@@ -60,36 +58,51 @@ const SymptomChecker = () => {
     }
   };
 
+  const handleEmergencyCall = () => {
+    // In a real application, this would integrate with local emergency services
+    window.location.href = "tel:911";
+    toast({
+      title: "Emergency Call",
+      description: "Connecting to emergency services...",
+      variant: "destructive",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
-      <div className="max-w-4xl mx-auto px-4 pt-16 pb-16">
-        <Card className="p-6">
-          <h1 className="text-3xl font-bold mb-6">What brings you in today?</h1>
-          <p className="text-gray-600 mb-6">
-            Please describe your symptoms in detail, and we'll help you find the right specialist.
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-secondary to-white flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-2xl text-center space-y-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+          How may we help?
+        </h1>
+        
+        <div className="space-y-6">
+          <Textarea
+            placeholder="Describe your symptoms here..."
+            value={symptoms}
+            onChange={(e) => setSymptoms(e.target.value)}
+            className="min-h-[150px] text-lg p-4 resize-none"
+          />
           
-          <div className="space-y-4">
-            <Textarea
-              placeholder="Describe your symptoms here... (e.g., 'I've had a headache and fever for the last 2 days')"
-              value={symptoms}
-              onChange={(e) => setSymptoms(e.target.value)}
-              className="min-h-[200px]"
-            />
-            
-            <Button 
-              onClick={analyzeSymptoms} 
-              disabled={isAnalyzing || !symptoms.trim()}
-              className="w-full"
-            >
-              {isAnalyzing ? "Analyzing..." : "Find Specialists"}
-            </Button>
-          </div>
-          
-          <p className="text-sm text-gray-500 mt-6">
-            In case of emergency, always call your local emergency services immediately.
-          </p>
-        </Card>
+          <Button 
+            onClick={analyzeSymptoms} 
+            disabled={isAnalyzing || !symptoms.trim()}
+            className="w-full h-12 text-lg"
+          >
+            {isAnalyzing ? "Analyzing..." : "Find Specialists"}
+          </Button>
+        </div>
+
+        <div className="pt-6">
+          <Button 
+            onClick={handleEmergencyCall}
+            variant="destructive"
+            size="lg"
+            className="w-full md:w-auto h-14 px-8 text-lg"
+          >
+            <Phone className="mr-2 h-5 w-5" />
+            Emergency Ambulance
+          </Button>
+        </div>
       </div>
     </div>
   );
