@@ -1,74 +1,136 @@
 
+import { useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 
-const features = [
-  {
-    title: "AI Symptom Checker",
-    description: "Get instant AI-powered analysis of your symptoms and recommendations",
-    icon: "🤖",
-  },
-  {
-    title: "Video Consultations",
-    description: "Connect with doctors face-to-face from the comfort of your home",
-    icon: "🎥",
-  },
-  {
-    title: "Instant Messaging",
-    description: "Quick chat with healthcare professionals for minor concerns",
-    icon: "💬",
-  },
-];
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  years_of_experience: number;
+  rating: number;
+  image_url: string;
+}
 
 const Index = () => {
+  const location = useLocation();
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const symptoms = location.state?.symptoms || '';
+  const analysis = location.state?.analysis || '';
+  const recommendedAction = location.state?.recommendedAction || '';
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('doctors')
+          .select('*');
+
+        if (error) throw error;
+
+        // Filter doctors based on symptoms if provided
+        if (symptoms && data) {
+          const relevantDoctors = data.filter(doctor => 
+            doctor.keywords.some(keyword => 
+              symptoms.toLowerCase().includes(keyword.toLowerCase())
+            )
+          );
+          setDoctors(relevantDoctors.length > 0 ? relevantDoctors : data);
+        } else {
+          setDoctors(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, [symptoms]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-16 px-4 animate-fade-down">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Healthcare at Your Fingertips
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Connect with qualified doctors instantly through secure video calls and chat.
-            Get the care you need, when you need it.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button asChild size="lg" className="h-12 px-8">
-              <Link to="/signup">Get Started</Link>
-            </Button>
-            <Button asChild size="lg" variant="secondary" className="h-12 px-8">
-              <Link to="/symptom-checker">Try AI Symptom Checker</Link>
-            </Button>
+      {/* Symptoms Analysis Section */}
+      {symptoms && (
+        <section className="pt-24 px-4">
+          <div className="max-w-7xl mx-auto">
+            <Card className="p-6 mb-8">
+              <h2 className="text-2xl font-bold mb-4">Your Symptoms Analysis</h2>
+              <p className="text-gray-600 mb-4">{analysis}</p>
+              <div className={`mt-4 p-4 rounded-lg ${
+                recommendedAction === 'emergency' ? 'bg-red-100 text-red-700' :
+                recommendedAction === 'virtual_consultation' ? 'bg-blue-100 text-blue-700' :
+                'bg-green-100 text-green-700'
+              }`}>
+                <p className="font-semibold">
+                  {recommendedAction === 'emergency' ? 'Seek immediate medical attention' :
+                   recommendedAction === 'virtual_consultation' ? 'Schedule a virtual consultation' :
+                   'Self-care recommended'}
+                </p>
+              </div>
+            </Card>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Features Section */}
-      <section className="py-16 px-4 animate-fade-up">
+      {/* Recommended Doctors Section */}
+      <section className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </Card>
-            ))}
-          </div>
+          <h2 className="text-3xl font-bold mb-8">
+            {symptoms ? 'Recommended Doctors' : 'Our Specialists'}
+          </h2>
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {doctors.map((doctor) => (
+                <Card key={doctor.id} className="p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-start space-x-4">
+                    <img
+                      src={doctor.image_url}
+                      alt={doctor.name}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                    <div>
+                      <h3 className="text-xl font-semibold">{doctor.name}</h3>
+                      <p className="text-gray-600">{doctor.specialization}</p>
+                      <p className="text-sm text-gray-500">
+                        {doctor.years_of_experience} years of experience
+                      </p>
+                      <div className="mt-2 flex items-center">
+                        <span className="text-yellow-400">★</span>
+                        <span className="ml-1">{doctor.rating}</span>
+                      </div>
+                      <Button className="mt-4" size="sm">
+                        Book Appointment
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 bg-primary text-white">
+      <section className="py-16 px-4 bg-primary text-white mt-16">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+          <h2 className="text-3xl font-bold mb-6">Need Another Consultation?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join thousands of patients who trust Hello Doc for their healthcare needs.
+            Try our AI Symptom Checker to find the right specialist for your needs.
           </p>
           <Button
             variant="secondary"
@@ -76,7 +138,7 @@ const Index = () => {
             asChild
             className="h-12 px-8 text-primary"
           >
-            <Link to="/signup">Sign Up Now</Link>
+            <Link to="/symptom-checker">Start New Consultation</Link>
           </Button>
         </div>
       </section>
