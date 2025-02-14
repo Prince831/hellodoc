@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          date: string
+          doctor_id: string
+          id: string
+          notes: string | null
+          reason: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          doctor_id: string
+          id?: string
+          notes?: string | null
+          reason: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          doctor_id?: string
+          id?: string
+          notes?: string | null
+          reason?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctors: {
         Row: {
           availability: boolean | null
@@ -42,6 +83,74 @@ export type Database = {
           rating?: number
           specialization?: string
           years_of_experience?: number
+        }
+        Relationships: []
+      }
+      health_records: {
+        Row: {
+          created_at: string
+          date: string
+          diagnosis: string
+          doctor_id: string | null
+          id: string
+          notes: string | null
+          prescription: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          diagnosis: string
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          prescription?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          diagnosis?: string
+          doctor_id?: string | null
+          id?: string
+          notes?: string | null
+          prescription?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_records_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read?: boolean | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean | null
+          receiver_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
