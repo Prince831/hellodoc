@@ -22,18 +22,35 @@ const Messages = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const { data, error } = await supabase
+        // First, fetch doctors to get the sender information
+        const { data: doctorsData, error: doctorsError } = await supabase
+          .from('doctors')
+          .select('id, name');
+
+        if (doctorsError) throw doctorsError;
+
+        const doctorsMap = new Map(doctorsData.map(d => [d.id, d.name]));
+
+        // Then fetch messages
+        const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
-          .select(`
-            *,
-            sender:sender_id (
-              name
-            )
-          `)
+          .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setMessages(data || []);
+        if (messagesError) throw messagesError;
+
+        // Transform the data to match our interface
+        const transformedMessages = (messagesData || []).map(msg => ({
+          id: msg.id,
+          content: msg.content,
+          created_at: msg.created_at,
+          read: msg.read || false,
+          sender: {
+            name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
+          }
+        }));
+
+        setMessages(transformedMessages);
       } catch (error) {
         console.error('Error fetching messages:', error);
       } finally {

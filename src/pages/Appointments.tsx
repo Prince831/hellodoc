@@ -29,7 +29,11 @@ const Appointments = () => {
         const { data, error } = await supabase
           .from('appointments')
           .select(`
-            *,
+            id,
+            date,
+            status,
+            reason,
+            notes,
             doctor:doctor_id (
               name,
               specialization
@@ -38,7 +42,14 @@ const Appointments = () => {
           .order('date', { ascending: true });
 
         if (error) throw error;
-        setAppointments(data || []);
+
+        // Type cast the data to ensure status is of the correct type
+        const typedData = (data || []).map(item => ({
+          ...item,
+          status: item.status as 'scheduled' | 'completed' | 'cancelled'
+        }));
+
+        setAppointments(typedData);
       } catch (error) {
         console.error('Error fetching appointments:', error);
       } finally {
