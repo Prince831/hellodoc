@@ -44,7 +44,6 @@ const Appointments = () => {
 
         if (error) throw error;
 
-        // Type cast the data to ensure status is of the correct type
         const typedData = (data || []).map(item => ({
           ...item,
           status: item.status as 'scheduled' | 'completed' | 'cancelled'
@@ -79,7 +78,7 @@ const Appointments = () => {
       <Navbar />
       <div className="flex">
         <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
-          <SideNav />
+          <SideNav collapsed={isSidebarCollapsed} />
           <Button
             variant="ghost"
             size="icon"

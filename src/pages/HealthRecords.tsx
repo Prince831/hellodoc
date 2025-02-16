@@ -55,7 +55,7 @@ const HealthRecords = () => {
       <Navbar />
       <div className="flex">
         <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
-          <SideNav />
+          <SideNav collapsed={isSidebarCollapsed} />
           <Button
             variant="ghost"
             size="icon"
