@@ -10,6 +10,11 @@ import SideNav from "@/components/SideNav";
 import { ChevronLeft, ChevronRight, Send, MessageSquare, Calendar, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+interface AppointmentRequest {
+  date: string;
+  reason: string;
+}
+
 interface Message {
   id: string;
   content: string;
@@ -19,10 +24,7 @@ interface Message {
     name: string;
   };
   read: boolean;
-  appointment_request?: {
-    date: string;
-    reason: string;
-  } | null;
+  appointment_request?: AppointmentRequest | null;
   appointment_status?: 'pending' | 'accepted' | 'rejected' | null;
   notification_type?: string | null;
 }
@@ -63,8 +65,8 @@ const Messages = () => {
             name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
           },
           appointment_request: msg.appointment_request ? {
-            date: msg.appointment_request.date,
-            reason: msg.appointment_request.reason
+            date: (msg.appointment_request as AppointmentRequest).date,
+            reason: (msg.appointment_request as AppointmentRequest).reason
           } : null,
           appointment_status: msg.appointment_status as Message['appointment_status'],
           notification_type: msg.notification_type
@@ -190,7 +192,7 @@ const Messages = () => {
         messageData.appointment_request = {
           date: appointmentMatch[1],
           reason: appointmentMatch[2]
-        };
+        } as AppointmentRequest;
         messageData.appointment_status = 'pending';
         messageData.notification_type = 'appointment_request';
       }
