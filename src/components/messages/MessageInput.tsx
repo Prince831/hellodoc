@@ -1,0 +1,41 @@
+
+import { Message } from "@/types/messages";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Send } from "lucide-react";
+
+interface MessageInputProps {
+  selectedMessage: Message | null;
+  newMessage: string;
+  onMessageChange: (value: string) => void;
+  onSendMessage: () => void;
+}
+
+const MessageInput = ({ selectedMessage, newMessage, onMessageChange, onSendMessage }: MessageInputProps) => {
+  return (
+    <div className="mt-auto">
+      <p className="text-sm text-gray-500 mb-2">
+        Tip: Use /schedule "YYYY-MM-DD HH:mm" "reason" to request an appointment
+      </p>
+      <div className="flex gap-2">
+        <Input
+          placeholder={selectedMessage ? "Type your message..." : "Select a conversation to send a message"}
+          value={newMessage}
+          onChange={(e) => onMessageChange(e.target.value)}
+          disabled={!selectedMessage}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              onSendMessage();
+            }
+          }}
+        />
+        <Button onClick={onSendMessage} disabled={!selectedMessage}>
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default MessageInput;
