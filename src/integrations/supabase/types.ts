@@ -129,25 +129,34 @@ export type Database = {
       }
       messages: {
         Row: {
+          appointment_request: Json | null
+          appointment_status: string | null
           content: string
           created_at: string
           id: string
+          notification_type: string | null
           read: boolean | null
           receiver_id: string
           sender_id: string
         }
         Insert: {
+          appointment_request?: Json | null
+          appointment_status?: string | null
           content: string
           created_at?: string
           id?: string
+          notification_type?: string | null
           read?: boolean | null
           receiver_id: string
           sender_id: string
         }
         Update: {
+          appointment_request?: Json | null
+          appointment_status?: string | null
           content?: string
           created_at?: string
           id?: string
+          notification_type?: string | null
           read?: boolean | null
           receiver_id?: string
           sender_id?: string

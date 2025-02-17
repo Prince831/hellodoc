@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Navbar from "@/components/Navbar";
 import SideNav from "@/components/SideNav";
-import { ChevronLeft, ChevronRight, Send, MessageSquare } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, MessageSquare, Calendar, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -18,6 +17,12 @@ interface Message {
     name: string;
   };
   read: boolean;
+  appointment_request?: {
+    date: string;
+    reason: string;
+  } | null;
+  appointment_status?: 'pending' | 'accepted' | 'rejected' | null;
+  notification_type?: string | null;
 }
 
 const Messages = () => {
@@ -31,7 +36,6 @@ const Messages = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        // First, fetch doctors to get the sender information
         const { data: doctorsData, error: doctorsError } = await supabase
           .from('doctors')
           .select('id, name');
@@ -40,15 +44,13 @@ const Messages = () => {
 
         const doctorsMap = new Map(doctorsData.map(d => [d.id, d.name]));
 
-        // Then fetch messages
         const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
-          .select('*')
+          .select('*, appointment_request, appointment_status, notification_type')
           .order('created_at', { ascending: false });
 
         if (messagesError) throw messagesError;
 
-        // Transform the data to match our interface
         const transformedMessages = (messagesData || []).map(msg => ({
           id: msg.id,
           content: msg.content,
@@ -56,7 +58,10 @@ const Messages = () => {
           read: msg.read || false,
           sender: {
             name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
-          }
+          },
+          appointment_request: msg.appointment_request,
+          appointment_status: msg.appointment_status,
+          notification_type: msg.notification_type
         }));
 
         setMessages(transformedMessages);
@@ -74,7 +79,6 @@ const Messages = () => {
 
     fetchMessages();
 
-    // Set up real-time subscription
     const channel = supabase
       .channel('messages-changes')
       .on(
@@ -86,7 +90,7 @@ const Messages = () => {
         },
         (payload) => {
           console.log('Real-time update:', payload);
-          fetchMessages(); // Refresh messages when there's an update
+          fetchMessages();
         }
       )
       .subscribe();
@@ -95,6 +99,51 @@ const Messages = () => {
       supabase.removeChannel(channel);
     };
   }, [toast]);
+
+  const handleAppointmentResponse = async (messageId: string, status: 'accepted' | 'rejected') => {
+    try {
+      const message = messages.find(m => m.id === messageId);
+      if (!message?.appointment_request) return;
+
+      if (status === 'accepted') {
+        const { error: appointmentError } = await supabase
+          .from('appointments')
+          .insert([
+            {
+              date: message.appointment_request.date,
+              reason: message.appointment_request.reason,
+              status: 'scheduled',
+              doctor_id: message.sender.id,
+              user_id: '00000000-0000-0000-0000-000000000000',
+            }
+          ]);
+
+        if (appointmentError) throw appointmentError;
+      }
+
+      const { error: messageError } = await supabase
+        .from('messages')
+        .update({ 
+          appointment_status: status,
+          notification_type: status === 'accepted' ? 'appointment_confirmed' : 'appointment_rejected'
+        })
+        .eq('id', messageId);
+
+      if (messageError) throw messageError;
+
+      toast({
+        title: "Success",
+        description: `Appointment ${status === 'accepted' ? 'accepted' : 'rejected'} successfully.`,
+      });
+    } catch (error) {
+      console.error('Error handling appointment response:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to ${status} appointment. Please try again.`,
+      });
+    }
+  };
 
   const markAsRead = async (messageId: string) => {
     try {
@@ -122,23 +171,36 @@ const Messages = () => {
     if (!newMessage.trim()) return;
 
     try {
+      const appointmentMatch = newMessage.match(/\/schedule\s+"([^"]+)"\s+"([^"]+)"/);
+
+      const messageData: any = {
+        content: newMessage,
+        sender_id: '00000000-0000-0000-0000-000000000000',
+        receiver_id: selectedMessage?.id || null,
+        read: false
+      };
+
+      if (appointmentMatch) {
+        messageData.appointment_request = {
+          date: appointmentMatch[1],
+          reason: appointmentMatch[2]
+        };
+        messageData.appointment_status = 'pending';
+        messageData.notification_type = 'appointment_request';
+      }
+
       const { error } = await supabase
         .from('messages')
-        .insert([
-          {
-            content: newMessage,
-            sender_id: '00000000-0000-0000-0000-000000000000', // Replace with actual user ID
-            receiver_id: selectedMessage?.id || null,
-            read: false
-          }
-        ]);
+        .insert([messageData]);
 
       if (error) throw error;
 
       setNewMessage("");
       toast({
         title: "Success",
-        description: "Message sent successfully.",
+        description: appointmentMatch 
+          ? "Appointment request sent successfully."
+          : "Message sent successfully.",
       });
     } catch (error) {
       console.error('Error sending message:', error);
@@ -148,6 +210,67 @@ const Messages = () => {
         description: "Failed to send message. Please try again.",
       });
     }
+  };
+
+  const renderMessageContent = (message: Message) => {
+    if (message.appointment_request && message.appointment_status === 'pending') {
+      return (
+        <div className="space-y-4">
+          <p className="text-gray-700">{message.content}</p>
+          <Card className="p-4 bg-blue-50 border-blue-200">
+            <h4 className="font-semibold text-blue-900 flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Appointment Request
+            </h4>
+            <p className="text-blue-800 mt-2">
+              Date: {new Date(message.appointment_request.date).toLocaleString()}
+            </p>
+            <p className="text-blue-800">Reason: {message.appointment_request.reason}</p>
+            <div className="flex gap-2 mt-4">
+              <Button
+                size="sm"
+                className="bg-green-500 hover:bg-green-600"
+                onClick={() => handleAppointmentResponse(message.id, 'accepted')}
+              >
+                <Check className="h-4 w-4 mr-1" /> Accept
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleAppointmentResponse(message.id, 'rejected')}
+              >
+                <X className="h-4 w-4 mr-1" /> Decline
+              </Button>
+            </div>
+          </Card>
+        </div>
+      );
+    }
+
+    if (message.appointment_request && message.appointment_status) {
+      const statusColor = message.appointment_status === 'accepted' ? 'green' : 'red';
+      const statusText = message.appointment_status === 'accepted' ? 'Appointment Confirmed' : 'Appointment Declined';
+
+      return (
+        <div className="space-y-4">
+          <p className="text-gray-700">{message.content}</p>
+          <Card className={`p-4 bg-${statusColor}-50 border-${statusColor}-200`}>
+            <h4 className={`font-semibold text-${statusColor}-900 flex items-center gap-2`}>
+              <Calendar className="h-4 w-4" />
+              {statusText}
+            </h4>
+            <p className={`text-${statusColor}-800 mt-2`}>
+              Date: {new Date(message.appointment_request.date).toLocaleString()}
+            </p>
+            <p className={`text-${statusColor}-800`}>
+              Reason: {message.appointment_request.reason}
+            </p>
+          </Card>
+        </div>
+      );
+    }
+
+    return <p className="text-gray-700 whitespace-pre-wrap">{message.content}</p>;
   };
 
   return (
@@ -174,7 +297,6 @@ const Messages = () => {
         
         <main className={`flex-1 p-8 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-8rem)]">
-            {/* Messages List */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
@@ -208,13 +330,24 @@ const Messages = () => {
                               {new Date(message.created_at).toLocaleString()}
                             </p>
                           </div>
-                          {!message.read && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                              New
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {message.appointment_request && (
+                              <Calendar className={`h-4 w-4 ${
+                                message.appointment_status === 'accepted' ? 'text-green-500' :
+                                message.appointment_status === 'rejected' ? 'text-red-500' :
+                                'text-blue-500'
+                              }`} />
+                            )}
+                            {!message.read && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                New
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <p className="mt-2 text-gray-600 line-clamp-2">{message.content}</p>
+                        <p className="mt-2 text-gray-600 line-clamp-2">
+                          {message.content}
+                        </p>
                       </Card>
                     ))}
                   </div>
@@ -222,7 +355,6 @@ const Messages = () => {
               )}
             </div>
 
-            {/* Message Detail View */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col">
               {selectedMessage ? (
                 <>
@@ -235,9 +367,7 @@ const Messages = () => {
                     </p>
                   </div>
                   <ScrollArea className="flex-1 mb-4">
-                    <p className="text-gray-700 whitespace-pre-wrap">
-                      {selectedMessage.content}
-                    </p>
+                    {renderMessageContent(selectedMessage)}
                   </ScrollArea>
                 </>
               ) : (
@@ -246,21 +376,26 @@ const Messages = () => {
                 </div>
               )}
               
-              <div className="flex gap-2 mt-auto">
-                <Input
-                  placeholder="Type your reply..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button onClick={handleSendMessage}>
-                  <Send className="h-4 w-4" />
-                </Button>
+              <div className="mt-auto">
+                <p className="text-sm text-gray-500 mb-2">
+                  Tip: Use /schedule "YYYY-MM-DD HH:mm" "reason" to request an appointment
+                </p>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <Button onClick={handleSendMessage}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
