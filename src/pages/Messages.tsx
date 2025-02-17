@@ -28,15 +28,59 @@ interface Message {
   notification_type?: string | null;
 }
 
-interface MessageData {
-  content: string;
-  sender_id: string;
-  receiver_id: string;
-  read: boolean;
-  appointment_request?: AppointmentRequest;
-  appointment_status?: 'pending' | 'accepted' | 'rejected';
-  notification_type?: string;
-}
+const mockDoctors = [
+  {
+    id: "d1b792e6-4073-4f47-8c5f-9b035bdb77f3",
+    name: "John Smith",
+  },
+  {
+    id: "d2c892e6-4073-4f47-8c5f-9b035bdb77f4",
+    name: "Sarah Johnson",
+  }
+];
+
+const mockMessages: Message[] = [
+  {
+    id: "m1",
+    content: "Hello, how are you feeling today?",
+    created_at: new Date().toISOString(),
+    sender: mockDoctors[0],
+    read: false,
+  },
+  {
+    id: "m2",
+    content: "Your test results are ready for review.",
+    created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    sender: mockDoctors[1],
+    read: true,
+  },
+  {
+    id: "m3",
+    content: "Appointment request for regular checkup",
+    created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    sender: mockDoctors[0],
+    read: true,
+    appointment_request: {
+      date: "2024-03-01 10:00",
+      reason: "Regular checkup"
+    },
+    appointment_status: "pending",
+    notification_type: "appointment_request"
+  },
+  {
+    id: "m4",
+    content: "Following up on your last visit",
+    created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    sender: mockDoctors[1],
+    read: true,
+    appointment_request: {
+      date: "2024-02-15 14:30",
+      reason: "Follow-up consultation"
+    },
+    appointment_status: "accepted",
+    notification_type: "appointment_confirmed"
+  }
+];
 
 const Messages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -47,117 +91,27 @@ const Messages = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const { data: doctorsData, error: doctorsError } = await supabase
-          .from('doctors')
-          .select('id, name');
-
-        if (doctorsError) throw doctorsError;
-
-        const doctorsMap = new Map(doctorsData.map(d => [d.id, d.name]));
-
-        const { data: messagesData, error: messagesError } = await supabase
-          .from('messages')
-          .select('*, appointment_request, appointment_status, notification_type')
-          .order('created_at', { ascending: false });
-
-        if (messagesError) throw messagesError;
-
-        const transformedMessages: Message[] = (messagesData || []).map(msg => {
-          let appointmentRequest: AppointmentRequest | null = null;
-          
-          if (msg.appointment_request && typeof msg.appointment_request === 'object') {
-            const reqObj = msg.appointment_request as Record<string, unknown>;
-            if ('date' in reqObj && 'reason' in reqObj) {
-              appointmentRequest = {
-                date: String(reqObj.date),
-                reason: String(reqObj.reason)
-              };
-            }
-          }
-
-          return {
-            id: msg.id,
-            content: msg.content,
-            created_at: msg.created_at,
-            read: msg.read || false,
-            sender: {
-              id: msg.sender_id,
-              name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
-            },
-            appointment_request: appointmentRequest,
-            appointment_status: msg.appointment_status as Message['appointment_status'],
-            notification_type: msg.notification_type
-          };
-        });
-
-        setMessages(transformedMessages);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load messages. Please try again later.",
-        });
-      } finally {
+    const loadMockData = () => {
+      setTimeout(() => {
+        setMessages(mockMessages);
         setLoading(false);
-      }
+      }, 1000); // Simulate network delay
     };
 
-    fetchMessages();
-
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          console.log('Real-time update:', payload);
-          fetchMessages();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [toast]);
+    loadMockData();
+  }, []);
 
   const handleAppointmentResponse = async (messageId: string, status: 'accepted' | 'rejected') => {
     try {
-      const message = messages.find(m => m.id === messageId);
-      if (!message?.appointment_request) return;
-
-      if (status === 'accepted') {
-        const { error: appointmentError } = await supabase
-          .from('appointments')
-          .insert([
-            {
-              date: message.appointment_request.date,
-              reason: message.appointment_request.reason,
-              status: 'scheduled',
-              doctor_id: message.sender.id,
-              user_id: '00000000-0000-0000-0000-000000000000',
+      setMessages(messages.map(msg => 
+        msg.id === messageId
+          ? {
+              ...msg,
+              appointment_status: status,
+              notification_type: status === 'accepted' ? 'appointment_confirmed' : 'appointment_rejected'
             }
-          ]);
-
-        if (appointmentError) throw appointmentError;
-      }
-
-      const { error: messageError } = await supabase
-        .from('messages')
-        .update({ 
-          appointment_status: status,
-          notification_type: status === 'accepted' ? 'appointment_confirmed' : 'appointment_rejected'
-        })
-        .eq('id', messageId);
-
-      if (messageError) throw messageError;
+          : msg
+      ));
 
       toast({
         title: "Success",
@@ -175,13 +129,6 @@ const Messages = () => {
 
   const markAsRead = async (messageId: string) => {
     try {
-      const { error } = await supabase
-        .from('messages')
-        .update({ read: true })
-        .eq('id', messageId);
-
-      if (error) throw error;
-
       setMessages(messages.map(msg => 
         msg.id === messageId ? { ...msg, read: true } : msg
       ));
@@ -210,30 +157,29 @@ const Messages = () => {
     try {
       const appointmentMatch = newMessage.match(/\/schedule\s+"([^"]+)"\s+"([^"]+)"/);
       
-      const messageData: MessageData = {
+      const newMsg: Message = {
+        id: `m${Date.now()}`, // Generate a temporary ID
         content: newMessage,
-        sender_id: '00000000-0000-0000-0000-000000000000',
-        receiver_id: selectedMessage.sender.id,
+        created_at: new Date().toISOString(),
+        sender: {
+          id: '00000000-0000-0000-0000-000000000000',
+          name: 'You'
+        },
         read: false
       };
 
       if (appointmentMatch) {
-        const appointmentRequest: AppointmentRequest = {
+        newMsg.appointment_request = {
           date: appointmentMatch[1],
           reason: appointmentMatch[2]
         };
-        messageData.appointment_request = appointmentRequest;
-        messageData.appointment_status = 'pending';
-        messageData.notification_type = 'appointment_request';
+        newMsg.appointment_status = 'pending';
+        newMsg.notification_type = 'appointment_request';
       }
 
-      const { error } = await supabase
-        .from('messages')
-        .insert([messageData]);
-
-      if (error) throw error;
-
+      setMessages([newMsg, ...messages]);
       setNewMessage("");
+      
       toast({
         title: "Success",
         description: appointmentMatch 
