@@ -55,22 +55,33 @@ const Messages = () => {
 
         if (messagesError) throw messagesError;
 
-        const transformedMessages: Message[] = (messagesData || []).map(msg => ({
-          id: msg.id,
-          content: msg.content,
-          created_at: msg.created_at,
-          read: msg.read || false,
-          sender: {
-            id: msg.sender_id,
-            name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
-          },
-          appointment_request: msg.appointment_request ? {
-            date: (msg.appointment_request as AppointmentRequest).date,
-            reason: (msg.appointment_request as AppointmentRequest).reason
-          } : null,
-          appointment_status: msg.appointment_status as Message['appointment_status'],
-          notification_type: msg.notification_type
-        }));
+        const transformedMessages: Message[] = (messagesData || []).map(msg => {
+          let appointmentRequest: AppointmentRequest | null = null;
+          
+          if (msg.appointment_request && typeof msg.appointment_request === 'object') {
+            const reqObj = msg.appointment_request as Record<string, unknown>;
+            if ('date' in reqObj && 'reason' in reqObj) {
+              appointmentRequest = {
+                date: String(reqObj.date),
+                reason: String(reqObj.reason)
+              };
+            }
+          }
+
+          return {
+            id: msg.id,
+            content: msg.content,
+            created_at: msg.created_at,
+            read: msg.read || false,
+            sender: {
+              id: msg.sender_id,
+              name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
+            },
+            appointment_request: appointmentRequest,
+            appointment_status: msg.appointment_status as Message['appointment_status'],
+            notification_type: msg.notification_type
+          };
+        });
 
         setMessages(transformedMessages);
       } catch (error) {
@@ -189,10 +200,11 @@ const Messages = () => {
       };
 
       if (appointmentMatch) {
-        messageData.appointment_request = {
+        const appointmentRequest: AppointmentRequest = {
           date: appointmentMatch[1],
           reason: appointmentMatch[2]
-        } as AppointmentRequest;
+        };
+        messageData.appointment_request = appointmentRequest;
         messageData.appointment_status = 'pending';
         messageData.notification_type = 'appointment_request';
       }
