@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -27,6 +26,16 @@ interface Message {
   appointment_request?: AppointmentRequest | null;
   appointment_status?: 'pending' | 'accepted' | 'rejected' | null;
   notification_type?: string | null;
+}
+
+interface MessageData {
+  content: string;
+  sender_id: string;
+  receiver_id: string;
+  read: boolean;
+  appointment_request?: AppointmentRequest;
+  appointment_status?: 'pending' | 'accepted' | 'rejected';
+  notification_type?: string;
 }
 
 const Messages = () => {
@@ -201,7 +210,7 @@ const Messages = () => {
     try {
       const appointmentMatch = newMessage.match(/\/schedule\s+"([^"]+)"\s+"([^"]+)"/);
       
-      const messageData = {
+      const messageData: MessageData = {
         content: newMessage,
         sender_id: '00000000-0000-0000-0000-000000000000',
         receiver_id: selectedMessage.sender.id,
@@ -326,7 +335,6 @@ const Messages = () => {
         
         <main className={`flex-1 p-8 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-8rem)]">
-            {/* Left Panel (Message List) */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
@@ -385,7 +393,6 @@ const Messages = () => {
               )}
             </div>
 
-            {/* Right Panel (Message Detail) */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col">
               {selectedMessage ? (
                 <>
