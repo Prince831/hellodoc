@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,7 @@ interface Message {
   content: string;
   created_at: string;
   sender: {
+    id: string;
     name: string;
   };
   read: boolean;
@@ -51,16 +53,20 @@ const Messages = () => {
 
         if (messagesError) throw messagesError;
 
-        const transformedMessages = (messagesData || []).map(msg => ({
+        const transformedMessages: Message[] = (messagesData || []).map(msg => ({
           id: msg.id,
           content: msg.content,
           created_at: msg.created_at,
           read: msg.read || false,
           sender: {
+            id: msg.sender_id,
             name: doctorsMap.get(msg.sender_id) || 'Unknown Doctor'
           },
-          appointment_request: msg.appointment_request,
-          appointment_status: msg.appointment_status,
+          appointment_request: msg.appointment_request ? {
+            date: msg.appointment_request.date,
+            reason: msg.appointment_request.reason
+          } : null,
+          appointment_status: msg.appointment_status as Message['appointment_status'],
           notification_type: msg.notification_type
         }));
 
@@ -172,11 +178,11 @@ const Messages = () => {
 
     try {
       const appointmentMatch = newMessage.match(/\/schedule\s+"([^"]+)"\s+"([^"]+)"/);
-
+      
       const messageData: any = {
         content: newMessage,
         sender_id: '00000000-0000-0000-0000-000000000000',
-        receiver_id: selectedMessage?.id || null,
+        receiver_id: selectedMessage?.sender.id || null,
         read: false
       };
 
