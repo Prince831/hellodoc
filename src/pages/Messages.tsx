@@ -189,13 +189,22 @@ const Messages = () => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
+    if (!selectedMessage?.sender.id) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a recipient before sending a message.",
+      });
+      return;
+    }
+
     try {
       const appointmentMatch = newMessage.match(/\/schedule\s+"([^"]+)"\s+"([^"]+)"/);
       
-      const messageData: any = {
+      const messageData = {
         content: newMessage,
         sender_id: '00000000-0000-0000-0000-000000000000',
-        receiver_id: selectedMessage?.sender.id || null,
+        receiver_id: selectedMessage.sender.id,
         read: false
       };
 
@@ -317,6 +326,7 @@ const Messages = () => {
         
         <main className={`flex-1 p-8 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-8rem)]">
+            {/* Left Panel (Message List) */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
@@ -375,6 +385,7 @@ const Messages = () => {
               )}
             </div>
 
+            {/* Right Panel (Message Detail) */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex flex-col">
               {selectedMessage ? (
                 <>
@@ -402,9 +413,10 @@ const Messages = () => {
                 </p>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Type your message..."
+                    placeholder={selectedMessage ? "Type your message..." : "Select a conversation to send a message"}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
+                    disabled={!selectedMessage}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -412,7 +424,7 @@ const Messages = () => {
                       }
                     }}
                   />
-                  <Button onClick={handleSendMessage}>
+                  <Button onClick={handleSendMessage} disabled={!selectedMessage}>
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
