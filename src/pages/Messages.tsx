@@ -147,8 +147,8 @@ const Messages = () => {
           </Button>
         </div>
         
-        <main className={`flex-1 p-8 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-8rem)]">
+        <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] h-[calc(100vh-4rem)] bg-white shadow-lg">
             <MessageList
               messages={messages}
               selectedMessage={selectedMessage}
@@ -156,7 +156,7 @@ const Messages = () => {
               markAsRead={markAsRead}
               loading={loading}
             />
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full border-l border-gray-200">
               <MessageDetail
                 message={selectedMessage}
                 onAppointmentResponse={handleAppointmentResponse}

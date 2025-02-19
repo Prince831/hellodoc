@@ -13,11 +13,11 @@ interface MessageInputProps {
 
 const MessageInput = ({ selectedMessage, newMessage, onMessageChange, onSendMessage }: MessageInputProps) => {
   return (
-    <div className="mt-auto">
-      <p className="text-sm text-gray-500 mb-2">
+    <div className="p-4 border-t border-gray-200 bg-white">
+      <p className="text-xs text-gray-500 mb-2">
         Tip: Use /schedule "YYYY-MM-DD HH:mm" "reason" to request an appointment
       </p>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <Input
           placeholder={selectedMessage ? "Type your message..." : "Select a conversation to send a message"}
           value={newMessage}
@@ -29,8 +29,14 @@ const MessageInput = ({ selectedMessage, newMessage, onMessageChange, onSendMess
               onSendMessage();
             }
           }}
+          className="rounded-full bg-gray-50 border-gray-200 focus:border-primary focus:ring-primary"
         />
-        <Button onClick={onSendMessage} disabled={!selectedMessage}>
+        <Button 
+          onClick={onSendMessage} 
+          disabled={!selectedMessage}
+          size="icon"
+          className="rounded-full h-10 w-10 bg-primary hover:bg-primary/90"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </div>
