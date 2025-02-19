@@ -13,10 +13,7 @@ interface MessageInputProps {
 
 const MessageInput = ({ selectedMessage, newMessage, onMessageChange, onSendMessage }: MessageInputProps) => {
   return (
-    <div className="p-4 border-t border-gray-200 bg-white">
-      <p className="text-xs text-gray-500 mb-2">
-        Tip: Use /schedule "YYYY-MM-DD HH:mm" "reason" to request an appointment
-      </p>
+    <div className="p-4 border-t border-gray-800 bg-[#1A1F2C]">
       <div className="flex gap-2 items-center">
         <Input
           placeholder={selectedMessage ? "Type your message..." : "Select a conversation to send a message"}
@@ -29,13 +26,13 @@ const MessageInput = ({ selectedMessage, newMessage, onMessageChange, onSendMess
               onSendMessage();
             }
           }}
-          className="rounded-full bg-gray-50 border-gray-200 focus:border-primary focus:ring-primary"
+          className="bg-[#2C3444] border-none text-white placeholder:text-gray-400 focus:ring-1 focus:ring-gray-500"
         />
         <Button 
           onClick={onSendMessage} 
           disabled={!selectedMessage}
           size="icon"
-          className="rounded-full h-10 w-10 bg-primary hover:bg-primary/90"
+          className="bg-primary hover:bg-primary/90 text-white"
         >
           <Send className="h-4 w-4" />
         </Button>

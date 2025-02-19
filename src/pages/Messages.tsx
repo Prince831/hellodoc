@@ -126,7 +126,7 @@ const Messages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#1A1F2C]">
       <Navbar />
       <div className="flex">
         <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
@@ -134,7 +134,7 @@ const Messages = () => {
           <Button
             variant="ghost"
             size="icon"
-            className={`fixed left-64 top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300 ${
+            className={`fixed left-64 top-1/2 transform -translate-y-1/2 z-50 bg-[#2C3444] text-white hover:bg-gray-700 transition-all duration-300 ${
               isSidebarCollapsed ? 'left-16' : ''
             }`}
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -148,7 +148,7 @@ const Messages = () => {
         </div>
         
         <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] h-[calc(100vh-4rem)] bg-white shadow-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] h-[calc(100vh-4rem)] bg-[#1A1F2C]">
             <MessageList
               messages={messages}
               selectedMessage={selectedMessage}
@@ -156,7 +156,7 @@ const Messages = () => {
               markAsRead={markAsRead}
               loading={loading}
             />
-            <div className="flex flex-col h-full border-l border-gray-200">
+            <div className="flex flex-col h-full border-l border-gray-800">
               <MessageDetail
                 message={selectedMessage}
                 onAppointmentResponse={handleAppointmentResponse}
