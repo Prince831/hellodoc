@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -125,17 +124,17 @@ const Messages = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C]">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex">
-        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
+      <div className="flex h-[calc(100vh-4rem)]">
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-background`}>
           <SideNav collapsed={isSidebarCollapsed} />
           <Button
             variant="ghost"
             size="icon"
-            className={`fixed left-64 top-1/2 transform -translate-y-1/2 z-50 bg-[#2C3444] text-white hover:bg-gray-700 transition-all duration-300 ${
-              isSidebarCollapsed ? 'left-16' : ''
-            }`}
+            className={`fixed ${
+              isSidebarCollapsed ? 'left-16' : 'left-64'
+            } top-1/2 transform -translate-y-1/2 z-50 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300`}
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           >
             {isSidebarCollapsed ? (
@@ -146,25 +145,23 @@ const Messages = () => {
           </Button>
         </div>
         
-        <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] h-[calc(100vh-4rem)] bg-[#1A1F2C]">
-            <MessageList
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-[320px,1fr] h-full bg-background">
+          <MessageList
+            messages={messages}
+            selectedMessage={selectedMessage}
+            onSelectMessage={setSelectedMessage}
+            markAsRead={markAsRead}
+            loading={loading}
+          />
+          <div className="flex flex-col h-full border-l border-border">
+            <ChatArea
               messages={messages}
-              selectedMessage={selectedMessage}
-              onSelectMessage={setSelectedMessage}
-              markAsRead={markAsRead}
-              loading={loading}
+              selectedSenderId={selectedMessage?.sender.id || null}
+              onAppointmentResponse={handleAppointmentResponse}
+              newMessage={newMessage}
+              onMessageChange={setNewMessage}
+              onSendMessage={handleSendMessage}
             />
-            <div className="flex flex-col h-full border-l border-gray-800">
-              <ChatArea
-                messages={messages}
-                selectedSenderId={selectedMessage?.sender.id || null}
-                onAppointmentResponse={handleAppointmentResponse}
-                newMessage={newMessage}
-                onMessageChange={setNewMessage}
-                onSendMessage={handleSendMessage}
-              />
-            </div>
           </div>
         </main>
       </div>
