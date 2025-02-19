@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import SideNav from "@/components/SideNav";
 import MessageList from "@/components/messages/MessageList";
-import MessageDetail from "@/components/messages/MessageDetail";
-import MessageInput from "@/components/messages/MessageInput";
+import ChatArea from "@/components/messages/ChatArea";
 import { Message, mockMessages } from "@/types/messages";
 
 const Messages = () => {
@@ -148,7 +147,7 @@ const Messages = () => {
         </div>
         
         <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] h-[calc(100vh-4rem)] bg-[#1A1F2C]">
+          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] h-[calc(100vh-4rem)] bg-[#1A1F2C]">
             <MessageList
               messages={messages}
               selectedMessage={selectedMessage}
@@ -157,12 +156,10 @@ const Messages = () => {
               loading={loading}
             />
             <div className="flex flex-col h-full border-l border-gray-800">
-              <MessageDetail
-                message={selectedMessage}
+              <ChatArea
+                messages={messages}
+                selectedSenderId={selectedMessage?.sender.id || null}
                 onAppointmentResponse={handleAppointmentResponse}
-              />
-              <MessageInput
-                selectedMessage={selectedMessage}
                 newMessage={newMessage}
                 onMessageChange={setNewMessage}
                 onSendMessage={handleSendMessage}

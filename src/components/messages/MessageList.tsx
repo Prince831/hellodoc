@@ -1,6 +1,5 @@
 
 import { Message } from "@/types/messages";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -14,22 +13,34 @@ interface MessageListProps {
 }
 
 const MessageList = ({ messages, selectedMessage, onSelectMessage, markAsRead, loading }: MessageListProps) => {
+  // Group messages by sender
+  const senderGroups = messages.reduce((groups: { [key: string]: Message[] }, message) => {
+    const senderId = message.sender.id;
+    if (!groups[senderId]) {
+      groups[senderId] = [];
+    }
+    groups[senderId].push(message);
+    return groups;
+  }, {});
+
+  // Get unique senders with their latest message
+  const senders = Object.values(senderGroups).map(group => {
+    const latestMessage = group.reduce((latest, current) => 
+      new Date(current.created_at) > new Date(latest.created_at) ? current : latest
+    );
+    return latestMessage;
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
   return (
     <div className="bg-[#1A1F2C] h-full">
       <div className="p-4 border-b border-gray-800">
-        <h2 className="text-xl font-semibold text-white mb-4">Messages</h2>
+        <h2 className="text-xl font-semibold text-white mb-4">Contacts</h2>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
-            placeholder="Search" 
+            placeholder="Search contacts" 
             className="pl-10 bg-[#2C3444] border-none text-white placeholder:text-gray-400 focus:ring-1 focus:ring-gray-500"
           />
-        </div>
-        <div className="flex gap-4 mt-4">
-          <button className="text-primary hover:text-primary/90 text-sm font-medium">All</button>
-          <button className="text-gray-400 hover:text-gray-300 text-sm">Unread</button>
-          <button className="text-gray-400 hover:text-gray-300 text-sm">Favorites</button>
-          <button className="text-gray-400 hover:text-gray-300 text-sm">Groups</button>
         </div>
       </div>
       
@@ -40,48 +51,36 @@ const MessageList = ({ messages, selectedMessage, onSelectMessage, markAsRead, l
       ) : (
         <ScrollArea className="h-[calc(100%-8rem)]">
           <div>
-            {messages.map((message) => (
+            {senders.map((sender) => (
               <div 
-                key={message.id} 
-                className={`px-4 py-3 cursor-pointer transition-all hover:bg-[#2C3444] flex gap-3 items-start ${
-                  selectedMessage?.id === message.id ? 'bg-[#2C3444]' : ''
+                key={sender.sender.id} 
+                className={`px-4 py-3 cursor-pointer transition-all hover:bg-[#2C3444] flex gap-3 items-center ${
+                  selectedMessage?.sender.id === sender.sender.id ? 'bg-[#2C3444]' : ''
                 }`}
                 onClick={() => {
-                  onSelectMessage(message);
-                  if (!message.read) {
-                    markAsRead(message.id);
+                  onSelectMessage(sender);
+                  if (!sender.read) {
+                    markAsRead(sender.id);
                   }
                 }}
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium text-lg shrink-0">
-                  {message.sender.name.charAt(0)}
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-medium text-lg">
+                  {sender.sender.name.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center mb-0.5">
+                  <div className="flex justify-between items-center">
                     <h3 className="font-medium text-white truncate">
-                      {message.sender.name}
+                      {sender.sender.name}
                     </h3>
-                    <span className="text-xs text-gray-400 shrink-0">
-                      {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {message.appointment_request && (
-                      <Calendar className={`h-3.5 w-3.5 flex-shrink-0 ${
-                        message.appointment_status === 'accepted' ? 'text-green-400' :
-                        message.appointment_status === 'rejected' ? 'text-red-400' :
-                        'text-blue-400'
-                      }`} />
-                    )}
-                    <p className={`text-sm truncate ${!message.read ? 'text-gray-100' : 'text-gray-400'}`}>
-                      {message.content}
-                    </p>
-                    {!message.read && (
-                      <span className="ml-auto shrink-0 bg-primary rounded-full w-6 h-6 flex items-center justify-center text-xs text-white">
-                        1
+                    {senderGroups[sender.sender.id].some(m => !m.read) && (
+                      <span className="ml-2 bg-primary rounded-full w-6 h-6 flex items-center justify-center text-xs text-white">
+                        {senderGroups[sender.sender.id].filter(m => !m.read).length}
                       </span>
                     )}
                   </div>
+                  <p className="text-sm text-gray-400 truncate">
+                    {senderGroups[sender.sender.id].length} messages
+                  </p>
                 </div>
               </div>
             ))}
