@@ -5,8 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import SideNav from "@/components/SideNav";
-import { Calendar, Clock, Plus } from "lucide-react";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { Calendar, Clock, Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Appointment {
@@ -147,9 +146,9 @@ const Appointments = () => {
           <Button
             variant="ghost"
             size="icon"
-            className={`fixed left-64 top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300 ${
-              isSidebarCollapsed ? 'left-16' : ''
-            }`}
+            className={`fixed ${
+              isSidebarCollapsed ? 'left-16' : 'left-64'
+            } top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300`}
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           >
             {isSidebarCollapsed ? (
@@ -160,10 +159,13 @@ const Appointments = () => {
           </Button>
         </div>
         
-        <main className={`flex-1 p-8 pt-16 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <div className="max-w-7xl mx-auto">
+        <main className={`flex-1 p-8 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+          <div className="max-w-[1600px] mx-auto">
             <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
+                <p className="text-gray-600 mt-1">Manage your upcoming and past appointments</p>
+              </div>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Schedule New Appointment
@@ -177,43 +179,57 @@ const Appointments = () => {
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Upcoming Appointments */}
-                <ScrollArea className="h-[calc(100vh-12rem)]">
-                  <div className="pr-4 space-y-6">
-                    <h2 className="text-2xl font-bold mb-6 text-blue-600 flex items-center gap-2">
+                <div className="space-y-6">
+                  <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-2">
+                    <h2 className="text-2xl font-bold text-blue-600 flex items-center gap-2 border-b pb-4">
                       <Calendar className="h-5 w-5" />
                       Upcoming Appointments
+                      <span className="ml-2 text-sm font-normal text-gray-600">
+                        ({upcomingAppointments.length})
+                      </span>
                     </h2>
-                    {upcomingAppointments.length === 0 ? (
-                      <Card className="p-8 text-center bg-blue-50 border-blue-100">
-                        <p className="text-blue-800 font-medium">No upcoming appointments</p>
-                        <Button variant="link" className="mt-2">Schedule one now</Button>
-                      </Card>
-                    ) : (
-                      upcomingAppointments.map((appointment) => (
-                        <AppointmentCard key={appointment.id} appointment={appointment} />
-                      ))
-                    )}
                   </div>
-                </ScrollArea>
+                  <ScrollArea className="h-[calc(100vh-16rem)]">
+                    <div className="pr-4 space-y-6">
+                      {upcomingAppointments.length === 0 ? (
+                        <Card className="p-8 text-center bg-blue-50 border-blue-100">
+                          <p className="text-blue-800 font-medium">No upcoming appointments</p>
+                          <Button variant="link" className="mt-2">Schedule one now</Button>
+                        </Card>
+                      ) : (
+                        upcomingAppointments.map((appointment) => (
+                          <AppointmentCard key={appointment.id} appointment={appointment} />
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
 
                 {/* Past Appointments */}
-                <ScrollArea className="h-[calc(100vh-12rem)]">
-                  <div className="pr-4 space-y-6">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-600 flex items-center gap-2">
+                <div className="space-y-6">
+                  <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-2">
+                    <h2 className="text-2xl font-bold text-gray-600 flex items-center gap-2 border-b pb-4">
                       <Clock className="h-5 w-5" />
                       Past Appointments
+                      <span className="ml-2 text-sm font-normal text-gray-600">
+                        ({pastAppointments.length})
+                      </span>
                     </h2>
-                    {pastAppointments.length === 0 ? (
-                      <Card className="p-8 text-center bg-gray-50 border-gray-100">
-                        <p className="text-gray-600 font-medium">No past appointments</p>
-                      </Card>
-                    ) : (
-                      pastAppointments.map((appointment) => (
-                        <AppointmentCard key={appointment.id} appointment={appointment} />
-                      ))
-                    )}
                   </div>
-                </ScrollArea>
+                  <ScrollArea className="h-[calc(100vh-16rem)]">
+                    <div className="pr-4 space-y-6">
+                      {pastAppointments.length === 0 ? (
+                        <Card className="p-8 text-center bg-gray-50 border-gray-100">
+                          <p className="text-gray-600 font-medium">No past appointments</p>
+                        </Card>
+                      ) : (
+                        pastAppointments.map((appointment) => (
+                          <AppointmentCard key={appointment.id} appointment={appointment} />
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </div>
               </div>
             )}
           </div>
