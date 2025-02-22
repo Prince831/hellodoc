@@ -26,20 +26,20 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#4A90E2",
+          DEFAULT: "#8B9FE8", // Soft blue
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#F5F7FA",
-          foreground: "#1F2937",
+          DEFAULT: "#F5F7FA", // Light gray-blue
+          foreground: "#4A5568",
         },
         accent: {
-          DEFAULT: "#34D399",
-          foreground: "#FFFFFF",
+          DEFAULT: "#E2E8F0", // Softer gray
+          foreground: "#4A5568",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#FDA4AF", // Soft red
+          foreground: "#881337",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -53,6 +53,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
         "fade-up": {
@@ -79,6 +84,10 @@ export default {
       animation: {
         "fade-up": "fade-up 0.5s ease-out",
         "fade-down": "fade-down 0.5s ease-out",
+      },
+      boxShadow: {
+        'soft': '0 2px 10px rgba(0, 0, 0, 0.05)',
+        'soft-lg': '0 4px 20px rgba(0, 0, 0, 0.08)',
       },
     },
   },
