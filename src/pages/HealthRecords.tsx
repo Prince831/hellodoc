@@ -1,11 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import SideNav from "@/components/SideNav";
-import { ChevronLeft, ChevronRight, Activity, Calendar, FileText, AlertCircle, User, Heart, BookMedical } from "lucide-react";
+import { ChevronLeft, ChevronRight, Activity, Calendar, FileText, AlertCircle, User, Heart, Stethoscope } from "lucide-react";
 import { mockHealthRecords } from "@/data/mockHealthRecords";
 
 const HealthRecords = () => {
@@ -162,7 +161,7 @@ const HealthRecords = () => {
                           {new Date(record.date).toLocaleDateString()} • {record.doctor.name} ({record.doctor.specialization})
                         </CardDescription>
                       </div>
-                      <BookMedical className="h-5 w-5 text-muted-foreground" />
+                      <Stethoscope className="h-5 w-5 text-muted-foreground" />
                     </div>
                   </CardHeader>
                   <CardContent>
