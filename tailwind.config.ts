@@ -30,15 +30,15 @@ export default {
           foreground: "#FFFFFF",
         },
         secondary: {
-          DEFAULT: "#F5F7FA", // Light gray-blue
-          foreground: "#4A5568",
+          DEFAULT: "rgba(20, 20, 25, 0.9)", // Dark with slight transparency
+          foreground: "#E2E8F0",
         },
         accent: {
-          DEFAULT: "#E2E8F0", // Softer gray
-          foreground: "#4A5568",
+          DEFAULT: "rgba(25, 25, 30, 0.85)", // Even darker with transparency
+          foreground: "#E2E8F0",
         },
         destructive: {
-          DEFAULT: "#FDA4AF", // Soft red
+          DEFAULT: "#FDA4AF", // Keeping the soft red
           foreground: "#881337",
         },
         muted: {
