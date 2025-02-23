@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -14,6 +15,7 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMessageListCollapsed, setIsMessageListCollapsed] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const { toast } = useToast();
 
@@ -145,14 +147,28 @@ const Messages = () => {
           </Button>
         </div>
         
-        <main className="flex-1 grid grid-cols-1 lg:grid-cols-[320px,1fr] h-full bg-background">
-          <MessageList
-            messages={messages}
-            selectedMessage={selectedMessage}
-            onSelectMessage={setSelectedMessage}
-            markAsRead={markAsRead}
-            loading={loading}
-          />
+        <main className="flex-1 grid grid-cols-1 lg:grid-cols-[320px,1fr] h-full bg-background relative">
+          <div className={`transition-all duration-300 ${isMessageListCollapsed ? 'lg:w-0' : 'lg:w-[320px]'} overflow-hidden`}>
+            <MessageList
+              messages={messages}
+              selectedMessage={selectedMessage}
+              onSelectMessage={setSelectedMessage}
+              markAsRead={markAsRead}
+              loading={loading}
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden lg:flex fixed left-[calc(320px+64px)] top-1/2 transform -translate-y-1/2 z-50 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300"
+            onClick={() => setIsMessageListCollapsed(!isMessageListCollapsed)}
+          >
+            {isMessageListCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
           <div className="flex flex-col h-full border-l border-border">
             <ChatArea
               messages={messages}
