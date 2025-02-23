@@ -1,18 +1,9 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Patient } from "@/types/health-records";
 
 interface PatientDetailsProps {
-  patient: {
-    name: string;
-    dateOfBirth: string;
-    gender: string;
-    allergies: string[];
-    emergencyContact: {
-      name: string;
-      relation: string;
-      phone: string;
-    };
-  };
+  patient: Patient;
 }
 
 const PatientDetails = ({ patient }: PatientDetailsProps) => {
@@ -38,7 +29,7 @@ const PatientDetails = ({ patient }: PatientDetailsProps) => {
             </div>
             <div>
               <h4 className="text-sm font-medium mb-1">Allergies</h4>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {patient.allergies.map((allergy) => (
                   <span
                     key={allergy}

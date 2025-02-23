@@ -1,24 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Stethoscope } from "lucide-react";
-
-interface MedicalRecord {
-  id: string;
-  date: string;
-  diagnosis: string;
-  doctor: {
-    name: string;
-    specialization: string;
-  };
-  prescription?: string;
-  notes: string;
-  vitals: {
-    bloodPressure: string;
-    temperature: string;
-    heartRate: string;
-    oxygenSaturation: string;
-  };
-}
+import type { MedicalRecord } from "@/types/health-records";
 
 interface MedicalHistoryProps {
   records: MedicalRecord[];

@@ -1,14 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Activity, User, AlertCircle } from "lucide-react";
+import type { Patient } from "@/types/health-records";
 
 interface PatientOverviewProps {
-  patient: {
-    bloodType: string;
-    weight: string;
-    height: string;
-    allergies: string[];
-  };
+  patient: Patient;
 }
 
 const PatientOverview = ({ patient }: PatientOverviewProps) => {
