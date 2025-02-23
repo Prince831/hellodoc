@@ -58,17 +58,17 @@ const Index = () => {
   }, [symptoms]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex">
-        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
+      <div className="flex h-[calc(100vh-4rem)]">
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-background`}>
           <SideNav collapsed={isSidebarCollapsed} />
           <Button
             variant="ghost"
             size="icon"
-            className={`fixed left-64 top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300 ${
-              isSidebarCollapsed ? 'left-16' : ''
-            }`}
+            className={`fixed ${
+              isSidebarCollapsed ? 'left-16' : 'left-64'
+            } top-1/2 transform -translate-y-1/2 z-50 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300`}
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           >
             {isSidebarCollapsed ? (
@@ -79,33 +79,31 @@ const Index = () => {
           </Button>
         </div>
         
-        <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+        <main className={`flex-1 overflow-auto transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
           {/* Symptoms Analysis Section */}
           {symptoms && (
-            <section className="pt-24 px-4">
-              <div className="max-w-7xl mx-auto">
-                <Card className="p-6 mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Your Symptoms Analysis</h2>
-                  <p className="text-gray-600 mb-4">{analysis}</p>
-                  <div className={`mt-4 p-4 rounded-lg ${
-                    recommendedAction === 'emergency' ? 'bg-red-100 text-red-700' :
-                    recommendedAction === 'virtual_consultation' ? 'bg-blue-100 text-blue-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    <p className="font-semibold">
-                      {recommendedAction === 'emergency' ? 'Seek immediate medical attention' :
-                       recommendedAction === 'virtual_consultation' ? 'Schedule a virtual consultation' :
-                       'Self-care recommended'}
-                    </p>
-                  </div>
-                </Card>
-              </div>
+            <section className="px-8 pt-8">
+              <Card className="p-6 mb-8">
+                <h2 className="text-2xl font-bold mb-4">Your Symptoms Analysis</h2>
+                <p className="text-muted-foreground mb-4">{analysis}</p>
+                <div className={`mt-4 p-4 rounded-lg ${
+                  recommendedAction === 'emergency' ? 'bg-destructive/10 text-destructive' :
+                  recommendedAction === 'virtual_consultation' ? 'bg-primary/10 text-primary' :
+                  'bg-accent/10 text-accent-foreground'
+                }`}>
+                  <p className="font-semibold">
+                    {recommendedAction === 'emergency' ? 'Seek immediate medical attention' :
+                     recommendedAction === 'virtual_consultation' ? 'Schedule a virtual consultation' :
+                     'Self-care recommended'}
+                  </p>
+                </div>
+              </Card>
             </section>
           )}
 
           {/* Recommended Doctors Section */}
-          <section className="py-8 px-4">
-            <div className="max-w-7xl mx-auto">
+          <section className="px-8 pb-8">
+            <div className="max-w-[1600px] mx-auto">
               <h2 className="text-3xl font-bold mb-8">
                 {symptoms ? 'Recommended Doctors' : 'Our Specialists'}
               </h2>
@@ -126,8 +124,8 @@ const Index = () => {
                         />
                         <div>
                           <h3 className="text-xl font-semibold">{doctor.name}</h3>
-                          <p className="text-gray-600">{doctor.specialization}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-muted-foreground">{doctor.specialization}</p>
+                          <p className="text-sm text-muted-foreground">
                             {doctor.years_of_experience} years of experience
                           </p>
                           <div className="mt-2 flex items-center">
@@ -147,17 +145,17 @@ const Index = () => {
           </section>
 
           {/* CTA Section */}
-          <section className="py-16 px-4 bg-primary text-white mt-16">
-            <div className="max-w-7xl mx-auto text-center">
+          <section className="py-16 px-8 bg-primary/10 mt-8">
+            <div className="max-w-[1600px] mx-auto text-center">
               <h2 className="text-3xl font-bold mb-6">Need Another Consultation?</h2>
-              <p className="text-xl mb-8 opacity-90">
+              <p className="text-xl mb-8 text-muted-foreground">
                 Try our AI Symptom Checker to find the right specialist for your needs.
               </p>
               <Button
                 variant="secondary"
                 size="lg"
                 asChild
-                className="h-12 px-8 text-primary"
+                className="h-12 px-8"
               >
                 <Link to="/symptom-checker">Start New Consultation</Link>
               </Button>
