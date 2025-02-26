@@ -22,12 +22,12 @@ const SplashScreen = () => {
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="text-center"
+        className="text-center w-full max-w-[80vh] aspect-square p-8 flex flex-col items-center justify-center"
       >
         <img 
           src="/lovable-uploads/a14d508b-451d-457e-9978-d6ac299763b5.png"
           alt="Hello Doc Logo"
-          className="w-32 h-32 mx-auto mb-4"
+          className="w-full h-full object-contain max-w-[500px] max-h-[500px]"
         />
         {isLoading && (
           <div className="mt-8">
