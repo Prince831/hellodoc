@@ -22,7 +22,7 @@ const HealthRecords = () => {
       try {
         setLoading(true);
         
-        // Fetch health records from Supabase
+        // Fetch health records from Supabase using our new patient ID
         const { data: healthRecordsData, error: healthRecordsError } = await supabase
           .from('health_records')
           .select(`
@@ -37,7 +37,7 @@ const HealthRecords = () => {
               specialization
             )
           `)
-          .eq('user_id', '3e3e3e3e-3e3e-3e3e-3e3e-3e3e3e3e3e3e')
+          .eq('user_id', '7a1f3b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c')
           .order('date', { ascending: false });
 
         if (healthRecordsError) {
@@ -63,20 +63,20 @@ const HealthRecords = () => {
           }
         }));
 
-        // Create a patient record (this could be fetched from a user profile in the future)
+        // Create a patient record with the details of our new patient
         const patient = {
-          id: '3e3e3e3e-3e3e-3e3e-3e3e-3e3e3e3e3e3e',
-          name: 'Jane Doe',
-          dateOfBirth: '1985-05-15',
-          gender: 'Female',
-          bloodType: 'O+',
-          weight: '65 kg',
-          height: '170 cm',
-          allergies: ['Penicillin', 'Pollen'],
+          id: '7a1f3b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c',
+          name: 'John Smith',
+          dateOfBirth: '1990-03-21',
+          gender: 'Male',
+          bloodType: 'A+',
+          weight: '78 kg',
+          height: '182 cm',
+          allergies: ['Penicillin', 'Pollen', 'Shellfish'],
           emergencyContact: {
-            name: 'John Doe',
+            name: 'Mary Smith',
             relation: 'Spouse',
-            phone: '555-123-4567'
+            phone: '555-987-6543'
           }
         };
 
