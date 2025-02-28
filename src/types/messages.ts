@@ -1,6 +1,14 @@
+
 export interface AppointmentRequest {
   date: string;
   reason: string;
+}
+
+export interface Attachment {
+  name: string;
+  url?: string;
+  type: string;
+  size: number;
 }
 
 export interface Message {
@@ -15,6 +23,7 @@ export interface Message {
   appointment_request?: AppointmentRequest | null;
   appointment_status?: 'pending' | 'accepted' | 'rejected' | null;
   notification_type?: string | null;
+  attachments?: Attachment[];
 }
 
 export const mockDoctors = [
@@ -67,6 +76,13 @@ export const mockMessages: Message[] = [
       reason: "Follow-up consultation"
     },
     appointment_status: "accepted",
-    notification_type: "appointment_confirmed"
+    notification_type: "appointment_confirmed",
+    attachments: [
+      {
+        name: "test_results.pdf",
+        type: "application/pdf",
+        size: 1024000
+      }
+    ]
   }
 ];

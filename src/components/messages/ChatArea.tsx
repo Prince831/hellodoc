@@ -1,9 +1,8 @@
 
 import { Message } from "@/types/messages";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, Check, X } from "lucide-react";
+import { Calendar, Check, X, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import MessageInput from "./MessageInput";
 
 interface ChatAreaProps {
@@ -46,6 +45,24 @@ const ChatArea = ({
               <div className="mb-2 flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4" />
                 <span>Appointment Request</span>
+              </div>
+            )}
+            {message.attachments && message.attachments.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 text-sm mb-1">
+                  <Paperclip className="h-4 w-4" />
+                  <span>Attachments</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {message.attachments.map((attachment, index) => (
+                    <div 
+                      key={index}
+                      className="text-xs px-2 py-1 bg-black/10 dark:bg-white/10 rounded-md"
+                    >
+                      {attachment.name}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             <p className="whitespace-pre-wrap text-sm">{message.content}</p>
