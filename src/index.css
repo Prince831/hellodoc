@@ -1,35 +1,36 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 33% 4%;
-    --foreground: 210 20% 98%;
+    --background: 220 33% 98%;
+    --foreground: 224 71.4% 4.1%;
     
-    --card: 220 33% 6%;
-    --card-foreground: 210 20% 98%;
+    --card: 220 33% 98%;
+    --card-foreground: 224 71.4% 4.1%;
     
-    --popover: 220 33% 4%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 220 33% 98%;
+    --popover-foreground: 224 71.4% 4.1%;
     
     --primary: 228 65% 65%;
     --primary-foreground: 210 20% 98%;
     
-    --secondary: 220 33% 10%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
     
-    --muted: 220 33% 12%;
-    --muted-foreground: 217.9 10.6% 75%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
     
-    --accent: 220 33% 10%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220.9 39.3% 11%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
     
-    --border: 220 33% 12%;
-    --input: 220 33% 12%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 228 65% 65%;
     
     --radius: 0.75rem;
@@ -91,49 +92,52 @@
   
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+
+  .dark body {
     background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)), url('/doctor-patient.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
   }
 
-  /* Make cards and UI elements slightly transparent to show the background */
-  .bg-background {
+  /* Make cards and UI elements slightly transparent to show the background in dark mode */
+  .dark .bg-background {
     background-color: rgba(15, 15, 20, 0.85) !important;
     backdrop-filter: blur(8px);
   }
 
-  .bg-white {
+  .dark .bg-white {
     background-color: rgba(20, 20, 25, 0.9) !important;
     backdrop-filter: blur(8px);
   }
 
-  .bg-card {
+  .dark .bg-card {
     background-color: rgba(25, 25, 30, 0.85) !important;
     backdrop-filter: blur(4px);
   }
 
-  /* Adjust text colors for better contrast */
-  .text-gray-600 {
+  /* Adjust text colors for better contrast in dark mode */
+  .dark .text-gray-600 {
     color: rgba(220, 220, 230, 0.75) !important;
   }
 
-  .text-gray-700 {
+  .dark .text-gray-700 {
     color: rgba(220, 220, 230, 0.85) !important;
   }
 
-  .text-gray-900 {
+  .dark .text-gray-900 {
     color: rgba(240, 240, 250, 0.95) !important;
   }
 
-  /* Add a subtle glow effect to primary elements */
-  .text-primary {
+  /* Add a subtle glow effect to primary elements in dark mode */
+  .dark .text-primary {
     text-shadow: 0 0 15px rgba(139, 159, 232, 0.3);
   }
 
-  /* Improve card borders visibility */
-  .border-gray-200 {
+  /* Improve card borders visibility in dark mode */
+  .dark .border-gray-200 {
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
 }
