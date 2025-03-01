@@ -93,7 +93,8 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
-    background-image: url('/medical-light-bg.jpg');
+    /* Use a linear gradient as a fallback instead of an image */
+    background: linear-gradient(to bottom right, #f0f4ff, #e6f7ff);
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
