@@ -93,6 +93,10 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+    background-image: url('/medical-light-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
 
   .dark body {
@@ -100,6 +104,12 @@
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+  }
+
+  /* Make cards and UI elements slightly transparent to show the background */
+  .bg-background {
+    background-color: rgba(240, 240, 245, 0.85) !important;
+    backdrop-filter: blur(8px);
   }
 
   /* Make cards and UI elements slightly transparent to show the background in dark mode */
