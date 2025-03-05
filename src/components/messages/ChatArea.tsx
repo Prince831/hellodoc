@@ -1,6 +1,8 @@
 
 import { Message } from "@/types/messages";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar, Check, X, Paperclip } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import MessageInput from "./MessageInput";
 
 interface ChatAreaProps {
@@ -39,6 +41,30 @@ const ChatArea = ({
               ? 'bg-primary text-primary-foreground rounded-br-sm' 
               : 'bg-muted text-foreground rounded-bl-sm'
           }`}>
+            {message.appointment_request && (
+              <div className="mb-2 flex items-center gap-2 text-sm">
+                <Calendar className="h-4 w-4" />
+                <span>Appointment Request</span>
+              </div>
+            )}
+            {message.attachments && message.attachments.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center gap-2 text-sm mb-1">
+                  <Paperclip className="h-4 w-4" />
+                  <span>Attachments</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {message.attachments.map((attachment, index) => (
+                    <div 
+                      key={index}
+                      className="text-xs px-2 py-1 bg-black/10 dark:bg-white/10 rounded-md"
+                    >
+                      {attachment.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="whitespace-pre-wrap text-sm">{message.content}</p>
             <span className="text-xs opacity-70 mt-1 block">
               {new Date(message.created_at).toLocaleTimeString([], { 
@@ -47,6 +73,24 @@ const ChatArea = ({
               })}
             </span>
           </div>
+          {message.appointment_request && message.appointment_status === 'pending' && !isOwnMessage && (
+            <div className="flex gap-2 mt-2">
+              <Button
+                size="sm"
+                className="bg-green-500 hover:bg-green-600 transition-colors"
+                onClick={() => onAppointmentResponse(message.id, 'accepted')}
+              >
+                <Check className="h-3 w-3 mr-1" /> Accept
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => onAppointmentResponse(message.id, 'rejected')}
+              >
+                <X className="h-3 w-3 mr-1" /> Decline
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );
