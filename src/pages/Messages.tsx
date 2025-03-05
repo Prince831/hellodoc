@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ import ChatArea from "@/components/messages/ChatArea";
 import { Message, mockMessages } from "@/types/messages";
 
 const Messages = () => {
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState("");
@@ -19,16 +21,36 @@ const Messages = () => {
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const { toast } = useToast();
 
+  const doctorId = location.state?.doctorId;
+  const initiateChat = location.state?.initiateChat;
+
   useEffect(() => {
     const loadMockData = () => {
       setTimeout(() => {
         setMessages(mockMessages);
         setLoading(false);
+        
+        // If we're coming from the home page to initiate a chat with a doctor
+        if (doctorId && initiateChat) {
+          const doctorMessage = mockMessages.find(msg => 
+            msg.sender.id === doctorId || 
+            (doctorId === undefined && msg.sender.name !== 'You')
+          );
+          
+          if (doctorMessage) {
+            setSelectedMessage(doctorMessage);
+            // Show a toast to indicate chat is ready
+            toast({
+              title: "Chat Started",
+              description: `You can now chat with ${doctorMessage.sender.name}`,
+            });
+          }
+        }
       }, 1000);
     };
 
     loadMockData();
-  }, []);
+  }, [doctorId, initiateChat, toast]);
 
   const handleAppointmentResponse = async (messageId: string, status: 'accepted' | 'rejected') => {
     try {

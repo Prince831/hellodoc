@@ -1,5 +1,5 @@
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ interface Doctor {
 
 const Index = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -56,6 +57,15 @@ const Index = () => {
 
     fetchDoctors();
   }, [symptoms]);
+
+  const handleTalkToDoctor = (doctorId: string) => {
+    navigate('/messages', { 
+      state: { 
+        doctorId: doctorId,
+        initiateChat: true
+      } 
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
@@ -134,8 +144,12 @@ const Index = () => {
                             <span className="text-yellow-400">★</span>
                             <span className="ml-1">{doctor.rating}</span>
                           </div>
-                          <Button className="mt-4" size="sm">
-                            Book Appointment
+                          <Button 
+                            className="mt-4" 
+                            size="sm"
+                            onClick={() => handleTalkToDoctor(doctor.id)}
+                          >
+                            Talk to a Professional
                           </Button>
                         </div>
                       </div>
