@@ -13,6 +13,15 @@ import Appointments from "./pages/Appointments";
 import Messages from "./pages/Messages";
 import { ThemeProvider } from "./components/ThemeProvider";
 
+// Create placeholder pages for future development
+const ComingSoon = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+    <h1 className="text-4xl font-bold mb-4">Coming Soon</h1>
+    <p className="text-xl mb-8">We're working hard to bring you this feature.</p>
+    <a href="/home" className="text-primary hover:underline">Go back to Home</a>
+  </div>
+);
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -29,6 +38,8 @@ const App = () => (
             <Route path="/health-records" element={<HealthRecords />} />
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/profile" element={<ComingSoon />} />
+            <Route path="/settings" element={<ComingSoon />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

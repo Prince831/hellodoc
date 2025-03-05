@@ -1,13 +1,14 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, FileText, MessageSquare, Home, ChevronRight, ChevronDown } from "lucide-react";
+import { CalendarDays, FileText, MessageSquare, Home, ChevronRight, ChevronDown, Settings, UserCircle, HeartPulse, Stethoscope } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SideNavProps {
   collapsed?: boolean;
@@ -15,6 +16,7 @@ interface SideNavProps {
 
 const SideNav = ({ collapsed = false }: SideNavProps) => {
   const location = useLocation();
+  const { toast } = useToast();
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
     main: true,
     communication: true,
@@ -30,6 +32,13 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
         [section]: !prev[section]
       }));
     }
+  };
+
+  const handleComingSoonClick = (feature: string) => {
+    toast({
+      title: "Coming Soon",
+      description: `The ${feature} feature will be available soon!`,
+    });
   };
   
   return (
@@ -62,6 +71,14 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
                 <Home className="h-4 w-4" />
                 {!collapsed && <span className="ml-2">Home</span>}
               </Link>
+            </Button>
+            <Button
+              variant={isActive("/profile") ? "secondary" : "ghost"}
+              className={`w-full justify-start ${collapsed ? 'px-0 justify-center' : ''}`}
+              onClick={() => handleComingSoonClick("Profile")}
+            >
+              <UserCircle className="h-4 w-4" />
+              {!collapsed && <span className="ml-2">Profile</span>}
             </Button>
           </CollapsibleContent>
         </Collapsible>
@@ -103,6 +120,26 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
                 {!collapsed && <span className="ml-2">Appointments</span>}
               </Link>
             </Button>
+
+            <Button
+              variant={isActive("/symptom-checker") ? "secondary" : "ghost"}
+              className={`w-full justify-start ${collapsed ? 'px-0 justify-center' : ''}`}
+              asChild
+            >
+              <Link to="/symptom-checker">
+                <Stethoscope className="h-4 w-4" />
+                {!collapsed && <span className="ml-2">Symptom Checker</span>}
+              </Link>
+            </Button>
+
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${collapsed ? 'px-0 justify-center' : ''}`}
+              onClick={() => handleComingSoonClick("Vital Signs")}
+            >
+              <HeartPulse className="h-4 w-4" />
+              {!collapsed && <span className="ml-2">Vital Signs</span>}
+            </Button>
           </CollapsibleContent>
         </Collapsible>
 
@@ -131,6 +168,14 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
                 <MessageSquare className="h-4 w-4" />
                 {!collapsed && <span className="ml-2">Messages</span>}
               </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${collapsed ? 'px-0 justify-center' : ''}`}
+              onClick={() => handleComingSoonClick("Settings")}
+            >
+              <Settings className="h-4 w-4" />
+              {!collapsed && <span className="ml-2">Settings</span>}
             </Button>
           </CollapsibleContent>
         </Collapsible>

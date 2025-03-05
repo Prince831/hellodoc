@@ -13,6 +13,8 @@ interface AppointmentListProps {
   emptyMessage: string;
   showScheduleButton?: boolean;
   titleColor: string;
+  onCancelAppointment?: (id: string) => void;
+  onScheduleClick?: () => void;
 }
 
 export const AppointmentList = ({
@@ -21,7 +23,9 @@ export const AppointmentList = ({
   appointments,
   emptyMessage,
   showScheduleButton = false,
-  titleColor
+  titleColor,
+  onCancelAppointment,
+  onScheduleClick
 }: AppointmentListProps) => {
   const Icon = icon === "calendar" ? Calendar : Clock;
   
@@ -46,12 +50,23 @@ export const AppointmentList = ({
                 icon === "calendar" ? "text-blue-800" : "text-gray-600"
               }`}>{emptyMessage}</p>
               {showScheduleButton && (
-                <Button variant="link" className="mt-2">Schedule one now</Button>
+                <Button 
+                  variant="link" 
+                  className="mt-2"
+                  onClick={onScheduleClick}
+                >
+                  Schedule one now
+                </Button>
               )}
             </Card>
           ) : (
             appointments.map((appointment) => (
-              <AppointmentCard key={appointment.id} appointment={appointment} />
+              <AppointmentCard 
+                key={appointment.id} 
+                appointment={appointment} 
+                onCancel={onCancelAppointment && appointment.status === 'scheduled' ? 
+                  () => onCancelAppointment(appointment.id) : undefined}
+              />
             ))
           )}
         </div>

@@ -7,11 +7,38 @@ import SideNav from "@/components/SideNav";
 import { Plus, ChevronRight, ChevronLeft } from "lucide-react";
 import { Appointment } from "@/types/appointments";
 import { AppointmentList } from "@/components/appointments/AppointmentList";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [newAppointment, setNewAppointment] = useState({
+    doctor: "",
+    date: "",
+    time: "",
+    reason: "",
+  });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -49,13 +76,54 @@ const Appointments = () => {
     fetchAppointments();
   }, []);
 
+  const handleNewAppointment = async () => {
+    // In a real app, this would send data to the backend
+    const newAppt: Appointment = {
+      id: String(Date.now()),
+      date: new Date(`${newAppointment.date}T${newAppointment.time}`).toISOString(),
+      status: 'scheduled',
+      reason: newAppointment.reason,
+      notes: "",
+      doctor: {
+        name: newAppointment.doctor,
+        specialization: "General Practice",
+      },
+    };
+
+    setAppointments(prev => [...prev, newAppt]);
+    setDialogOpen(false);
+    toast({
+      title: "Appointment Scheduled",
+      description: `Your appointment with Dr. ${newAppointment.doctor} has been scheduled.`,
+    });
+    
+    // Reset form
+    setNewAppointment({
+      doctor: "",
+      date: "",
+      time: "",
+      reason: "",
+    });
+  };
+
+  const handleCancelAppointment = (id: string) => {
+    setAppointments(prev => prev.map(app => 
+      app.id === id ? { ...app, status: 'cancelled' } : app
+    ));
+    
+    toast({
+      title: "Appointment Cancelled",
+      description: "Your appointment has been cancelled.",
+    });
+  };
+
   const now = new Date();
   const upcomingAppointments = appointments.filter(
-    app => new Date(app.date) > now
+    app => new Date(app.date) > now && app.status !== 'cancelled'
   ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const pastAppointments = appointments.filter(
-    app => new Date(app.date) <= now
+    app => new Date(app.date) <= now || app.status === 'cancelled'
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
@@ -87,10 +155,87 @@ const Appointments = () => {
                 <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
                 <p className="text-gray-600 mt-1">Manage your upcoming and past appointments</p>
               </div>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Schedule New Appointment
-              </Button>
+              
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Schedule New Appointment
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Schedule New Appointment</DialogTitle>
+                    <DialogDescription>
+                      Fill in the details to schedule a new appointment with a doctor.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="doctor" className="text-right">
+                        Doctor
+                      </Label>
+                      <Select 
+                        onValueChange={(value) => setNewAppointment({...newAppointment, doctor: value})}
+                        value={newAppointment.doctor}
+                      >
+                        <SelectTrigger className="col-span-3">
+                          <SelectValue placeholder="Select a doctor" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Sarah Johnson">Dr. Sarah Johnson</SelectItem>
+                          <SelectItem value="Michael Chen">Dr. Michael Chen</SelectItem>
+                          <SelectItem value="Lisa Rodriguez">Dr. Lisa Rodriguez</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="date" className="text-right">
+                        Date
+                      </Label>
+                      <Input
+                        id="date"
+                        type="date"
+                        value={newAppointment.date}
+                        onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="time" className="text-right">
+                        Time
+                      </Label>
+                      <Input
+                        id="time"
+                        type="time"
+                        value={newAppointment.time}
+                        onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
+                        className="col-span-3"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="reason" className="text-right">
+                        Reason
+                      </Label>
+                      <Input
+                        id="reason"
+                        placeholder="Reason for visit"
+                        value={newAppointment.reason}
+                        onChange={(e) => setNewAppointment({...newAppointment, reason: e.target.value})}
+                        className="col-span-3"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button 
+                      onClick={handleNewAppointment}
+                      disabled={!newAppointment.doctor || !newAppointment.date || !newAppointment.time || !newAppointment.reason}
+                    >
+                      Schedule
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
             
             {loading ? (
@@ -106,6 +251,8 @@ const Appointments = () => {
                   emptyMessage="No upcoming appointments"
                   showScheduleButton={true}
                   titleColor="text-blue-600"
+                  onCancelAppointment={handleCancelAppointment}
+                  onScheduleClick={() => setDialogOpen(true)}
                 />
                 <AppointmentList
                   title="Past Appointments"
