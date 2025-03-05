@@ -39,6 +39,21 @@ const Messages = () => {
           
           if (doctorMessage) {
             setSelectedMessage(doctorMessage);
+            
+            // Send initial greeting message
+            const initialGreeting: Message = {
+              id: `m${Date.now()}`,
+              content: "Good day.",
+              created_at: new Date().toISOString(),
+              sender: {
+                id: '00000000-0000-0000-0000-000000000000',
+                name: 'You'
+              },
+              read: true
+            };
+            
+            setMessages(prevMessages => [initialGreeting, ...prevMessages]);
+            
             // Show a toast to indicate chat is ready
             toast({
               title: "Chat Started",
