@@ -2,8 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, User } from "lucide-react";
-import { GlobalSearch } from "@/components/GlobalSearch";
+import { User } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -31,11 +30,6 @@ const Navbar = () => {
           </nav>
         </div>
         <div className="flex items-center gap-2">
-          <GlobalSearch />
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
-          </Button>
           <ThemeToggle />
           <Button variant="ghost" size="icon">
             <User className="h-5 w-5" />
