@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Bell, User, Settings } from "lucide-react";
@@ -16,19 +16,60 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
+interface Notification {
+  id: number;
+  title: string;
+  description: string;
+  time: string;
+  type?: "message" | "appointment" | "test_results";
+  path?: string;
+}
+
 const Navbar = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(3);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Mock notifications data
-  const notifications = [
-    { id: 1, title: "New Message", description: "Dr. Smith sent you a message", time: "Just now" },
-    { id: 2, title: "Appointment Reminder", description: "Your appointment is tomorrow at 10 AM", time: "2 hours ago" },
-    { id: 3, title: "Test Results", description: "Your test results are ready", time: "Yesterday" }
+  // Mock notifications data with types and paths
+  const notifications: Notification[] = [
+    { 
+      id: 1, 
+      title: "New Message", 
+      description: "Dr. Smith sent you a message", 
+      time: "Just now",
+      type: "message",
+      path: "/messages"
+    },
+    { 
+      id: 2, 
+      title: "Appointment Reminder", 
+      description: "Your appointment is tomorrow at 10 AM", 
+      time: "2 hours ago",
+      type: "appointment",
+      path: "/appointments"
+    },
+    { 
+      id: 3, 
+      title: "Test Results", 
+      description: "Your test results are ready", 
+      time: "Yesterday",
+      type: "test_results",
+      path: "/health-records"
+    }
   ];
 
   const handleNotificationClick = () => {
     setUnreadNotifications(0);
+  };
+
+  const handleNotificationItemClick = (notification: Notification) => {
+    if (notification.path) {
+      navigate(notification.path);
+      toast({
+        title: "Navigating",
+        description: `Going to ${notification.title}`
+      });
+    }
   };
 
   return (
@@ -82,7 +123,11 @@ const Navbar = () => {
                 {notifications.length > 0 ? (
                   <div className="divide-y">
                     {notifications.map((notification) => (
-                      <div key={notification.id} className="p-4 hover:bg-muted/50 cursor-pointer transition-colors">
+                      <div 
+                        key={notification.id} 
+                        className="p-4 hover:bg-muted/50 cursor-pointer transition-colors"
+                        onClick={() => handleNotificationItemClick(notification)}
+                      >
                         <div className="font-medium text-sm">{notification.title}</div>
                         <div className="text-xs text-muted-foreground mt-1">{notification.description}</div>
                         <div className="text-xs text-muted-foreground mt-2">{notification.time}</div>
