@@ -13,6 +13,7 @@ import Appointments from "./pages/Appointments";
 import Messages from "./pages/Messages";
 import Dashboard from "./pages/Dashboard";
 import Medications from "./pages/Medications";
+import VideoConsultation from "./pages/VideoConsultation";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 // Create placeholder pages for future development
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/medications" element={<Medications />} />
+            <Route path="/video-consultation" element={<VideoConsultation />} />
             <Route path="/profile" element={<ComingSoon />} />
             <Route path="/settings" element={<ComingSoon />} />
             <Route path="*" element={<NotFound />} />

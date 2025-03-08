@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, User, Settings, Pill, Activity } from "lucide-react";
+import { Bell, User, Settings, Pill, Activity, Video } from "lucide-react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { useState } from "react";
 import {
@@ -100,6 +100,9 @@ const Navbar = () => {
             <Link to="/messages" className="transition-colors hover:text-primary">
               Messages
             </Link>
+            <Link to="/video-consultation" className="transition-colors hover:text-primary">
+              Video Call
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-2">
@@ -177,6 +180,12 @@ const Navbar = () => {
                 <Link to="/medications" className="cursor-pointer w-full">
                   <Pill className="mr-2 h-4 w-4" />
                   <span>Medications</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/video-consultation" className="cursor-pointer w-full">
+                  <Video className="mr-2 h-4 w-4" />
+                  <span>Video Consultation</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
