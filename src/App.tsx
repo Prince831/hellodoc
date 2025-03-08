@@ -11,6 +11,8 @@ import SplashScreen from "./pages/SplashScreen";
 import HealthRecords from "./pages/HealthRecords";
 import Appointments from "./pages/Appointments";
 import Messages from "./pages/Messages";
+import Dashboard from "./pages/Dashboard";
+import Medications from "./pages/Medications";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 // Create placeholder pages for future development
@@ -35,9 +37,11 @@ const App = () => (
             <Route path="/" element={<SplashScreen />} />
             <Route path="/symptom-checker" element={<SymptomChecker />} />
             <Route path="/home" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/health-records" element={<HealthRecords />} />
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/messages" element={<Messages />} />
+            <Route path="/medications" element={<Medications />} />
             <Route path="/profile" element={<ComingSoon />} />
             <Route path="/settings" element={<ComingSoon />} />
             <Route path="*" element={<NotFound />} />

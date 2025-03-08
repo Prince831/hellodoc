@@ -2,7 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, User, Settings } from "lucide-react";
+import { Bell, User, Settings, Pill, Activity } from "lucide-react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { useState } from "react";
 import {
@@ -82,6 +82,9 @@ const Navbar = () => {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
+            <Link to="/dashboard" className="transition-colors hover:text-primary">
+              Dashboard
+            </Link>
             <Link to="/symptom-checker" className="transition-colors hover:text-primary">
               Symptom Checker
             </Link>
@@ -90,6 +93,9 @@ const Navbar = () => {
             </Link>
             <Link to="/health-records" className="transition-colors hover:text-primary">
               Records
+            </Link>
+            <Link to="/medications" className="transition-colors hover:text-primary">
+              Medications
             </Link>
             <Link to="/messages" className="transition-colors hover:text-primary">
               Messages
@@ -160,6 +166,18 @@ const Navbar = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/profile" className="cursor-pointer w-full">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/dashboard" className="cursor-pointer w-full">
+                  <Activity className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/medications" className="cursor-pointer w-full">
+                  <Pill className="mr-2 h-4 w-4" />
+                  <span>Medications</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/settings" className="cursor-pointer w-full">
