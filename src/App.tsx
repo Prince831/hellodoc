@@ -14,6 +14,7 @@ import Messages from "./pages/Messages";
 import Dashboard from "./pages/Dashboard";
 import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
+import Settings from "./pages/Settings";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 // Create placeholder pages for future development
@@ -45,7 +46,7 @@ const App = () => (
             <Route path="/medications" element={<Medications />} />
             <Route path="/video-consultation" element={<VideoConsultation />} />
             <Route path="/profile" element={<ComingSoon />} />
-            <Route path="/settings" element={<ComingSoon />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
