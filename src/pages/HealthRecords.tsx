@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import PatientOverview from "@/components/health-records/PatientOverview";
 import PatientDetails from "@/components/health-records/PatientDetails";
 import MedicalHistory from "@/components/health-records/MedicalHistory";
+import LabResultsChart from "@/components/health-records/LabResultsChart";
 import type { HealthRecords as HealthRecordsType } from "@/types/health-records";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -138,6 +139,7 @@ const HealthRecords = () => {
 
                 <PatientOverview patient={data.patient} />
                 <PatientDetails patient={data.patient} />
+                <LabResultsChart patientId={data.patient.id} />
                 <MedicalHistory records={data.records} />
               </div>
             </div>
