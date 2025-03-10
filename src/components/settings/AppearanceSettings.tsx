@@ -7,9 +7,40 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
+import { colorSchemes } from "@/utils/colorSchemes";
+import { useToast } from "@/hooks/use-toast";
 
 const AppearanceSettings = () => {
+  const { theme, setTheme, colorScheme, setColorScheme } = useTheme();
   const [fontSize, setFontSize] = useState([16]);
+  const { toast } = useToast();
+  
+  const handleThemeChange = (value: string) => {
+    if (value === "light" || value === "dark") {
+      setTheme(value);
+      toast({
+        title: "Theme updated",
+        description: `Theme set to ${value} mode`,
+      });
+    } else if (value === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      setTheme(systemTheme);
+      toast({
+        title: "Theme updated",
+        description: "Using system preference for theme",
+      });
+    }
+  };
+  
+  const handleColorSchemeChange = (schemeId: string) => {
+    setColorScheme(schemeId);
+    const schemeName = colorSchemes.find(s => s.id === schemeId)?.name || "Custom";
+    toast({
+      title: "Color scheme updated",
+      description: `Color scheme set to ${schemeName}`,
+    });
+  };
   
   return (
     <div className="space-y-6">
@@ -23,7 +54,12 @@ const AppearanceSettings = () => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>Color Theme</Label>
-            <RadioGroup defaultValue="system" className="flex flex-col space-y-2">
+            <RadioGroup 
+              defaultValue={theme} 
+              value={theme}
+              onValueChange={handleThemeChange}
+              className="flex flex-col space-y-2"
+            >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="light" id="light" />
                 <Label htmlFor="light" className="cursor-pointer">Light Mode</Label>
@@ -44,48 +80,25 @@ const AppearanceSettings = () => {
           <div className="space-y-4">
             <Label htmlFor="color-scheme">Color Scheme</Label>
             <div className="grid grid-cols-3 gap-2">
-              <div 
-                className="h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center bg-blue-600 text-white"
-                role="button"
-                tabIndex={0}
-              >
-                Blue
-              </div>
-              <div 
-                className="h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center bg-green-600 text-white"
-                role="button"
-                tabIndex={0}
-              >
-                Green
-              </div>
-              <div 
-                className="h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center bg-purple-600 text-white"
-                role="button"
-                tabIndex={0}
-              >
-                Purple
-              </div>
-              <div 
-                className="h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center bg-orange-600 text-white"
-                role="button"
-                tabIndex={0}
-              >
-                Orange
-              </div>
-              <div 
-                className="h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center bg-red-600 text-white"
-                role="button"
-                tabIndex={0}
-              >
-                Red
-              </div>
-              <div 
-                className="h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center bg-slate-600 text-white"
-                role="button"
-                tabIndex={0}
-              >
-                Slate
-              </div>
+              {colorSchemes.map((scheme) => (
+                <div 
+                  key={scheme.id}
+                  className={`h-10 rounded-md cursor-pointer ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center text-white ${
+                    colorScheme === scheme.id ? 'ring-2 ring-ring ring-offset-2' : ''
+                  }`}
+                  style={{ backgroundColor: scheme.primary }}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleColorSchemeChange(scheme.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleColorSchemeChange(scheme.id);
+                    }
+                  }}
+                >
+                  {scheme.name}
+                </div>
+              ))}
             </div>
           </div>
         </CardContent>

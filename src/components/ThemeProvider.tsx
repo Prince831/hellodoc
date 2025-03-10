@@ -1,5 +1,6 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { colorSchemes, getColorScheme } from "@/utils/colorSchemes";
 
 type Theme = 'light' | 'dark';
 
@@ -11,13 +12,17 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme;
+  colorScheme: string;
   setTheme: (theme: Theme) => void;
+  setColorScheme: (schemeId: string) => void;
   toggleTheme: () => void;
 };
 
 const initialState: ThemeProviderState = {
   theme: 'dark',
+  colorScheme: 'blue',
   setTheme: () => null,
+  setColorScheme: () => null,
   toggleTheme: () => null,
 };
 
@@ -32,6 +37,10 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   );
+  
+  const [colorScheme, setColorScheme] = useState<string>(
+    () => localStorage.getItem('hello-doc-color-scheme') || 'blue'
+  );
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -40,13 +49,26 @@ export function ThemeProvider({
     localStorage.setItem(storageKey, theme);
   }, [theme, storageKey]);
 
+  useEffect(() => {
+    const scheme = getColorScheme(colorScheme);
+    
+    // Apply the color scheme to CSS variables
+    document.documentElement.style.setProperty('--primary', scheme.primary);
+    document.documentElement.style.setProperty('--secondary', scheme.secondary);
+    document.documentElement.style.setProperty('--accent', scheme.accent);
+    
+    localStorage.setItem('hello-doc-color-scheme', colorScheme);
+  }, [colorScheme]);
+
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   const value = {
     theme,
+    colorScheme,
     setTheme,
+    setColorScheme,
     toggleTheme,
   };
 
