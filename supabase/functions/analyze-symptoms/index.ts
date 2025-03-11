@@ -51,7 +51,27 @@ serve(async (req) => {
     });
 
     const aiResponse = await response.json();
-    const aiOutput = JSON.parse(aiResponse.choices[0].message.content);
+    
+    // Fix for the "Cannot read properties of undefined (reading '0')" error
+    if (!aiResponse.choices || !aiResponse.choices[0]) {
+      console.error('Unexpected API response:', JSON.stringify(aiResponse));
+      throw new Error('Invalid response from OpenAI API');
+    }
+
+    const content = aiResponse.choices[0].message.content;
+    let aiOutput;
+    
+    try {
+      aiOutput = JSON.parse(content);
+    } catch (error) {
+      console.error('Error parsing AI response as JSON:', content);
+      // Fallback with basic structure if parsing fails
+      aiOutput = {
+        analysis: "Unable to analyze symptoms properly. Please consult with a healthcare professional.",
+        recommendedAction: "virtual_consultation",
+        recommendations: "Schedule a consultation with a doctor to discuss your symptoms."
+      };
+    }
 
     // Store the result in the database
     const supabaseClient = createClient(
@@ -59,17 +79,19 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { error: dbError } = await supabaseClient
-      .from('symptom_checks')
-      .insert({
-        user_id: userId,
-        symptoms,
-        ai_recommendation: aiOutput.recommendations,
-        recommended_action: aiOutput.recommendedAction,
-      });
+    if (userId) {
+      const { error: dbError } = await supabaseClient
+        .from('symptom_checks')
+        .insert({
+          user_id: userId,
+          symptoms,
+          ai_recommendation: aiOutput.recommendations,
+          recommended_action: aiOutput.recommendedAction,
+        });
 
-    if (dbError) {
-      throw dbError;
+      if (dbError) {
+        console.error('Database error:', dbError);
+      }
     }
 
     return new Response(JSON.stringify(aiOutput), {
@@ -77,7 +99,12 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      analysis: "An error occurred during analysis. Please try again later.",
+      recommendedAction: "virtual_consultation",
+      recommendations: "Please consult with a healthcare professional."
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
