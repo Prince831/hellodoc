@@ -29,11 +29,9 @@ export function useGlobalSearch() {
         .from('appointments')
         .select(`
           id, 
-          date, 
+          date,
           reason,
-          doctor:doctor_id (
-            name
-          )
+          doctor_id
         `)
         .ilike('reason', `%${query}%`)
         .limit(5);
@@ -45,7 +43,7 @@ export function useGlobalSearch() {
         .from('health_records')
         .select(`
           id, 
-          diagnosis, 
+          diagnosis,
           date
         `)
         .ilike('diagnosis', `%${query}%`)
@@ -53,11 +51,11 @@ export function useGlobalSearch() {
 
       if (recordsError) throw recordsError;
 
-      // Search for common symptoms
+      // Search for symptoms in symptom checks
       const { data: symptoms, error: symptomsError } = await supabase
-        .from('common_symptoms')
-        .select('id, name, description')
-        .or(`name.ilike.%${query}%, description.ilike.%${query}%`)
+        .from('symptom_checks')
+        .select('id, symptoms')
+        .ilike('symptoms', `%${query}%`)
         .limit(5);
 
       if (symptomsError) throw symptomsError;
@@ -73,7 +71,7 @@ export function useGlobalSearch() {
         })),
         ...(appointments || []).map((appointment) => ({
           id: appointment.id,
-          title: appointment.doctor?.name || "Appointment",
+          title: "Appointment",
           description: `${new Date(appointment.date).toLocaleDateString()} - ${appointment.reason}`,
           icon: "calendar",
           type: 'appointment' as const,
@@ -89,11 +87,11 @@ export function useGlobalSearch() {
         })),
         ...(symptoms || []).map((symptom) => ({
           id: symptom.id,
-          title: symptom.name,
-          description: symptom.description,
+          title: "Symptom",
+          description: symptom.symptoms,
           icon: "activity",
           type: 'symptom' as const,
-          url: `/symptom-checker?symptom=${encodeURIComponent(symptom.name)}`
+          url: `/symptom-checker?symptom=${encodeURIComponent(symptom.symptoms)}`
         }))
       ];
 
