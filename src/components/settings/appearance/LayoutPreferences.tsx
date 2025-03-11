@@ -2,8 +2,52 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTheme } from "@/components/ThemeProvider";
+import { useToast } from "@/hooks/use-toast";
 
 const LayoutPreferences = () => {
+  const { 
+    compactView, 
+    setCompactView, 
+    dateFormat, 
+    setDateFormat, 
+    timeFormat, 
+    setTimeFormat 
+  } = useTheme();
+  
+  const { toast } = useToast();
+
+  const handleCompactViewChange = (checked: boolean) => {
+    setCompactView(checked);
+    toast({
+      title: "Layout preference updated",
+      description: checked ? "Compact view enabled" : "Standard view enabled",
+    });
+  };
+
+  const handleDateFormatChange = (value: string) => {
+    setDateFormat(value as "mdy" | "dmy" | "ymd");
+    
+    const formatDescriptions = {
+      mdy: "MM/DD/YYYY",
+      dmy: "DD/MM/YYYY",
+      ymd: "YYYY/MM/DD"
+    };
+    
+    toast({
+      title: "Date format updated",
+      description: `Date format set to ${formatDescriptions[value as keyof typeof formatDescriptions]}`,
+    });
+  };
+
+  const handleTimeFormatChange = (value: string) => {
+    setTimeFormat(value as "12h" | "24h");
+    toast({
+      title: "Time format updated",
+      description: `Time format set to ${value === "12h" ? "12-hour (AM/PM)" : "24-hour"}`,
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -13,12 +57,19 @@ const LayoutPreferences = () => {
             Display more information with less spacing
           </p>
         </div>
-        <Switch id="compact-view" />
+        <Switch 
+          id="compact-view" 
+          checked={compactView}
+          onCheckedChange={handleCompactViewChange}
+        />
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="date-format">Date Format</Label>
-        <Select defaultValue="mdy">
+        <Select 
+          value={dateFormat}
+          onValueChange={handleDateFormatChange}
+        >
           <SelectTrigger className="w-full md:w-[300px]">
             <SelectValue placeholder="Select date format" />
           </SelectTrigger>
@@ -32,7 +83,10 @@ const LayoutPreferences = () => {
       
       <div className="space-y-2">
         <Label htmlFor="time-format">Time Format</Label>
-        <Select defaultValue="12h">
+        <Select 
+          value={timeFormat}
+          onValueChange={handleTimeFormatChange}
+        >
           <SelectTrigger className="w-full md:w-[300px]">
             <SelectValue placeholder="Select time format" />
           </SelectTrigger>

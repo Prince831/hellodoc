@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,6 +34,7 @@
     --ring: 228 65% 65%;
     
     --radius: 0.75rem;
+    --base-font-size: 16px;
 
     --sidebar-background: 220 33% 98%;
     --sidebar-foreground: 224 71.4% 4.1%;
@@ -89,6 +91,10 @@
     @apply border-border;
   }
   
+  html {
+    font-size: var(--base-font-size);
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
@@ -103,6 +109,87 @@
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+  }
+
+  /* Font family classes */
+  .font-system {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-serif {
+    font-family: 'Georgia', serif;
+  }
+  
+  .font-mono {
+    font-family: 'Courier New', monospace;
+  }
+  
+  .font-dyslexic {
+    font-family: 'OpenDyslexic', sans-serif;
+  }
+
+  /* High contrast mode */
+  .high-contrast {
+    --primary: #0078d4;
+    --foreground: #000000;
+    --background: #ffffff;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --border: #000000;
+  }
+  
+  .dark.high-contrast {
+    --primary: #3aa0ff;
+    --foreground: #ffffff;
+    --background: #000000;
+    --card: #121212;
+    --card-foreground: #ffffff;
+    --border: #ffffff;
+  }
+
+  /* Reduced motion */
+  .reduced-motion * {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Compact view */
+  .compact-view .card {
+    @apply p-2;
+  }
+  
+  .compact-view .p-4 {
+    @apply p-2;
+  }
+  
+  .compact-view .p-6 {
+    @apply p-3;
+  }
+  
+  .compact-view .space-y-4 {
+    @apply space-y-2;
+  }
+  
+  .compact-view .space-y-6 {
+    @apply space-y-3;
+  }
+  
+  .compact-view .text-xl {
+    @apply text-lg;
+  }
+  
+  .compact-view .text-2xl {
+    @apply text-xl;
+  }
+  
+  .compact-view .text-3xl {
+    @apply text-2xl;
   }
 
   /* Make cards and UI elements slightly transparent to show the background */
