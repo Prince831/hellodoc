@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
@@ -13,6 +13,20 @@ const SymptomChecker = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract query parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const symptomParam = searchParams.get('symptom');
+    const queryParam = searchParams.get('query');
+    
+    if (symptomParam) {
+      setSymptoms(symptomParam);
+    } else if (queryParam) {
+      setSymptoms(queryParam);
+    }
+  }, [location.search]);
 
   const analyzeSymptoms = async () => {
     if (!symptoms.trim()) {

@@ -4,6 +4,6 @@ export type SearchResult = {
   title: string;
   description: string;
   icon: string;
-  type: 'doctor' | 'appointment' | 'record';
+  type: 'doctor' | 'appointment' | 'record' | 'symptom';
   url: string;
 };

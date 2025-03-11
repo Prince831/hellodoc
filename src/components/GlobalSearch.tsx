@@ -8,7 +8,8 @@ import {
   CommandList, 
   CommandEmpty, 
   CommandGroup, 
-  CommandItem 
+  CommandItem,
+  CommandSeparator 
 } from "@/components/ui/command";
 import { useNavigate } from "react-router-dom";
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
@@ -47,6 +48,18 @@ export function GlobalSearch() {
     navigate(result.url);
   };
 
+  // Filter results by type
+  const doctorResults = results.filter(result => result.type === 'doctor');
+  const appointmentResults = results.filter(result => result.type === 'appointment');
+  const recordResults = results.filter(result => result.type === 'record');
+  const symptomResults = results.filter(result => result.type === 'symptom');
+
+  // Direct to symptom checker with the query
+  const handleSearchSymptoms = () => {
+    setOpen(false);
+    navigate(`/symptom-checker?query=${encodeURIComponent(search)}`);
+  };
+
   return (
     <>
       <Button
@@ -62,7 +75,7 @@ export function GlobalSearch() {
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput
-          placeholder="Search doctors, appointments, records..."
+          placeholder="Search doctors, appointments, symptoms..."
           value={search}
           onValueChange={setSearch}
           ref={inputRef}
@@ -74,46 +87,88 @@ export function GlobalSearch() {
                 <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-primary"></div>
               </div>
             ) : (
-              "No results found."
+              <div className="py-6 text-center text-sm">
+                <p>No results found.</p>
+                <Button 
+                  variant="link" 
+                  className="mt-2 text-primary" 
+                  onClick={handleSearchSymptoms}
+                >
+                  Check symptoms for "{search}"
+                </Button>
+              </div>
             )}
           </CommandEmpty>
+          
           {results.length > 0 && (
             <>
-              <CommandGroup heading="Doctors">
-                {results
-                  .filter(result => result.type === 'doctor')
-                  .map(result => (
+              {symptomResults.length > 0 && (
+                <CommandGroup heading="Symptoms">
+                  {symptomResults.map(result => (
                     <CommandItem
-                      key={`doctor-${result.id}`}
+                      key={`symptom-${result.id}`}
                       onSelect={() => handleSelect(result)}
                     >
                       <SearchResultItem result={result} onSelect={handleSelect} />
                     </CommandItem>
                   ))}
-              </CommandGroup>
-              <CommandGroup heading="Appointments">
-                {results
-                  .filter(result => result.type === 'appointment')
-                  .map(result => (
-                    <CommandItem
-                      key={`appointment-${result.id}`}
-                      onSelect={() => handleSelect(result)}
-                    >
-                      <SearchResultItem result={result} onSelect={handleSelect} />
-                    </CommandItem>
-                  ))}
-              </CommandGroup>
-              <CommandGroup heading="Health Records">
-                {results
-                  .filter(result => result.type === 'record')
-                  .map(result => (
-                    <CommandItem
-                      key={`record-${result.id}`}
-                      onSelect={() => handleSelect(result)}
-                    >
-                      <SearchResultItem result={result} onSelect={handleSelect} />
-                    </CommandItem>
-                  ))}
+                </CommandGroup>
+              )}
+              
+              {doctorResults.length > 0 && (
+                <>
+                  {symptomResults.length > 0 && <CommandSeparator />}
+                  <CommandGroup heading="Doctors">
+                    {doctorResults.map(result => (
+                      <CommandItem
+                        key={`doctor-${result.id}`}
+                        onSelect={() => handleSelect(result)}
+                      >
+                        <SearchResultItem result={result} onSelect={handleSelect} />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+              
+              {appointmentResults.length > 0 && (
+                <>
+                  {(doctorResults.length > 0 || symptomResults.length > 0) && <CommandSeparator />}
+                  <CommandGroup heading="Appointments">
+                    {appointmentResults.map(result => (
+                      <CommandItem
+                        key={`appointment-${result.id}`}
+                        onSelect={() => handleSelect(result)}
+                      >
+                        <SearchResultItem result={result} onSelect={handleSelect} />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+              
+              {recordResults.length > 0 && (
+                <>
+                  {(doctorResults.length > 0 || appointmentResults.length > 0 || symptomResults.length > 0) && <CommandSeparator />}
+                  <CommandGroup heading="Health Records">
+                    {recordResults.map(result => (
+                      <CommandItem
+                        key={`record-${result.id}`}
+                        onSelect={() => handleSelect(result)}
+                      >
+                        <SearchResultItem result={result} onSelect={handleSelect} />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+              
+              <CommandSeparator />
+              <CommandGroup>
+                <CommandItem onSelect={handleSearchSymptoms} className="justify-center text-primary">
+                  <Search className="mr-2 h-4 w-4" />
+                  Check all symptoms for "{search}"
+                </CommandItem>
               </CommandGroup>
             </>
           )}

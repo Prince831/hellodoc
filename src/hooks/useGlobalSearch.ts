@@ -15,6 +15,7 @@ export function useGlobalSearch() {
 
     setLoading(true);
     try {
+      // Search doctors
       const { data: doctors, error: doctorsError } = await supabase
         .from('doctors')
         .select('id, name, specialization')
@@ -23,6 +24,7 @@ export function useGlobalSearch() {
 
       if (doctorsError) throw doctorsError;
 
+      // Search appointments
       const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
         .select(`
@@ -38,6 +40,7 @@ export function useGlobalSearch() {
 
       if (appointmentsError) throw appointmentsError;
 
+      // Search health records
       const { data: records, error: recordsError } = await supabase
         .from('health_records')
         .select(`
@@ -49,6 +52,15 @@ export function useGlobalSearch() {
         .limit(5);
 
       if (recordsError) throw recordsError;
+
+      // Search for common symptoms
+      const { data: symptoms, error: symptomsError } = await supabase
+        .from('common_symptoms')
+        .select('id, name, description')
+        .or(`name.ilike.%${query}%, description.ilike.%${query}%`)
+        .limit(5);
+
+      if (symptomsError) throw symptomsError;
 
       const formattedResults: SearchResult[] = [
         ...(doctors || []).map((doctor) => ({
@@ -74,6 +86,14 @@ export function useGlobalSearch() {
           icon: "file-text",
           type: 'record' as const,
           url: `/health-records?id=${record.id}`
+        })),
+        ...(symptoms || []).map((symptom) => ({
+          id: symptom.id,
+          title: symptom.name,
+          description: symptom.description,
+          icon: "activity",
+          type: 'symptom' as const,
+          url: `/symptom-checker?symptom=${encodeURIComponent(symptom.name)}`
         }))
       ];
 
