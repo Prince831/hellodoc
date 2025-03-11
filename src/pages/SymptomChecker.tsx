@@ -54,7 +54,8 @@ const SymptomChecker = () => {
         description: "We'll find the best doctors for your symptoms.",
       });
 
-      navigate("/home", { 
+      // Updated navigation path from "/home" to "/"
+      navigate("/", { 
         state: { 
           symptoms,
           analysis: data.analysis,
