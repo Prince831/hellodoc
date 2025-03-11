@@ -179,19 +179,25 @@
   .compact-view .space-y-6 {
     @apply space-y-3;
   }
-  
-  .compact-view .text-xl {
-    @apply text-lg;
-  }
-  
-  .compact-view .text-2xl {
-    @apply text-xl;
-  }
-  
-  .compact-view .text-3xl {
-    @apply text-2xl;
-  }
+}
 
+/* Define compact view text sizing without using @apply */
+.compact-view .text-xl {
+  font-size: 1.125rem; /* text-lg size */
+  line-height: 1.75rem;
+}
+
+.compact-view .text-2xl {
+  font-size: 1.25rem; /* text-xl size */
+  line-height: 1.75rem;
+}
+
+.compact-view .text-3xl {
+  font-size: 1.5rem; /* text-2xl size */
+  line-height: 2rem;
+}
+
+@layer base {
   /* Make cards and UI elements slightly transparent to show the background */
   .bg-background {
     background-color: rgba(240, 240, 245, 0.85) !important;
