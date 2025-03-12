@@ -75,10 +75,12 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
             <Button
               variant={isActive("/profile") ? "secondary" : "ghost"}
               className={`w-full justify-start ${collapsed ? 'px-0 justify-center' : ''}`}
-              onClick={() => handleComingSoonClick("Profile")}
+              asChild
             >
-              <UserCircle className="h-4 w-4" />
-              {!collapsed && <span className="ml-2">Profile</span>}
+              <Link to="/profile">
+                <UserCircle className="h-4 w-4" />
+                {!collapsed && <span className="ml-2">Profile</span>}
+              </Link>
             </Button>
           </CollapsibleContent>
         </Collapsible>
