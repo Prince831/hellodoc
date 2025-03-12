@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,29 +6,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { PhoneCall, Mail, User, MapPin, Clock, Shield } from "lucide-react";
 
-const PersonalInformation = () => {
-  // Placeholder user data - in a real app, this would come from a database
-  const [user, setUser] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 000-0000",
-    dateOfBirth: "1985-05-15",
-    gender: "male",
-    address: "123 Healthcare St",
-    city: "Medtown",
-    state: "CA",
-    zipCode: "90210",
-    emergencyContact: "Jane Doe",
-    emergencyPhone: "+1 (555) 111-1111",
-    relationship: "spouse",
-    preferredLanguage: "english",
-    preferredContactMethod: "email",
-    communicationPreferences: "Prefer morning appointments and email notifications"
-  });
+interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  relationship: string;
+  preferredLanguage: string;
+  preferredContactMethod: string;
+  communicationPreferences: string;
+}
 
-  const handleChange = (field: string, value: string) => {
-    setUser(prev => ({ ...prev, [field]: value }));
+interface PersonalInformationProps {
+  userData: UserData;
+  onUpdateUserData: (updatedData: UserData) => void;
+}
+
+const PersonalInformation = ({ userData, onUpdateUserData }: PersonalInformationProps) => {
+  const handleChange = (field: keyof UserData, value: string) => {
+    onUpdateUserData({
+      ...userData,
+      [field]: value
+    });
   };
 
   return (
@@ -47,7 +53,7 @@ const PersonalInformation = () => {
               <Label htmlFor="firstName">First Name</Label>
               <Input 
                 id="firstName" 
-                value={user.firstName} 
+                value={userData.firstName} 
                 onChange={(e) => handleChange("firstName", e.target.value)}
               />
             </div>
@@ -56,7 +62,7 @@ const PersonalInformation = () => {
               <Label htmlFor="lastName">Last Name</Label>
               <Input 
                 id="lastName" 
-                value={user.lastName} 
+                value={userData.lastName} 
                 onChange={(e) => handleChange("lastName", e.target.value)}
               />
             </div>
@@ -69,7 +75,7 @@ const PersonalInformation = () => {
                   id="email" 
                   type="email" 
                   className="pl-10" 
-                  value={user.email} 
+                  value={userData.email} 
                   onChange={(e) => handleChange("email", e.target.value)}
                 />
               </div>
@@ -83,7 +89,7 @@ const PersonalInformation = () => {
                   id="phone" 
                   type="tel" 
                   className="pl-10" 
-                  value={user.phone} 
+                  value={userData.phone} 
                   onChange={(e) => handleChange("phone", e.target.value)}
                 />
               </div>
@@ -94,7 +100,7 @@ const PersonalInformation = () => {
               <Input 
                 id="dateOfBirth" 
                 type="date" 
-                value={user.dateOfBirth} 
+                value={userData.dateOfBirth} 
                 onChange={(e) => handleChange("dateOfBirth", e.target.value)}
               />
             </div>
@@ -102,7 +108,7 @@ const PersonalInformation = () => {
             <div className="space-y-2">
               <Label htmlFor="gender">Gender</Label>
               <Select 
-                value={user.gender} 
+                value={userData.gender} 
                 onValueChange={(value) => handleChange("gender", value)}
               >
                 <SelectTrigger>
@@ -137,7 +143,7 @@ const PersonalInformation = () => {
                 <Input 
                   id="address" 
                   className="pl-10" 
-                  value={user.address} 
+                  value={userData.address} 
                   onChange={(e) => handleChange("address", e.target.value)}
                 />
               </div>
@@ -148,7 +154,7 @@ const PersonalInformation = () => {
                 <Label htmlFor="city">City</Label>
                 <Input 
                   id="city" 
-                  value={user.city} 
+                  value={userData.city} 
                   onChange={(e) => handleChange("city", e.target.value)}
                 />
               </div>
@@ -156,7 +162,7 @@ const PersonalInformation = () => {
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
                 <Select 
-                  value={user.state} 
+                  value={userData.state} 
                   onValueChange={(value) => handleChange("state", value)}
                 >
                   <SelectTrigger>
@@ -176,7 +182,7 @@ const PersonalInformation = () => {
                 <Label htmlFor="zipCode">ZIP Code</Label>
                 <Input 
                   id="zipCode" 
-                  value={user.zipCode} 
+                  value={userData.zipCode} 
                   onChange={(e) => handleChange("zipCode", e.target.value)}
                 />
               </div>
@@ -193,7 +199,7 @@ const PersonalInformation = () => {
                   <Input 
                     id="emergencyContact" 
                     className="pl-10" 
-                    value={user.emergencyContact} 
+                    value={userData.emergencyContact} 
                     onChange={(e) => handleChange("emergencyContact", e.target.value)}
                   />
                 </div>
@@ -207,7 +213,7 @@ const PersonalInformation = () => {
                     id="emergencyPhone" 
                     type="tel" 
                     className="pl-10" 
-                    value={user.emergencyPhone} 
+                    value={userData.emergencyPhone} 
                     onChange={(e) => handleChange("emergencyPhone", e.target.value)}
                   />
                 </div>
@@ -216,7 +222,7 @@ const PersonalInformation = () => {
               <div className="space-y-2">
                 <Label htmlFor="relationship">Relationship</Label>
                 <Select 
-                  value={user.relationship} 
+                  value={userData.relationship} 
                   onValueChange={(value) => handleChange("relationship", value)}
                 >
                   <SelectTrigger>
@@ -249,7 +255,7 @@ const PersonalInformation = () => {
             <div className="space-y-2">
               <Label htmlFor="preferredLanguage">Preferred Language</Label>
               <Select 
-                value={user.preferredLanguage} 
+                value={userData.preferredLanguage} 
                 onValueChange={(value) => handleChange("preferredLanguage", value)}
               >
                 <SelectTrigger>
@@ -270,7 +276,7 @@ const PersonalInformation = () => {
               <div className="relative">
                 <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Select 
-                  value={user.preferredContactMethod} 
+                  value={userData.preferredContactMethod} 
                   onValueChange={(value) => handleChange("preferredContactMethod", value)}
                 >
                   <SelectTrigger className="pl-10">
@@ -292,7 +298,7 @@ const PersonalInformation = () => {
                 id="communicationPreferences" 
                 placeholder="E.g., preferred appointment times, notification preferences"
                 className="h-20 resize-none"
-                value={user.communicationPreferences}
+                value={userData.communicationPreferences}
                 onChange={(e) => handleChange("communicationPreferences", e.target.value)}
               />
               <p className="text-xs text-muted-foreground mt-1">

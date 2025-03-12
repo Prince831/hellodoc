@@ -3,16 +3,38 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, Upload } from "lucide-react";
 
+interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gender: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  relationship: string;
+  preferredLanguage: string;
+  preferredContactMethod: string;
+  communicationPreferences: string;
+}
+
 interface ProfileHeaderProps {
   onSave: () => void;
   isLoading: boolean;
+  userData: UserData;
 }
 
-const ProfileHeader = ({ onSave, isLoading }: ProfileHeaderProps) => {
+const ProfileHeader = ({ onSave, isLoading, userData }: ProfileHeaderProps) => {
+  const fullName = `${userData.firstName} ${userData.lastName}`;
+  
   // Placeholder user data - in a real app, this would come from a database
   const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
+    name: fullName,
+    email: userData.email,
     profileImage: "/placeholder.svg",
     patientId: "PAT-12345",
     memberSince: "January 2023"
