@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import { ThemeProvider } from "./components/ThemeProvider";
 
 // Create placeholder pages for future development
@@ -22,7 +23,7 @@ const ComingSoon = () => (
   <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
     <h1 className="text-4xl font-bold mb-4">Coming Soon</h1>
     <p className="text-xl mb-8">We're working hard to bring you this feature.</p>
-    <a href="/home" className="text-primary hover:underline">Go back to Home</a>
+    <a href="/" className="text-primary hover:underline">Go back to Home</a>
   </div>
 );
 
@@ -45,7 +46,7 @@ const App = () => (
             <Route path="/messages" element={<Messages />} />
             <Route path="/medications" element={<Medications />} />
             <Route path="/video-consultation" element={<VideoConsultation />} />
-            <Route path="/profile" element={<ComingSoon />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
