@@ -5,12 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Phone, Activity, Brain, Stethoscope, AlertCircle } from "lucide-react";
+import { Phone, Activity, Brain, Stethoscope, AlertCircle, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// Define interface for Doctor
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  years_of_experience: number;
+  rating: number;
+  keywords: string[];
+  image_url: string | null;
+  availability: boolean | null;
+}
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const [matchedDoctors, setMatchedDoctors] = useState<Doctor[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,6 +57,8 @@ const SymptomChecker = () => {
     }
 
     setIsAnalyzing(true);
+    setAnalysisResults(null);
+    setMatchedDoctors([]);
 
     try {
       // Get current user ID if logged in
@@ -60,21 +80,24 @@ const SymptomChecker = () => {
       }
 
       console.log("Analysis results:", data);
+      
+      // Set results state
+      setAnalysisResults({
+        analysis: data.analysis,
+        recommendedAction: data.recommendedAction,
+        recommendations: data.recommendations
+      });
+      
+      // Set matched doctors if they exist
+      if (data.matchedDoctors && Array.isArray(data.matchedDoctors)) {
+        setMatchedDoctors(data.matchedDoctors);
+      }
 
       toast({
         title: "Analysis Complete",
-        description: "We'll find the best doctors for your symptoms.",
+        description: "We've identified relevant specialists for your symptoms.",
       });
-
-      // Navigate to home page with analysis results
-      navigate("/", { 
-        state: { 
-          symptoms,
-          analysis: data.analysis,
-          recommendedAction: data.recommendedAction,
-          recommendations: data.recommendations
-        } 
-      });
+      
     } catch (error) {
       console.error("Error during analysis:", error);
       toast({
@@ -95,6 +118,41 @@ const SymptomChecker = () => {
       description: "Connecting to emergency services...",
       variant: "destructive",
     });
+  };
+
+  const getActionLabel = (action: string) => {
+    switch (action) {
+      case "self_care":
+        return <Badge className="bg-green-500">Self Care</Badge>;
+      case "virtual_consultation":
+        return <Badge className="bg-blue-500">Virtual Consultation</Badge>;
+      case "emergency":
+        return <Badge className="bg-red-500">Emergency</Badge>;
+      default:
+        return <Badge>Unknown</Badge>;
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  const getRatingStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (i <= Math.floor(rating)) {
+        stars.push(<span key={i} className="text-yellow-500">★</span>);
+      } else if (i - 0.5 <= rating) {
+        stars.push(<span key={i} className="text-yellow-500">★</span>);
+      } else {
+        stars.push(<span key={i} className="text-gray-300">★</span>);
+      }
+    }
+    return <div className="flex">{stars}</div>;
   };
 
   return (
@@ -127,6 +185,85 @@ const SymptomChecker = () => {
               {isAnalyzing ? "Analyzing..." : "Find Specialists"}
             </Button>
           </div>
+
+          {analysisResults && (
+            <Card className="mb-8 border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span>Symptom Analysis</span>
+                  {getActionLabel(analysisResults.recommendedAction)}
+                </CardTitle>
+                <CardDescription>
+                  Based on the symptoms you've described
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium text-lg mb-2">Analysis</h3>
+                    <p className="text-muted-foreground">{analysisResults.analysis}</p>
+                  </div>
+                  <Separator />
+                  <div>
+                    <h3 className="font-medium text-lg mb-2">Recommendations</h3>
+                    <p className="text-muted-foreground">{analysisResults.recommendations}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {matchedDoctors.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">Recommended Specialists</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {matchedDoctors.map((doctor) => (
+                  <Card key={doctor.id} className="overflow-hidden border-primary/10 hover:border-primary/30 transition-colors">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
+                          <AvatarFallback className="bg-primary/20 text-primary">
+                            {getInitials(doctor.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-lg">{doctor.name}</CardTitle>
+                          <CardDescription>{doctor.specialization}</CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm space-y-2">
+                        <div className="flex justify-between">
+                          <span>Experience:</span>
+                          <span className="font-medium">{doctor.years_of_experience} years</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Rating:</span>
+                          <span>{getRatingStars(doctor.rating)} ({doctor.rating})</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Availability:</span>
+                          <span className={doctor.availability ? "text-green-500" : "text-red-500"}>
+                            {doctor.availability ? "Available" : "Unavailable"}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="pt-2 flex justify-between">
+                      <Badge variant="outline" className="mr-2">
+                        {doctor.specialization}
+                      </Badge>
+                      <Button size="sm" variant="outline">
+                        Book Appointment
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="bg-background/80 backdrop-blur-md rounded-lg p-6 flex flex-col items-center text-center">

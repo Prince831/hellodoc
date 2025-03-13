@@ -24,6 +24,12 @@ serve(async (req) => {
 
     console.log("Processing symptoms:", symptoms);
 
+    // Create Supabase client for database operations
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Call OpenAI API to analyze symptoms
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -40,11 +46,13 @@ serve(async (req) => {
             1. A brief analysis of the symptoms
             2. Recommend one of these actions: "self_care", "virtual_consultation", or "emergency"
             3. Provide specific recommendations based on the symptoms
+            4. Extract key medical terms or keywords from the symptoms that could help match with specialist doctors
             Format your response as JSON with these fields:
             {
               "analysis": "brief analysis",
               "recommendedAction": "one of the three actions",
-              "recommendations": "specific recommendations"
+              "recommendations": "specific recommendations",
+              "keywords": ["keyword1", "keyword2", "..."]
             }`
           },
           { role: 'user', content: symptoms }
@@ -73,17 +81,31 @@ serve(async (req) => {
       aiOutput = {
         analysis: "Unable to analyze symptoms properly. Please consult with a healthcare professional.",
         recommendedAction: "virtual_consultation",
-        recommendations: "Schedule a consultation with a doctor to discuss your symptoms."
+        recommendations: "Schedule a consultation with a doctor to discuss your symptoms.",
+        keywords: symptoms.toLowerCase().split(' ')
       };
+    }
+
+    // Extract keywords for doctor matching
+    const keywords = aiOutput.keywords || 
+      symptoms.toLowerCase().split(/\s+/).filter((word: string) => word.length > 3);
+    
+    console.log("Extracted keywords for doctor matching:", keywords);
+
+    // Find doctors that match the keywords
+    const { data: matchedDoctors, error: doctorsError } = await supabaseClient
+      .from('doctors')
+      .select('*')
+      .filter('keywords', 'cs', `{${keywords.join(',')}}`);
+      
+    if (doctorsError) {
+      console.error("Error fetching matching doctors:", doctorsError);
+    } else {
+      console.log(`Found ${matchedDoctors?.length || 0} matching doctors`);
     }
 
     // Store the result in the database if userId is provided
     if (userId) {
-      const supabaseClient = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
-
       console.log("Storing symptom check for user:", userId);
       
       const { error: dbError } = await supabaseClient
@@ -100,7 +122,11 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify(aiOutput), {
+    // Include matched doctors in the response
+    return new Response(JSON.stringify({
+      ...aiOutput,
+      matchedDoctors: matchedDoctors || []
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
@@ -109,7 +135,8 @@ serve(async (req) => {
       error: error.message,
       analysis: "An error occurred during analysis. Please try again later.",
       recommendedAction: "virtual_consultation",
-      recommendations: "Please consult with a healthcare professional."
+      recommendations: "Please consult with a healthcare professional.",
+      matchedDoctors: []
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
