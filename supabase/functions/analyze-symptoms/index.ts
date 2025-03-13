@@ -22,6 +22,8 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
+    console.log("Processing symptoms:", symptoms);
+
     // Call OpenAI API to analyze symptoms
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -51,6 +53,7 @@ serve(async (req) => {
     });
 
     const aiResponse = await response.json();
+    console.log("API response received:", JSON.stringify(aiResponse));
     
     // Fix for the "Cannot read properties of undefined (reading '0')" error
     if (!aiResponse.choices || !aiResponse.choices[0]) {
@@ -63,6 +66,7 @@ serve(async (req) => {
     
     try {
       aiOutput = JSON.parse(content);
+      console.log("Parsed AI output:", JSON.stringify(aiOutput));
     } catch (error) {
       console.error('Error parsing AI response as JSON:', content);
       // Fallback with basic structure if parsing fails
@@ -73,13 +77,15 @@ serve(async (req) => {
       };
     }
 
-    // Store the result in the database
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
+    // Store the result in the database if userId is provided
     if (userId) {
+      const supabaseClient = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
+
+      console.log("Storing symptom check for user:", userId);
+      
       const { error: dbError } = await supabaseClient
         .from('symptom_checks')
         .insert({

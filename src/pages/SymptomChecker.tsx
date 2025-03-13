@@ -41,20 +41,32 @@ const SymptomChecker = () => {
     setIsAnalyzing(true);
 
     try {
+      // Get current user ID if logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
+
+      console.log("Analyzing symptoms, user ID:", userId || "not logged in");
+      
       const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
         body: {
           symptoms,
+          userId, // Pass the user ID to the function
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Function error:", error);
+        throw error;
+      }
+
+      console.log("Analysis results:", data);
 
       toast({
         title: "Analysis Complete",
         description: "We'll find the best doctors for your symptoms.",
       });
 
-      // Updated navigation path from "/home" to "/"
+      // Navigate to home page with analysis results
       navigate("/", { 
         state: { 
           symptoms,
@@ -64,6 +76,7 @@ const SymptomChecker = () => {
         } 
       });
     } catch (error) {
+      console.error("Error during analysis:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to analyze symptoms",

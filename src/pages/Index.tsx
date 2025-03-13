@@ -32,18 +32,27 @@ const Index = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
+        setLoading(true);
+        console.log("Fetching doctors, symptoms:", symptoms ? `"${symptoms}"` : "none");
+
         const { data, error } = await supabase
           .from('doctors')
           .select('*');
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching doctors:", error);
+          throw error;
+        }
 
         if (symptoms && data) {
+          // Filter doctors based on keywords in symptoms
           const relevantDoctors = data.filter(doctor => 
-            doctor.keywords.some(keyword => 
+            doctor.keywords && doctor.keywords.some(keyword => 
               symptoms.toLowerCase().includes(keyword.toLowerCase())
             )
           );
+          
+          console.log(`Found ${relevantDoctors.length} relevant doctors out of ${data.length} total`);
           setDoctors(relevantDoctors.length > 0 ? relevantDoctors : data);
         } else {
           setDoctors(data || []);
@@ -59,6 +68,7 @@ const Index = () => {
   }, [symptoms]);
 
   const handleTalkToDoctor = (doctorId: string) => {
+    console.log("Initiating chat with doctor:", doctorId);
     navigate('/messages', { 
       state: { 
         doctorId: doctorId,
@@ -71,14 +81,14 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
       <Navbar />
       <div className="flex">
-        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
+        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
           <SideNav collapsed={isSidebarCollapsed} />
           <Button
             variant="ghost"
             size="icon"
-            className={`fixed left-64 top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300 ${
-              isSidebarCollapsed ? 'left-16' : ''
-            }`}
+            className={`fixed ${
+              isSidebarCollapsed ? 'left-16' : 'left-64'
+            } top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300`}
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           >
             {isSidebarCollapsed ? (
@@ -130,9 +140,13 @@ const Index = () => {
                     <Card key={doctor.id} className="p-6 hover:shadow-lg transition-shadow">
                       <div className="flex items-start space-x-4">
                         <img
-                          src={doctor.image_url}
+                          src={doctor.image_url || '/placeholder.svg'}
                           alt={doctor.name}
                           className="w-20 h-20 rounded-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg';
+                          }}
                         />
                         <div>
                           <h3 className="text-xl font-semibold">{doctor.name}</h3>
