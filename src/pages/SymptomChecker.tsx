@@ -89,14 +89,29 @@ const SymptomChecker = () => {
       });
       
       // Set matched doctors if they exist
-      if (data.matchedDoctors && Array.isArray(data.matchedDoctors)) {
-        setMatchedDoctors(data.matchedDoctors);
-      }
+      const doctorsData = data.matchedDoctors && Array.isArray(data.matchedDoctors) 
+        ? data.matchedDoctors 
+        : [];
+      
+      setMatchedDoctors(doctorsData);
 
       toast({
         title: "Analysis Complete",
-        description: "We've identified relevant specialists for your symptoms.",
+        description: "Redirecting to specialists matching your symptoms.",
       });
+      
+      // Navigate to dashboard with the analysis results and matched doctors
+      setTimeout(() => {
+        navigate('/home', { 
+          state: { 
+            symptoms: symptoms,
+            analysis: data.analysis,
+            recommendedAction: data.recommendedAction,
+            recommendations: data.recommendations,
+            matchedDoctors: doctorsData
+          } 
+        });
+      }, 1000); // Short delay to allow the toast to be visible
       
     } catch (error) {
       console.error("Error during analysis:", error);

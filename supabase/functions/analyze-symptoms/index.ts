@@ -30,107 +30,147 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Call OpenAI API to analyze symptoms
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a medical pre-screening assistant. Analyze the symptoms and provide:
-            1. A brief analysis of the symptoms
-            2. Recommend one of these actions: "self_care", "virtual_consultation", or "emergency"
-            3. Provide specific recommendations based on the symptoms
-            4. Extract key medical terms or keywords from the symptoms that could help match with specialist doctors
-            Format your response as JSON with these fields:
-            {
-              "analysis": "brief analysis",
-              "recommendedAction": "one of the three actions",
-              "recommendations": "specific recommendations",
-              "keywords": ["keyword1", "keyword2", "..."]
-            }`
-          },
-          { role: 'user', content: symptoms }
-        ],
-      }),
-    });
-
-    const aiResponse = await response.json();
-    console.log("API response received:", JSON.stringify(aiResponse));
+    // First, let's directly query for doctors based on the symptoms text
+    // This is a fallback in case the AI analysis fails
+    const lowercaseSymptoms = symptoms.toLowerCase();
+    const symptomWords = lowercaseSymptoms
+      .split(/\s+|,/)
+      .map(word => word.trim())
+      .filter(word => word.length > 3);
     
-    // Fix for the "Cannot read properties of undefined (reading '0')" error
-    if (!aiResponse.choices || !aiResponse.choices[0]) {
-      console.error('Unexpected API response:', JSON.stringify(aiResponse));
-      throw new Error('Invalid response from OpenAI API');
-    }
-
-    const content = aiResponse.choices[0].message.content;
-    let aiOutput;
+    console.log("Extracted keyword candidates:", symptomWords);
     
-    try {
-      aiOutput = JSON.parse(content);
-      console.log("Parsed AI output:", JSON.stringify(aiOutput));
-    } catch (error) {
-      console.error('Error parsing AI response as JSON:', content);
-      // Fallback with basic structure if parsing fails
-      aiOutput = {
-        analysis: "Unable to analyze symptoms properly. Please consult with a healthcare professional.",
-        recommendedAction: "virtual_consultation",
-        recommendations: "Schedule a consultation with a doctor to discuss your symptoms.",
-        keywords: symptoms.toLowerCase().split(' ')
-      };
-    }
-
-    // Extract keywords for doctor matching
-    const keywords = aiOutput.keywords || 
-      symptoms.toLowerCase().split(/\s+/).filter((word: string) => word.length > 3);
-    
-    console.log("Extracted keywords for doctor matching:", keywords);
-
-    // Find doctors that match the keywords
-    const { data: matchedDoctors, error: doctorsError } = await supabaseClient
+    // Direct database query using symptom words
+    const { data: directMatchDoctors, error: directQueryError } = await supabaseClient
       .from('doctors')
       .select('*')
-      .filter('keywords', 'cs', `{${keywords.join(',')}}`);
+      .filter('keywords', 'cs', `{${symptomWords.join(',')}}`);
       
-    if (doctorsError) {
-      console.error("Error fetching matching doctors:", doctorsError);
+    if (directQueryError) {
+      console.error("Error in direct doctor query:", directQueryError);
     } else {
-      console.log(`Found ${matchedDoctors?.length || 0} matching doctors`);
+      console.log(`Found ${directMatchDoctors?.length || 0} doctors through direct matching`);
     }
 
-    // Store the result in the database if userId is provided
-    if (userId) {
-      console.log("Storing symptom check for user:", userId);
+    // Call OpenAI API to analyze symptoms
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a medical pre-screening assistant. Analyze the symptoms and provide:
+              1. A brief analysis of the symptoms
+              2. Recommend one of these actions: "self_care", "virtual_consultation", or "emergency"
+              3. Provide specific recommendations based on the symptoms
+              4. Extract key medical terms or keywords from the symptoms that could help match with specialist doctors
+              Format your response as JSON with these fields:
+              {
+                "analysis": "brief analysis",
+                "recommendedAction": "one of the three actions",
+                "recommendations": "specific recommendations",
+                "keywords": ["keyword1", "keyword2", "..."]
+              }`
+            },
+            { role: 'user', content: symptoms }
+          ],
+        }),
+      });
+
+      const aiResponse = await response.json();
+      console.log("API response received:", JSON.stringify(aiResponse));
       
-      const { error: dbError } = await supabaseClient
-        .from('symptom_checks')
-        .insert({
-          user_id: userId,
-          symptoms,
-          ai_recommendation: aiOutput.recommendations,
-          recommended_action: aiOutput.recommendedAction,
-        });
-
-      if (dbError) {
-        console.error('Database error:', dbError);
+      if (!aiResponse.choices || !aiResponse.choices[0]) {
+        console.error('Unexpected API response:', JSON.stringify(aiResponse));
+        throw new Error('Invalid response from OpenAI API');
       }
-    }
 
-    // Include matched doctors in the response
-    return new Response(JSON.stringify({
-      ...aiOutput,
-      matchedDoctors: matchedDoctors || []
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+      const content = aiResponse.choices[0].message.content;
+      let aiOutput;
+      
+      try {
+        aiOutput = JSON.parse(content);
+        console.log("Parsed AI output:", JSON.stringify(aiOutput));
+      } catch (error) {
+        console.error('Error parsing AI response as JSON:', content);
+        // Fallback with basic structure if parsing fails
+        aiOutput = {
+          analysis: "Unable to analyze symptoms properly. Please consult with a healthcare professional.",
+          recommendedAction: "virtual_consultation",
+          recommendations: "Schedule a consultation with a doctor to discuss your symptoms.",
+          keywords: symptomWords
+        };
+      }
+
+      // Extract keywords for doctor matching
+      const keywords = aiOutput.keywords || symptomWords;
+      
+      console.log("Extracted keywords for doctor matching:", keywords);
+
+      // Find doctors that match the keywords
+      const { data: matchedDoctors, error: doctorsError } = await supabaseClient
+        .from('doctors')
+        .select('*')
+        .filter('keywords', 'cs', `{${keywords.join(',')}}`);
+        
+      if (doctorsError) {
+        console.error("Error fetching matching doctors:", doctorsError);
+      } else {
+        console.log(`Found ${matchedDoctors?.length || 0} matching doctors`);
+      }
+
+      // If AI matching found no doctors, use the direct match results
+      const finalDoctors = (matchedDoctors && matchedDoctors.length > 0) 
+        ? matchedDoctors 
+        : (directMatchDoctors || []);
+
+      // Store the result in the database if userId is provided
+      if (userId) {
+        console.log("Storing symptom check for user:", userId);
+        
+        const { error: dbError } = await supabaseClient
+          .from('symptom_checks')
+          .insert({
+            user_id: userId,
+            symptoms,
+            ai_recommendation: aiOutput.recommendations,
+            recommended_action: aiOutput.recommendedAction,
+          });
+
+        if (dbError) {
+          console.error('Database error:', dbError);
+        }
+      }
+
+      // Include matched doctors in the response
+      return new Response(JSON.stringify({
+        ...aiOutput,
+        matchedDoctors: finalDoctors
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+
+    } catch (aiError) {
+      console.error('OpenAI API error:', aiError);
+      
+      // Fallback response with direct matched doctors
+      return new Response(JSON.stringify({ 
+        analysis: "We couldn't perform a detailed analysis at this time, but here are some specialists who might help with your symptoms.",
+        recommendedAction: "virtual_consultation",
+        recommendations: "Please consult with a healthcare professional about your symptoms.",
+        matchedDoctors: directMatchDoctors || []
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('General error:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       analysis: "An error occurred during analysis. Please try again later.",
