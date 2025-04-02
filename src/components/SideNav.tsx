@@ -42,9 +42,7 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
   };
   
   return (
-    <div className={`fixed left-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto bg-background/80 backdrop-blur-sm border-r border-border transition-all duration-300 ${
-      collapsed ? 'w-16' : 'w-64'
-    }`}>
+    <div className="h-full overflow-y-auto">
       <nav className="p-4 space-y-4">
         {/* Main Navigation */}
         <Collapsible 

@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import SideNav from "@/components/SideNav";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import CollapsibleSidebar from "@/components/messages/CollapsibleSidebar";
 
 interface Doctor {
   id: string;
@@ -81,23 +80,10 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-b from-secondary to-white">
       <Navbar />
       <div className="flex">
-        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
-          <SideNav collapsed={isSidebarCollapsed} />
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`fixed ${
-              isSidebarCollapsed ? 'left-16' : 'left-64'
-            } top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300`}
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          >
-            {isSidebarCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
+        <CollapsibleSidebar 
+          collapsed={isSidebarCollapsed} 
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} 
+        />
         
         <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
           {/* Symptoms Analysis Section */}

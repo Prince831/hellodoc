@@ -11,14 +11,14 @@ interface CollapsibleSidebarProps {
 
 const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ collapsed, onToggle }) => {
   return (
-    <div className={`transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} border-r border-border bg-background relative`}>
+    <div className={`transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} border-r border-border bg-background h-[calc(100vh-4rem)]`}>
       <SideNav collapsed={collapsed} />
       <Button
         variant="ghost"
         size="icon"
         className={`fixed ${
           collapsed ? 'left-16' : 'left-64'
-        } top-1/2 transform -translate-y-1/2 z-50 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300 shadow-sm`}
+        } top-24 transform z-50 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300 shadow-sm`}
         onClick={onToggle}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
