@@ -17,7 +17,6 @@ import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import { ThemeProvider } from "./components/ThemeProvider";
-import { useState } from "react";
 
 // Create placeholder pages for future development
 const ComingSoon = () => (
@@ -30,35 +29,31 @@ const ComingSoon = () => (
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="hello-doc-theme">
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<SplashScreen />} />
-              <Route path="/symptom-checker" element={<SymptomChecker />} />
-              <Route path="/home" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/health-records" element={<HealthRecords />} />
-              <Route path="/appointments" element={<Appointments />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/medications" element={<Medications />} />
-              <Route path="/video-consultation" element={<VideoConsultation />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
-  );
-};
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="dark" storageKey="hello-doc-theme">
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<SplashScreen />} />
+            <Route path="/symptom-checker" element={<SymptomChecker />} />
+            <Route path="/home" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/health-records" element={<HealthRecords />} />
+            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/medications" element={<Medications />} />
+            <Route path="/video-consultation" element={<VideoConsultation />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
 
 export default App;
