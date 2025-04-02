@@ -42,10 +42,10 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
   };
   
   return (
-    <div className={`fixed left-0 top-16 h-full bg-background/80 backdrop-blur-sm border-r border-border p-4 transition-all duration-300 ${
+    <div className={`fixed left-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto bg-background/80 backdrop-blur-sm border-r border-border transition-all duration-300 ${
       collapsed ? 'w-16' : 'w-64'
     }`}>
-      <nav className="space-y-4">
+      <nav className="p-4 space-y-4">
         {/* Main Navigation */}
         <Collapsible 
           open={openSections.main} 
