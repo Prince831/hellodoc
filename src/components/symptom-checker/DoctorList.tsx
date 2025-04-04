@@ -13,9 +13,15 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.15,
+      delayChildren: 0.2
     }
   }
+};
+
+const item = {
+  hidden: { y: 20, opacity: 0 },
+  show: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } }
 };
 
 const DoctorList = ({ doctors, title = "Recommended Specialists" }: DoctorListProps) => {
@@ -42,11 +48,12 @@ const DoctorList = ({ doctors, title = "Recommended Specialists" }: DoctorListPr
       <h2 className="text-2xl font-bold mb-6">{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {doctors.map((doctor) => (
-          <DoctorCard 
-            key={doctor.id} 
-            doctor={doctor} 
-            onBookAppointment={handleBookAppointment}
-          />
+          <motion.div key={doctor.id} variants={item}>
+            <DoctorCard 
+              doctor={doctor} 
+              onBookAppointment={handleBookAppointment}
+            />
+          </motion.div>
         ))}
       </div>
     </motion.div>
