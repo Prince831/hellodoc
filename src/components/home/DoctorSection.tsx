@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Loading from "@/components/ui/loading";
+import { LoadingScreen } from "@/components/ui/loading";
 
 interface DoctorSectionProps {
   doctors: Doctor[];
@@ -69,9 +69,7 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
       )}
       
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loading size="lg" text="Finding specialists for you..." />
-        </div>
+        <LoadingScreen text={symptoms ? "Finding specialists for your symptoms..." : "Loading specialists..."} />
       ) : doctors.length > 0 ? (
         <DoctorList 
           doctors={doctors} 

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { SkeletonCard } from "@/components/ui/loading";
 
 interface DoctorListProps {
   doctors: Doctor[];
@@ -58,12 +59,20 @@ const DoctorList = ({
   };
   
   if (loading) {
+    const skeletonCount = compact ? 4 : 3;
     return (
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-6">{title}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="w-full h-[220px] bg-muted/30 animate-pulse"></Card>
+        <div className={compact 
+          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        }>
+          {[...Array(skeletonCount)].map((_, i) => (
+            <SkeletonCard 
+              key={i} 
+              className="w-full" 
+              height={compact ? "h-[90px]" : "h-[280px]"}
+            />
           ))}
         </div>
       </div>
