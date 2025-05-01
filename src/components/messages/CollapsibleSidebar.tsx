@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SideNav from "@/components/SideNav";
@@ -9,6 +9,8 @@ interface CollapsibleSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
 }
+
+const SIDEBAR_STATE_KEY = "hellodoc-sidebar-collapsed";
 
 const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ collapsed, onToggle }) => {
   return (

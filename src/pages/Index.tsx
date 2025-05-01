@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import CollapsibleSidebar from "@/components/messages/CollapsibleSidebar";
 import { motion } from "framer-motion";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 // Imported components
 import SymptomAnalysis from "@/components/home/SymptomAnalysis";
@@ -26,7 +27,8 @@ const Index = () => {
   const location = useLocation();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const { isSidebarCollapsed, toggleSidebar } = useSidebar();
   
   const symptoms = location.state?.symptoms || '';
   const analysis = location.state?.analysis || '';
@@ -44,7 +46,7 @@ const Index = () => {
 
         if (error) {
           console.error("Error fetching doctors:", error);
-          throw error;
+          throw new Error(error.message);
         }
 
         if (symptoms && data) {
@@ -62,6 +64,7 @@ const Index = () => {
         }
       } catch (error) {
         console.error('Error fetching doctors:', error);
+        setError(error instanceof Error ? error : new Error('An unknown error occurred'));
       } finally {
         setLoading(false);
       }
@@ -86,7 +89,7 @@ const Index = () => {
       <div className="flex">
         <CollapsibleSidebar 
           collapsed={isSidebarCollapsed} 
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onToggle={toggleSidebar}
         />
         
         <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} pt-16`}>
@@ -105,7 +108,8 @@ const Index = () => {
             <DoctorSection 
               doctors={doctors} 
               loading={loading} 
-              symptoms={symptoms} 
+              symptoms={symptoms}
+              error={error}
             />
 
             <CallToAction />

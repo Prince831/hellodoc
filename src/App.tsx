@@ -17,6 +17,7 @@ import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { SidebarProvider } from "./contexts/SidebarContext";
 
 // Create placeholder pages for future development
 const ComingSoon = () => (
@@ -35,22 +36,25 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/symptom-checker" element={<SymptomChecker />} />
-            <Route path="/home" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/health-records" element={<HealthRecords />} />
-            <Route path="/appointments" element={<Appointments />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/medications" element={<Medications />} />
-            <Route path="/video-consultation" element={<VideoConsultation />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <SidebarProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/welcome" element={<SplashScreen />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Navigate to="/" replace />} />
+              <Route path="/symptom-checker" element={<SymptomChecker />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/health-records" element={<HealthRecords />} />
+              <Route path="/appointments" element={<Appointments />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/medications" element={<Medications />} />
+              <Route path="/video-consultation" element={<VideoConsultation />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </SidebarProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
