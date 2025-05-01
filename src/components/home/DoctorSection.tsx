@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Loading from "@/components/ui/loading";
 
 interface DoctorSectionProps {
   doctors: Doctor[];
@@ -27,6 +28,10 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
         initiateChat: true
       } 
     });
+  };
+
+  const handleSearchAgain = () => {
+    navigate('/symptom-checker');
   };
 
   const containerVariants = {
@@ -65,10 +70,14 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
       
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <Loading size="lg" text="Finding specialists for you..." />
         </div>
       ) : doctors.length > 0 ? (
-        <DoctorList doctors={doctors} />
+        <DoctorList 
+          doctors={doctors} 
+          onSearch={symptoms ? handleSearchAgain : undefined}
+          loading={loading}
+        />
       ) : (
         <Card className="p-8 text-center">
           <h3 className="text-xl font-medium mb-2">No specialists found</h3>
@@ -78,7 +87,7 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
               : "No specialists are available at the moment."}
           </p>
           <Button 
-            onClick={() => navigate('/symptom-checker')}
+            onClick={handleSearchAgain}
             variant="outline"
           >
             Try another symptom search

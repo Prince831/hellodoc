@@ -2,10 +2,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, FileText } from "lucide-react";
 import VideoDisplay from "./VideoDisplay";
 import VideoControls from "./VideoControls";
 import VideoChat from "./VideoChat";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 interface VideoInterfaceProps {
   doctorName: string;
@@ -15,6 +18,8 @@ interface VideoInterfaceProps {
 const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(true);
+  const [notes, setNotes] = useState("");
+  const { toast } = useToast();
   const localVideoRef = useRef<HTMLVideoElement>(null);
   
   // Simulated remote video feed - in a real app, this would use WebRTC
@@ -34,12 +39,22 @@ const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
             localVideoRef.current.srcObject = stream;
           }
           
+          toast({
+            title: "Video connected",
+            description: "Your camera and microphone are now active",
+          });
+          
           // Clean up function to stop all tracks when component unmounts
           return () => {
             stream.getTracks().forEach(track => track.stop());
           };
         } catch (error) {
           console.error("Error accessing media devices:", error);
+          toast({
+            title: "Camera access error",
+            description: "Could not access your camera or microphone",
+            variant: "destructive"
+          });
         }
       };
       
@@ -50,7 +65,7 @@ const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
         isConnected.current = false;
       };
     }
-  }, []);
+  }, [toast]);
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
@@ -62,6 +77,11 @@ const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
         track.enabled = isMuted;
       });
     }
+    
+    toast({
+      title: isMuted ? "Microphone unmuted" : "Microphone muted",
+      description: isMuted ? "Others can now hear you" : "Others cannot hear you",
+    });
   };
 
   const toggleVideo = () => {
@@ -74,6 +94,18 @@ const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
         track.enabled = !isVideoOn;
       });
     }
+    
+    toast({
+      title: isVideoOn ? "Camera turned off" : "Camera turned on",
+      description: isVideoOn ? "Others cannot see you" : "Others can now see you",
+    });
+  };
+
+  const handleSaveNotes = () => {
+    toast({
+      title: "Notes saved",
+      description: "Your consultation notes have been saved",
+    });
   };
 
   return (
@@ -102,6 +134,7 @@ const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
               Chat
             </TabsTrigger>
             <TabsTrigger value="notes" className="flex-1">
+              <FileText className="h-4 w-4 mr-2" />
               Notes
             </TabsTrigger>
           </TabsList>
@@ -109,12 +142,15 @@ const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
             <VideoChat doctorName={doctorName} />
           </TabsContent>
           <TabsContent value="notes" className="flex-1">
-            <Card className="h-full p-4">
+            <Card className="h-full p-4 flex flex-col">
               <h3 className="font-medium mb-2">Consultation Notes</h3>
-              <textarea 
-                className="w-full h-[calc(100%-3rem)] p-2 rounded-md border focus:outline-none focus:ring-1 focus:ring-primary" 
+              <Textarea 
+                className="flex-1 p-2 mb-4 resize-none" 
                 placeholder="Take notes during your consultation..."
-              ></textarea>
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+              <Button onClick={handleSaveNotes}>Save Notes</Button>
             </Card>
           </TabsContent>
         </Tabs>

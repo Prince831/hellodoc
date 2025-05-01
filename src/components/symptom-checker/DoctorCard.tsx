@@ -21,9 +21,11 @@ export interface Doctor {
 interface DoctorCardProps {
   doctor: Doctor;
   onBookAppointment?: (doctorId: string) => void;
+  onContactDoctor?: (doctorId: string) => void;
+  compact?: boolean;
 }
 
-const DoctorCard = ({ doctor, onBookAppointment }: DoctorCardProps) => {
+const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = false }: DoctorCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   
   const getInitials = (name: string) => {
@@ -40,10 +42,10 @@ const DoctorCard = ({ doctor, onBookAppointment }: DoctorCardProps) => {
         {[...Array(5)].map((_, i) => (
           <Star 
             key={i} 
-            className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
+            className={`h-3 w-3 ${i < Math.floor(rating) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
           />
         ))}
-        <span className="ml-1 text-sm">({rating.toFixed(1)})</span>
+        <span className="ml-1 text-xs font-medium">({rating.toFixed(1)})</span>
       </div>
     );
   };
@@ -54,6 +56,45 @@ const DoctorCard = ({ doctor, onBookAppointment }: DoctorCardProps) => {
     }
   };
 
+  const handleContactDoctor = () => {
+    if (onContactDoctor) {
+      onContactDoctor(doctor.id);
+    }
+  };
+
+  if (compact) {
+    return (
+      <motion.div
+        whileHover={{ y: -3, scale: 1.01 }}
+        className="h-full"
+      >
+        <Card className="h-full overflow-hidden border-primary/10 transition-all duration-300 hover:shadow-md hover:border-primary/30">
+          <div className="flex items-center p-3">
+            <Avatar className="h-12 w-12 mr-3 border border-primary/20">
+              <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
+                {getInitials(doctor.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{doctor.name}</p>
+              <p className="text-xs text-muted-foreground">{doctor.specialization}</p>
+              <div className="mt-1">{getRatingStars(doctor.rating)}</div>
+            </div>
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="ml-auto h-7 w-7 p-0"
+              onClick={handleBookAppointment}
+            >
+              <CalendarDays className="h-4 w-4 text-primary" />
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -62,6 +103,7 @@ const DoctorCard = ({ doctor, onBookAppointment }: DoctorCardProps) => {
       whileHover={{ y: -5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className="h-full"
     >
       <Card className={`h-full overflow-hidden border-primary/10 transition-all duration-300 ${isHovered ? 'shadow-lg border-primary/30' : 'shadow-sm'}`}>
         <CardHeader className="pb-2">
@@ -120,6 +162,7 @@ const DoctorCard = ({ doctor, onBookAppointment }: DoctorCardProps) => {
             variant="outline" 
             size="sm" 
             className="flex-1"
+            onClick={handleContactDoctor}
           >
             <Phone className="h-4 w-4 mr-2" />
             Contact
