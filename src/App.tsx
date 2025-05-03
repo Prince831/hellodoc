@@ -19,10 +19,14 @@ import Profile from "./pages/Profile";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
 
+// Doctor pages
+import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorPatients from "./pages/DoctorPatients";
+
 // Create placeholder pages for future development
-const ComingSoon = () => (
+const ComingSoon = ({ title = "Coming Soon" }) => (
   <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-    <h1 className="text-4xl font-bold mb-4">Coming Soon</h1>
+    <h1 className="text-4xl font-bold mb-4">{title}</h1>
     <p className="text-xl mb-8">We're working hard to bring you this feature.</p>
     <a href="/" className="text-primary hover:underline">Go back to Home</a>
   </div>
@@ -39,6 +43,7 @@ const App = () => (
         <SidebarProvider>
           <BrowserRouter>
             <Routes>
+              {/* Patient routes */}
               <Route path="/welcome" element={<SplashScreen />} />
               <Route path="/" element={<Index />} />
               <Route path="/home" element={<Navigate to="/" replace />} />
@@ -51,6 +56,17 @@ const App = () => (
               <Route path="/video-consultation" element={<VideoConsultation />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              
+              {/* Doctor routes */}
+              <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+              <Route path="/doctor-patients" element={<DoctorPatients />} />
+              <Route path="/doctor-appointments" element={<ComingSoon title="Doctor Appointments" />} />
+              <Route path="/doctor-consultations" element={<ComingSoon title="Doctor Video Consultations" />} />
+              <Route path="/doctor-messages" element={<ComingSoon title="Doctor Messages" />} />
+              <Route path="/doctor-records" element={<ComingSoon title="Patient Records" />} />
+              <Route path="/doctor-prescriptions" element={<ComingSoon title="Prescriptions" />} />
+              <Route path="/doctor-settings" element={<ComingSoon title="Doctor Settings" />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
