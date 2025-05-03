@@ -69,7 +69,7 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
       )}
       
       {loading ? (
-        <LoadingScreen text={symptoms ? "Finding specialists for your symptoms..." : "Loading specialists..."} />
+        <LoadingScreen message={symptoms ? "Finding specialists for your symptoms..." : "Loading specialists..."} />
       ) : doctors.length > 0 ? (
         <DoctorList 
           doctors={doctors} 
