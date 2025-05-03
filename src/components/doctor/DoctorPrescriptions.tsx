@@ -90,7 +90,7 @@ const DoctorPrescriptions = () => {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
+      case 'active': return 'default';  // Changed from 'success' to 'default'
       case 'expired': return 'secondary';
       case 'cancelled': return 'destructive';
       default: return 'outline';
