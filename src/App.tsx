@@ -22,15 +22,12 @@ import { SidebarProvider } from "./contexts/SidebarContext";
 // Doctor pages
 import DoctorDashboard from "./pages/DoctorDashboard";
 import DoctorPatients from "./pages/DoctorPatients";
-
-// Create placeholder pages for future development
-const ComingSoon = ({ title = "Coming Soon" }) => (
-  <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-    <h1 className="text-4xl font-bold mb-4">{title}</h1>
-    <p className="text-xl mb-8">We're working hard to bring you this feature.</p>
-    <a href="/" className="text-primary hover:underline">Go back to Home</a>
-  </div>
-);
+import DoctorAppointments from "./pages/DoctorAppointments";
+import DoctorConsultations from "./pages/DoctorConsultations";
+import DoctorMessages from "./pages/DoctorMessages";
+import DoctorRecords from "./pages/DoctorRecords";
+import DoctorPrescriptions from "./pages/DoctorPrescriptions";
+import DoctorSettings from "./pages/DoctorSettings";
 
 const queryClient = new QueryClient();
 
@@ -60,12 +57,12 @@ const App = () => (
               {/* Doctor routes */}
               <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
               <Route path="/doctor-patients" element={<DoctorPatients />} />
-              <Route path="/doctor-appointments" element={<ComingSoon title="Doctor Appointments" />} />
-              <Route path="/doctor-consultations" element={<ComingSoon title="Doctor Video Consultations" />} />
-              <Route path="/doctor-messages" element={<ComingSoon title="Doctor Messages" />} />
-              <Route path="/doctor-records" element={<ComingSoon title="Patient Records" />} />
-              <Route path="/doctor-prescriptions" element={<ComingSoon title="Prescriptions" />} />
-              <Route path="/doctor-settings" element={<ComingSoon title="Doctor Settings" />} />
+              <Route path="/doctor-appointments" element={<DoctorAppointments />} />
+              <Route path="/doctor-consultations" element={<DoctorConsultations />} />
+              <Route path="/doctor-messages" element={<DoctorMessages />} />
+              <Route path="/doctor-records" element={<DoctorRecords />} />
+              <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
+              <Route path="/doctor-settings" element={<DoctorSettings />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
