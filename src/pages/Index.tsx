@@ -49,8 +49,9 @@ const Index = () => {
             rating: doc.rating,
             imageUrl: doc.image_url,
             availability: doc.availability,
-            languages: doc.languages || [],
-            education: doc.education || ''
+            // Since languages and education might not exist in the database, provide defaults
+            languages: [], // Default to empty array
+            education: ''  // Default to empty string
           }));
           
           // Filter doctors based on keywords in symptoms
