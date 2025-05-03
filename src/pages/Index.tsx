@@ -1,4 +1,3 @@
-
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -6,22 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import CollapsibleSidebar from "@/components/messages/CollapsibleSidebar";
 import { motion } from "framer-motion";
 import { useSidebar } from "@/contexts/SidebarContext";
+import { Doctor } from "@/components/symptom-checker/DoctorCard";
 
 // Imported components
 import SymptomAnalysis from "@/components/home/SymptomAnalysis";
 import DoctorSection from "@/components/home/DoctorSection";
 import CallToAction from "@/components/home/CallToAction";
-
-interface Doctor {
-  id: string;
-  name: string;
-  specialization: string;
-  years_of_experience: number;
-  rating: number;
-  image_url: string;
-  keywords: string[];
-  availability: boolean | null;
-}
 
 const Index = () => {
   const location = useLocation();
@@ -50,17 +39,44 @@ const Index = () => {
         }
 
         if (symptoms && data) {
+          // Map database doctor format to the Doctor interface expected by components
+          const mappedDoctors: Doctor[] = data.map(doc => ({
+            id: doc.id,
+            name: doc.name,
+            specialization: doc.specialization,
+            yearsExperience: doc.years_of_experience,
+            rating: doc.rating,
+            imageUrl: doc.image_url,
+            availability: doc.availability,
+            languages: doc.languages || [],
+            education: doc.education || ''
+          }));
+          
           // Filter doctors based on keywords in symptoms
-          const relevantDoctors = data.filter(doctor => 
-            doctor.keywords && doctor.keywords.some(keyword => 
+          const relevantDoctors = mappedDoctors.filter(doctor => 
+            doc.keywords && doc.keywords.some(keyword => 
               symptoms.toLowerCase().includes(keyword.toLowerCase())
             )
           );
           
           console.log(`Found ${relevantDoctors.length} relevant doctors out of ${data.length} total`);
-          setDoctors(relevantDoctors.length > 0 ? relevantDoctors : data);
+          setDoctors(relevantDoctors.length > 0 ? relevantDoctors : mappedDoctors);
+        } else if (data) {
+          // Map all doctors if no symptoms filter
+          const mappedDoctors: Doctor[] = data.map(doc => ({
+            id: doc.id,
+            name: doc.name,
+            specialization: doc.specialization,
+            yearsExperience: doc.years_of_experience,
+            rating: doc.rating,
+            imageUrl: doc.image_url,
+            availability: doc.availability,
+            languages: doc.languages || [],
+            education: doc.education || ''
+          }));
+          setDoctors(mappedDoctors);
         } else {
-          setDoctors(data || []);
+          setDoctors([]);
         }
       } catch (error) {
         console.error('Error fetching doctors:', error);

@@ -9,9 +9,10 @@ import AnalysisResults from "@/components/symptom-checker/AnalysisResults";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import FeatureSection from "@/components/symptom-checker/FeatureSection";
 import EmergencySection from "@/components/symptom-checker/EmergencySection";
+import { Doctor } from "@/components/symptom-checker/DoctorCard";
 
-// Define interface for Doctor
-interface Doctor {
+// Define interface for database doctor structure
+interface DBDoctor {
   id: string;
   name: string;
   specialization: string;
@@ -20,6 +21,8 @@ interface Doctor {
   keywords: string[];
   image_url: string | null;
   availability: boolean | null;
+  education?: string;
+  languages?: string[];
 }
 
 const SymptomChecker = () => {
@@ -86,9 +89,19 @@ const SymptomChecker = () => {
         recommendations: data.recommendations
       });
       
-      // Set matched doctors if they exist
+      // Map the doctors data to match our Doctor interface
       const doctorsData = data.matchedDoctors && Array.isArray(data.matchedDoctors) 
-        ? data.matchedDoctors 
+        ? data.matchedDoctors.map((doc: DBDoctor) => ({
+            id: doc.id,
+            name: doc.name,
+            specialization: doc.specialization,
+            yearsExperience: doc.years_of_experience,
+            rating: doc.rating,
+            imageUrl: doc.image_url || undefined,
+            availability: doc.availability || false,
+            education: doc.education || '',
+            languages: doc.languages || []
+          }))
         : [];
       
       setMatchedDoctors(doctorsData);
