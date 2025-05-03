@@ -1,3 +1,4 @@
+
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
@@ -54,7 +55,8 @@ const Index = () => {
           
           // Filter doctors based on keywords in symptoms
           const relevantDoctors = mappedDoctors.filter(doctor => 
-            doc.keywords && doc.keywords.some(keyword => 
+            // Check if the original doctor data has keywords
+            data.find(d => d.id === doctor.id)?.keywords?.some(keyword => 
               symptoms.toLowerCase().includes(keyword.toLowerCase())
             )
           );
@@ -71,8 +73,8 @@ const Index = () => {
             rating: doc.rating,
             imageUrl: doc.image_url,
             availability: doc.availability,
-            languages: doc.languages || [],
-            education: doc.education || ''
+            languages: [],  // Default to empty array if not provided
+            education: ''   // Default to empty string if not provided
           }));
           setDoctors(mappedDoctors);
         } else {
