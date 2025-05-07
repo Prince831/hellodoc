@@ -13,12 +13,14 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
   useEffect(() => {
     const loadMockData = () => {
       setTimeout(() => {
-        setMessages(mockMessages);
+        // Create a deep copy to avoid reference issues
+        const messagesCopy = JSON.parse(JSON.stringify(mockMessages));
+        setMessages(messagesCopy);
         setLoading(false);
         
         // If we're coming from the home page to initiate a chat with a doctor
         if (doctorId && initiateChat) {
-          const doctorMessage = mockMessages.find(msg => 
+          const doctorMessage = messagesCopy.find(msg => 
             msg.sender.id === doctorId || 
             (doctorId === undefined && msg.sender.name !== 'You')
           );
@@ -29,7 +31,7 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
             // Send initial greeting message
             const initialGreeting: Message = {
               id: `m${Date.now()}`,
-              content: "Good day.",
+              content: "Good day doctor, I'd like to discuss my recent symptoms.",
               created_at: new Date().toISOString(),
               sender: {
                 id: '00000000-0000-0000-0000-000000000000',
@@ -66,7 +68,7 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
       ));
 
       toast({
-        title: "Success",
+        title: "Appointment Response Sent",
         description: `Appointment ${status === 'accepted' ? 'accepted' : 'rejected'} successfully.`,
       });
     } catch (error) {
@@ -129,11 +131,16 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
         newMsg.notification_type = 'appointment_request';
       }
 
-      setMessages([newMsg, ...messages]);
+      // Add message to the global messages list
+      setMessages(prevMessages => [newMsg, ...prevMessages]);
       setNewMessage("");
       
+      // In a real application, this would send the message to a Supabase table
+      // which both the doctor and patient UIs would subscribe to
+      console.log("Message sent:", newMsg);
+      
       toast({
-        title: "Success",
+        title: "Message Sent",
         description: appointmentMatch 
           ? "Appointment request sent successfully."
           : "Message sent successfully.",

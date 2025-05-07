@@ -72,8 +72,9 @@ const PatientsList = () => {
       title: "Viewing records",
       description: `Loading medical records for ${patientName}`,
     });
-    // In a real app, navigate to the patient records page
-    // navigate(`/doctor-records/${patientId}`);
+    navigate('/doctor-records', {
+      state: { patientId, patientName }
+    });
   };
 
   const handleSendMessage = (patientId: string, patientName: string) => {
@@ -81,8 +82,8 @@ const PatientsList = () => {
       title: "Message initiated",
       description: `Starting conversation with ${patientName}`,
     });
-    navigate('/messages', {
-      state: { patientId, initiateChat: true }
+    navigate('/doctor-messages', {
+      state: { patientId, patientName, initiateChat: true }
     });
   };
   
@@ -91,8 +92,8 @@ const PatientsList = () => {
       title: "Schedule appointment",
       description: `Scheduling appointment with ${patientName}`,
     });
-    navigate('/appointments', {
-      state: { patientId, scheduleAppointment: true }
+    navigate('/doctor-appointments', {
+      state: { patientId, patientName, scheduleAppointment: true }
     });
   };
   
@@ -101,8 +102,8 @@ const PatientsList = () => {
       title: "Starting consultation",
       description: `Initiating video call with ${patientName}`,
     });
-    navigate('/video-consultation', {
-      state: { patientId, startConsultation: true }
+    navigate('/doctor-consultations', {
+      state: { patientId, patientName, startConsultation: true }
     });
   };
 

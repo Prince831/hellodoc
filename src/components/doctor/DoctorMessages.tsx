@@ -1,13 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Search, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Message, mockMessages } from "@/types/messages";
 
-interface Message {
+interface PatientConversation {
   id: string;
   patientId: string;
   patientName: string;
@@ -21,86 +23,133 @@ interface Message {
   unread: boolean;
 }
 
-// Mock data - would come from Supabase in a real implementation
-const mockConversations: Message[] = [
-  {
-    id: "c1",
-    patientId: "p1",
-    patientName: "Michael Johnson",
-    patientImage: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100",
-    messages: [
-      {
-        id: "m1",
-        content: "Good morning doctor, I wanted to ask about the medication you prescribed.",
-        sender: "patient",
-        timestamp: "2025-05-03T08:30:00"
-      },
-      {
-        id: "m2",
-        content: "Hello Michael, which medication are you asking about?",
-        sender: "doctor",
-        timestamp: "2025-05-03T08:35:00"
-      },
-      {
-        id: "m3",
-        content: "The blood pressure medication. I'm experiencing some side effects.",
-        sender: "patient",
-        timestamp: "2025-05-03T08:37:00"
+// Derive patient conversations from mock messages
+const deriveConversationsFromMessages = (): PatientConversation[] => {
+  // Group messages by sender
+  const conversations: { [key: string]: PatientConversation } = {};
+  
+  mockMessages.forEach(message => {
+    // Skip messages sent by the doctor/current user
+    if (message.sender.id === '00000000-0000-0000-0000-000000000000') return;
+    
+    const senderId = message.sender.id;
+    const senderName = message.sender.name;
+    
+    if (!conversations[senderId]) {
+      conversations[senderId] = {
+        id: `c-${senderId}`,
+        patientId: senderId,
+        patientName: senderName,
+        messages: [],
+        unread: false
+      };
+    }
+    
+    // Convert to the conversation message format
+    conversations[senderId].messages.push({
+      id: message.id,
+      content: message.content,
+      sender: "patient",
+      timestamp: message.created_at
+    });
+    
+    // Mark conversation as unread if any message is unread
+    if (!message.read) {
+      conversations[senderId].unread = true;
+    }
+  });
+  
+  // Add doctor's sent messages
+  mockMessages.forEach(message => {
+    if (message.sender.id === '00000000-0000-0000-0000-000000000000' && message.content) {
+      // Find the conversation this message belongs to
+      const recipientId = Object.keys(conversations).find(id => 
+        conversations[id].messages.some(m => m.timestamp < message.created_at)
+      );
+      
+      if (recipientId) {
+        conversations[recipientId].messages.push({
+          id: message.id,
+          content: message.content,
+          sender: "doctor",
+          timestamp: message.created_at
+        });
       }
-    ],
-    unread: true
-  },
-  {
-    id: "c2",
-    patientId: "p2",
-    patientName: "Emma Rodriguez",
-    patientImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
-    messages: [
-      {
-        id: "m4",
-        content: "Hi doctor, just checking if my test results are ready?",
-        sender: "patient",
-        timestamp: "2025-05-02T14:20:00"
-      },
-      {
-        id: "m5",
-        content: "Hello Emma, I just received them. Everything looks good!",
-        sender: "doctor",
-        timestamp: "2025-05-02T15:05:00"
-      }
-    ],
-    unread: false
-  },
-  {
-    id: "c3",
-    patientId: "p3",
-    patientName: "David Kim",
-    messages: [
-      {
-        id: "m6",
-        content: "Doctor, I need to reschedule my appointment for next week.",
-        sender: "patient",
-        timestamp: "2025-05-01T10:15:00"
-      }
-    ],
-    unread: true
-  }
-];
+    }
+  });
+  
+  // Sort messages in each conversation by timestamp
+  Object.values(conversations).forEach(conversation => {
+    conversation.messages.sort((a, b) => 
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+  });
+  
+  return Object.values(conversations);
+};
 
 const DoctorMessages = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedConversation, setSelectedConversation] = useState<Message | null>(mockConversations[0]);
+  const [conversations, setConversations] = useState<PatientConversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<PatientConversation | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const { toast } = useToast();
   
-  const filteredConversations = mockConversations.filter(conversation => 
+  useEffect(() => {
+    // Initialize conversations from mock data
+    const derivedConversations = deriveConversationsFromMessages();
+    setConversations(derivedConversations);
+    
+    if (derivedConversations.length > 0) {
+      setSelectedConversation(derivedConversations[0]);
+    }
+  }, []);
+  
+  const filteredConversations = conversations.filter(conversation => 
     conversation.patientName.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedConversation) return;
     
-    console.log("Sending message:", newMessage);
-    // In a real app, we would update the state and send the message to Supabase
+    // Create new message
+    const newMsg = {
+      id: `m-${Date.now()}`,
+      content: newMessage,
+      sender: "doctor",
+      timestamp: new Date().toISOString()
+    };
+    
+    // Update conversations state
+    setConversations(prevConversations => 
+      prevConversations.map(conv => 
+        conv.id === selectedConversation.id
+          ? { ...conv, messages: [...conv.messages, newMsg] }
+          : conv
+      )
+    );
+    
+    // Update selected conversation
+    setSelectedConversation(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        messages: [...prev.messages, newMsg]
+      };
+    });
+    
+    // In a real app, this would send the message to the patient via Supabase
+    console.log("Sending message to patient:", {
+      patientId: selectedConversation.patientId,
+      content: newMessage,
+      timestamp: new Date().toISOString()
+    });
+    
+    toast({
+      title: "Message sent",
+      description: "Your message has been sent to the patient."
+    });
+    
     setNewMessage("");
   };
 
@@ -112,7 +161,7 @@ const DoctorMessages = () => {
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search conversations..."
+              placeholder="Search patients..."
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -139,7 +188,9 @@ const DoctorMessages = () => {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground truncate">
-                  {conversation.messages[conversation.messages.length - 1].content}
+                  {conversation.messages.length > 0 
+                    ? conversation.messages[conversation.messages.length - 1].content 
+                    : "No messages yet"}
                 </p>
               </div>
             </div>

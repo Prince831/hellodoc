@@ -29,11 +29,30 @@ export interface Message {
 export const mockDoctors = [
   {
     id: "d1b792e6-4073-4f47-8c5f-9b035bdb77f3",
-    name: "John Smith",
+    name: "Dr. John Smith",
   },
   {
     id: "d2c892e6-4073-4f47-8c5f-9b035bdb77f4",
-    name: "Sarah Johnson",
+    name: "Dr. Sarah Johnson",
+  }
+];
+
+export const mockPatients = [
+  {
+    id: "p1",
+    name: "Michael Johnson",
+  },
+  {
+    id: "p2",
+    name: "Emma Rodriguez",
+  },
+  {
+    id: "p3",
+    name: "David Kim",
+  },
+  {
+    id: "p4",
+    name: "Sophia Martinez",
   }
 ];
 
@@ -84,5 +103,27 @@ export const mockMessages: Message[] = [
         size: 1024000
       }
     ]
+  },
+  // Patient messages to doctors
+  {
+    id: "m5",
+    content: "I've been experiencing headaches recently.",
+    created_at: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
+    sender: mockPatients[0],
+    read: false,
+  },
+  {
+    id: "m6",
+    content: "When should I take the new medication?",
+    created_at: new Date(Date.now() - 129600000).toISOString(), // 36 hours ago
+    sender: mockPatients[1],
+    read: true,
+  },
+  {
+    id: "m7",
+    content: "My blood sugar readings have improved.",
+    created_at: new Date(Date.now() - 216000000).toISOString(), // 60 hours ago
+    sender: mockPatients[2],
+    read: false,
   }
 ];
