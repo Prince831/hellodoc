@@ -17,7 +17,7 @@ interface PatientConversation {
   messages: {
     id: string;
     content: string;
-    sender: "patient" | "doctor";
+    sender: "patient" | "doctor"; // Union type that only allows these two specific values
     timestamp: string;
   }[];
   unread: boolean;
@@ -49,7 +49,7 @@ const deriveConversationsFromMessages = (): PatientConversation[] => {
     conversations[senderId].messages.push({
       id: message.id,
       content: message.content,
-      sender: "patient",
+      sender: "patient", // Use the literal string "patient" instead of a variable
       timestamp: message.created_at
     });
     
@@ -71,7 +71,7 @@ const deriveConversationsFromMessages = (): PatientConversation[] => {
         conversations[recipientId].messages.push({
           id: message.id,
           content: message.content,
-          sender: "doctor",
+          sender: "doctor", // Use the literal string "doctor" instead of a variable
           timestamp: message.created_at
         });
       }
@@ -112,15 +112,15 @@ const DoctorMessages = () => {
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedConversation) return;
     
-    // Create new message
+    // Create new message with the correct sender type
     const newMsg = {
       id: `m-${Date.now()}`,
       content: newMessage,
-      sender: "doctor",
+      sender: "doctor" as const, // Use a const assertion to ensure TypeScript knows this is specifically "doctor"
       timestamp: new Date().toISOString()
     };
     
-    // Update conversations state
+    // Update conversations state with properly typed sender
     setConversations(prevConversations => 
       prevConversations.map(conv => 
         conv.id === selectedConversation.id
@@ -129,7 +129,7 @@ const DoctorMessages = () => {
       )
     );
     
-    // Update selected conversation
+    // Update selected conversation with properly typed sender
     setSelectedConversation(prev => {
       if (!prev) return null;
       return {
