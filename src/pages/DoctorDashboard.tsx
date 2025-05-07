@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Doctor } from "@/components/symptom-checker/DoctorCard";
 import { LoadingScreen } from "@/components/ui/loading";
-import { supabase } from "@/integrations/supabase/client";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 
 // Mock data - would come from Supabase in a real implementation
 const mockDoctorData: Doctor = {
@@ -71,14 +71,16 @@ const DoctorDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-7xl py-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <DoctorSidebar className="hidden md:block w-60 shrink-0" />
-          <main className="flex-1">
-            {doctorData && <DoctorOverview doctor={doctorData} />}
-          </main>
+      <SidebarProvider>
+        <div className="container max-w-7xl py-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            <DoctorSidebar className="hidden md:block shrink-0" />
+            <main className="flex-1">
+              {doctorData && <DoctorOverview doctor={doctorData} />}
+            </main>
+          </div>
         </div>
-      </div>
+      </SidebarProvider>
     </div>
   );
 };
