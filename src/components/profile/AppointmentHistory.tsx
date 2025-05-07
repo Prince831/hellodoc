@@ -1,18 +1,29 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "components/ui/card";
+import { Button } from "components/ui/button";
+import { Badge } from "components/ui/badge";
 import { CalendarDays, Clock, FileText, MoreHorizontal, User, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "components/ui/input";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "components/ui/dialog";
+
+interface Appointment {
+  id: string;
+  doctor: string;
+  specialty: string;
+  date: string;
+  status: "completed" | "upcoming" | "cancelled" | "missed" | string;
+  notes: string;
+  diagnosis: string;
+  prescriptions: string[];
+  followUp: string;
+}
 
 const AppointmentHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
   // Placeholder appointment data - in a real app, this would come from a database

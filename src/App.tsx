@@ -1,4 +1,4 @@
-
+import AdminDashboard from "./pages/admin/Dashboard";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,7 +16,13 @@ import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+import DoctorDashboard from "./pages/doctor/Dashboard";
+import DoctorAppointments from "./pages/doctor/Appointments";
+import DoctorMessages from "./pages/doctor/Messages";
+import DoctorProfile from "./pages/doctor/Profile";
+import DoctorVideoConsultation from "./pages/doctor/VideoConsultation";
 import { ThemeProvider } from "./components/ThemeProvider";
+import DoctorPatientRecords from "./pages/doctor/PatientRecords";
 
 // Create placeholder pages for future development
 const ComingSoon = () => (
@@ -28,6 +34,7 @@ const ComingSoon = () => (
 );
 
 const queryClient = new QueryClient();
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -48,6 +55,18 @@ const App = () => (
             <Route path="/video-consultation" element={<VideoConsultation />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
+
+            {/* Doctor side routes */}
+            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+            <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+            <Route path="/doctor/messages" element={<DoctorMessages />} />
+            <Route path="/doctor/profile" element={<DoctorProfile />} />
+            <Route path="/doctor/video-consultation" element={<DoctorVideoConsultation />} />
+            <Route path="/doctor/patient-records" element={} />
+
+            {/* Administrator side routes */}
+            <Route path="/admin/dashboard" element={} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -55,5 +74,6 @@ const App = () => (
     </ThemeProvider>
   </QueryClientProvider>
 );
+
 
 export default App;

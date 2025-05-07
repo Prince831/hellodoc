@@ -7,7 +7,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "components/": ["src/components/"],
+      "lib/": ["src/lib/"],
+      "integrations/": ["src/integrations/"],
+      "src/": ["src/"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,
