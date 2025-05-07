@@ -22,16 +22,21 @@ import DoctorMessages from "./pages/doctor/Messages";
 import DoctorProfile from "./pages/doctor/Profile";
 import DoctorVideoConsultation from "./pages/doctor/VideoConsultation";
 import { ThemeProvider } from "./components/ThemeProvider";
+<<<<<<< HEAD
 import DoctorPatientRecords from "./pages/doctor/PatientRecords";
+=======
+import { SidebarProvider } from "./contexts/SidebarContext";
+>>>>>>> e83d2b2f6d75062ca8e2861d856d5bbe2c2a00ac
 
-// Create placeholder pages for future development
-const ComingSoon = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-    <h1 className="text-4xl font-bold mb-4">Coming Soon</h1>
-    <p className="text-xl mb-8">We're working hard to bring you this feature.</p>
-    <a href="/" className="text-primary hover:underline">Go back to Home</a>
-  </div>
-);
+// Doctor pages
+import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorPatients from "./pages/DoctorPatients";
+import DoctorAppointments from "./pages/DoctorAppointments";
+import DoctorConsultations from "./pages/DoctorConsultations";
+import DoctorMessages from "./pages/DoctorMessages";
+import DoctorRecords from "./pages/DoctorRecords";
+import DoctorPrescriptions from "./pages/DoctorPrescriptions";
+import DoctorSettings from "./pages/DoctorSettings";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +47,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+<<<<<<< HEAD
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<SplashScreen />} />
@@ -70,6 +76,39 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+=======
+        <SidebarProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Patient routes */}
+              <Route path="/welcome" element={<SplashScreen />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/home" element={<Navigate to="/" replace />} />
+              <Route path="/symptom-checker" element={<SymptomChecker />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/health-records" element={<HealthRecords />} />
+              <Route path="/appointments" element={<Appointments />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/medications" element={<Medications />} />
+              <Route path="/video-consultation" element={<VideoConsultation />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              
+              {/* Doctor routes */}
+              <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+              <Route path="/doctor-patients" element={<DoctorPatients />} />
+              <Route path="/doctor-appointments" element={<DoctorAppointments />} />
+              <Route path="/doctor-consultations" element={<DoctorConsultations />} />
+              <Route path="/doctor-messages" element={<DoctorMessages />} />
+              <Route path="/doctor-records" element={<DoctorRecords />} />
+              <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
+              <Route path="/doctor-settings" element={<DoctorSettings />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </SidebarProvider>
+>>>>>>> e83d2b2f6d75062ca8e2861d856d5bbe2c2a00ac
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
