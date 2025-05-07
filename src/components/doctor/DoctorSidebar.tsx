@@ -3,9 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   CalendarDays, Users, MessageSquare, Video, 
-  Clipboard, Heart, FileText, Settings
+  Clipboard, Heart, FileText, Settings, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/contexts/SidebarContext";
+import { motion } from "framer-motion";
 
 interface DoctorSidebarProps {
   className?: string;
@@ -13,6 +15,7 @@ interface DoctorSidebarProps {
 
 const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
   const location = useLocation();
+  const { isSidebarCollapsed, toggleSidebar } = useSidebar();
   
   const isActive = (path: string) => location.pathname === path;
 
@@ -60,24 +63,51 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
   ];
 
   return (
-    <div className={cn("border rounded-lg p-4 space-y-2", className)}>
-      <h2 className="text-xl font-semibold mb-4 px-2">Doctor Portal</h2>
+    <motion.div 
+      className={cn(
+        "border rounded-lg p-4 space-y-2 relative bg-background transition-all duration-300", 
+        isSidebarCollapsed ? "w-16" : "w-60",
+        className
+      )}
+      animate={{ width: isSidebarCollapsed ? 64 : 240 }}
+      transition={{ duration: 0.3 }}
+    >
+      {!isSidebarCollapsed && (
+        <h2 className="text-xl font-semibold mb-4 px-2">Doctor Portal</h2>
+      )}
       <nav className="space-y-1">
         {navItems.map((item) => (
           <Button
             key={item.path}
             variant={isActive(item.path) ? "secondary" : "ghost"}
-            className="w-full justify-start"
+            className={cn(
+              "w-full", 
+              isSidebarCollapsed ? "justify-center px-0" : "justify-start"
+            )}
             asChild
           >
             <Link to={item.path}>
               {item.icon}
-              <span className="ml-2">{item.name}</span>
+              {!isSidebarCollapsed && <span className="ml-2">{item.name}</span>}
             </Link>
           </Button>
         ))}
       </nav>
-    </div>
+
+      {/* Toggle Button */}
+      <Button 
+        variant="outline" 
+        size="icon"
+        className="absolute -right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 bg-background border rounded-full shadow-md"
+        onClick={toggleSidebar}
+      >
+        {isSidebarCollapsed ? (
+          <ChevronRight className="h-4 w-4" />
+        ) : (
+          <ChevronLeft className="h-4 w-4" />
+        )}
+      </Button>
+    </motion.div>
   );
 };
 
