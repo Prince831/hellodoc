@@ -1,5 +1,10 @@
 
 import AdminDashboard from "./pages/admin/Dashboard";
+import UsersPage from "./pages/admin/Users";
+import AppointmentsPage from "./pages/admin/Appointments";
+import HealthRecordsPage from "./pages/admin/HealthRecords";
+import MessagesPage from "./pages/admin/Messages";
+import SettingsPage from "./pages/admin/Settings";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,8 +27,8 @@ import DoctorAppointments from "./pages/doctor/Appointments";
 import DoctorMessages from "./pages/doctor/Messages";
 import DoctorProfile from "./pages/doctor/Profile";
 import DoctorVideoConsultation from "./pages/doctor/VideoConsultation";
-import { ThemeProvider } from "./components/ThemeProvider";
 import DoctorPatientRecords from "./pages/doctor/PatientRecords";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
 
 // Doctor pages for the new doctor dashboard
@@ -32,6 +37,7 @@ import DoctorConsultations from "./pages/DoctorConsultations";
 import DoctorRecords from "./pages/DoctorRecords";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
 import DoctorSettings from "./pages/DoctorSettings";
+import { AuthProvider } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
@@ -41,48 +47,55 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <SidebarProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Patient routes */}
-              <Route path="/welcome" element={<SplashScreen />} />
-              <Route path="/" element={<Index />} />
-              <Route path="/home" element={<Navigate to="/" replace />} />
-              <Route path="/symptom-checker" element={<SymptomChecker />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/health-records" element={<HealthRecords />} />
-              <Route path="/appointments" element={<Appointments />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/medications" element={<Medications />} />
-              <Route path="/video-consultation" element={<VideoConsultation />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              
-              {/* Doctor routes - combined from both versions */}
-              <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-              <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-              <Route path="/doctor/messages" element={<DoctorMessages />} />
-              <Route path="/doctor/profile" element={<DoctorProfile />} />
-              <Route path="/doctor/video-consultation" element={<DoctorVideoConsultation />} />
-              <Route path="/doctor/patient-records" element={<DoctorPatientRecords />} />
-              
-              {/* New doctor dashboard routes */}
-              <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-              <Route path="/doctor-patients" element={<DoctorPatients />} />
-              <Route path="/doctor-appointments" element={<DoctorAppointments />} />
-              <Route path="/doctor-consultations" element={<DoctorConsultations />} />
-              <Route path="/doctor-messages" element={<DoctorMessages />} />
-              <Route path="/doctor-records" element={<DoctorRecords />} />
-              <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
-              <Route path="/doctor-settings" element={<DoctorSettings />} />
-              
-              {/* Administrator side routes */}
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </SidebarProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Patient routes */}
+                <Route path="/welcome" element={<SplashScreen />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/home" element={<Navigate to="/" replace />} />
+                <Route path="/symptom-checker" element={<SymptomChecker />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/health-records" element={<HealthRecords />} />
+                <Route path="/appointments" element={<Appointments />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/medications" element={<Medications />} />
+                <Route path="/video-consultation" element={<VideoConsultation />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                
+                {/* Doctor routes - combined from both versions */}
+                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+                <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+                <Route path="/doctor/messages" element={<DoctorMessages />} />
+                <Route path="/doctor/profile" element={<DoctorProfile />} />
+                <Route path="/doctor/video-consultation" element={<DoctorVideoConsultation />} />
+                <Route path="/doctor/patient-records" element={<DoctorPatientRecords />} />
+                
+                {/* New doctor dashboard routes */}
+                <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+                <Route path="/doctor-patients" element={<DoctorPatients />} />
+                <Route path="/doctor-appointments" element={<DoctorAppointments />} />
+                <Route path="/doctor-consultations" element={<DoctorConsultations />} />
+                <Route path="/doctor-messages" element={<DoctorMessages />} />
+                <Route path="/doctor-records" element={<DoctorRecords />} />
+                <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
+                <Route path="/doctor-settings" element={<DoctorSettings />} />
+                
+                {/* Administrator side routes */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<UsersPage />} />
+                <Route path="/admin/appointments" element={<AppointmentsPage />} />
+                <Route path="/admin/health-records" element={<HealthRecordsPage />} />
+                <Route path="/admin/messages" element={<MessagesPage />} />
+                <Route path="/admin/settings" element={<SettingsPage />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </SidebarProvider>
+        </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { User, Settings, Pill, Activity, Video } from "lucide-react";
+import { User, Settings, Pill, Activity, Video, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -11,9 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserDropdown = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -52,13 +63,22 @@ const UserDropdown = () => {
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
+        
+        {/* Admin Access Link - Only shown for users with admin role */}
+        {user?.role === "admin" && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/admin/dashboard" className="cursor-pointer w-full">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>Admin Panel</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+        
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => {
-          toast({
-            title: "Logged out",
-            description: "You have been logged out successfully",
-          });
-        }}>
+        <DropdownMenuItem onClick={handleSignOut}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
