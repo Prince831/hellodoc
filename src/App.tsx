@@ -1,3 +1,4 @@
+
 import AdminDashboard from "./pages/admin/Dashboard";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,24 +23,17 @@ import DoctorMessages from "./pages/doctor/Messages";
 import DoctorProfile from "./pages/doctor/Profile";
 import DoctorVideoConsultation from "./pages/doctor/VideoConsultation";
 import { ThemeProvider } from "./components/ThemeProvider";
-<<<<<<< HEAD
 import DoctorPatientRecords from "./pages/doctor/PatientRecords";
-=======
 import { SidebarProvider } from "./contexts/SidebarContext";
->>>>>>> e83d2b2f6d75062ca8e2861d856d5bbe2c2a00ac
 
-// Doctor pages
-import DoctorDashboard from "./pages/DoctorDashboard";
+// Doctor pages for the new doctor dashboard
 import DoctorPatients from "./pages/DoctorPatients";
-import DoctorAppointments from "./pages/DoctorAppointments";
 import DoctorConsultations from "./pages/DoctorConsultations";
-import DoctorMessages from "./pages/DoctorMessages";
 import DoctorRecords from "./pages/DoctorRecords";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
 import DoctorSettings from "./pages/DoctorSettings";
 
 const queryClient = new QueryClient();
-
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -47,36 +41,6 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-<<<<<<< HEAD
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<SplashScreen />} />
-            <Route path="/symptom-checker" element={<SymptomChecker />} />
-            <Route path="/home" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/health-records" element={<HealthRecords />} />
-            <Route path="/appointments" element={<Appointments />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/medications" element={<Medications />} />
-            <Route path="/video-consultation" element={<VideoConsultation />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-
-            {/* Doctor side routes */}
-            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-            <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-            <Route path="/doctor/messages" element={<DoctorMessages />} />
-            <Route path="/doctor/profile" element={<DoctorProfile />} />
-            <Route path="/doctor/video-consultation" element={<DoctorVideoConsultation />} />
-            <Route path="/doctor/patient-records" element={} />
-
-            {/* Administrator side routes */}
-            <Route path="/admin/dashboard" element={} />
-
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-=======
         <SidebarProvider>
           <BrowserRouter>
             <Routes>
@@ -94,7 +58,15 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               
-              {/* Doctor routes */}
+              {/* Doctor routes - combined from both versions */}
+              <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+              <Route path="/doctor/appointments" element={<DoctorAppointments />} />
+              <Route path="/doctor/messages" element={<DoctorMessages />} />
+              <Route path="/doctor/profile" element={<DoctorProfile />} />
+              <Route path="/doctor/video-consultation" element={<DoctorVideoConsultation />} />
+              <Route path="/doctor/patient-records" element={<DoctorPatientRecords />} />
+              
+              {/* New doctor dashboard routes */}
               <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
               <Route path="/doctor-patients" element={<DoctorPatients />} />
               <Route path="/doctor-appointments" element={<DoctorAppointments />} />
@@ -104,15 +76,16 @@ const App = () => (
               <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
               <Route path="/doctor-settings" element={<DoctorSettings />} />
               
+              {/* Administrator side routes */}
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </SidebarProvider>
->>>>>>> e83d2b2f6d75062ca8e2861d856d5bbe2c2a00ac
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
-
 
 export default App;
