@@ -1,10 +1,11 @@
+
 import { useEffect, useState } from "react";
-import PatientOverview from "../components/health-records/PatientOverview.tsx";
-import PatientDetails from "../components/health-records/PatientDetails.tsx";
-import MedicalHistory from "../components/health-records/MedicalHistory.tsx";
-import LabResultsChart from "../components/health-records/LabResultsChart.tsx";
-import { supabase } from "../integrations/supabase/client.ts";
-import { useToast } from "../hooks/use-toast.ts";
+import PatientOverview from "@/components/health-records/PatientOverview";
+import PatientDetails from "@/components/health-records/PatientDetails";
+import MedicalHistory from "@/components/health-records/MedicalHistory";
+import LabResultsChart from "@/components/health-records/LabResultsChart";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const DoctorPatientRecords = () => {
   const [loading, setLoading] = useState(true);

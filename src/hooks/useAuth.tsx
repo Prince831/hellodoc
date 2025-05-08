@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { supabase } from "../integrations/supabase/client";
 
@@ -22,19 +23,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const getUser = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (data.user) {
-        // Fetch user role from a 'profiles' table or user metadata
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error("Error fetching user profile:", profileError);
-          setUser({ id: data.user.id, email: data.user.email, role: "patient" }); // default role
-        } else {
-          setUser({ id: data.user.id, email: data.user.email, role: profileData.role });
-        }
+        // Since there's no 'profiles' table yet, we'll set a default role
+        // In a real application, you would fetch this from a profiles table
+        setUser({ 
+          id: data.user.id, 
+          email: data.user.email, 
+          role: "patient" // Default role
+        });
       } else {
         setUser(null);
       }
