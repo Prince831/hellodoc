@@ -5,7 +5,7 @@ import {
   Users,
   LayoutDashboard,
   Calendar,
-  ClipboardList,
+  Clipboard,
   MessageSquare,
   Settings,
   LogOut,
@@ -37,7 +37,7 @@ const AdminSidebar = () => {
     {
       name: "Health Records",
       href: "/admin/health-records",
-      icon: ClipboardList,
+      icon: Clipboard,
     },
     {
       name: "Messages",

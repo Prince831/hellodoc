@@ -23,11 +23,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const getUser = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (data.user) {
-        // Since there's no 'profiles' table yet, we'll set a default role
+        // Set default role since we don't have a profiles table yet
         // In a real application, you would fetch this from a profiles table
         setUser({ 
           id: data.user.id, 
           email: data.user.email, 
+          // This is a temporary solution until the profiles table is created
           role: "patient" // Default role
         });
       } else {

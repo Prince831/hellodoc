@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Calendar, Activity, AlertTriangle, MessageSquare } from "lucide-react";
+import { Users, Calendar, Activity, AlertTriangle, MessageSquare, Clipboard, Settings as SettingsIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
@@ -25,27 +25,35 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         
-        // Fetch counts from different tables
+        // Instead of querying profiles table that doesn't exist yet, 
+        // use auth.users with service role (would need edge function) or approximate with other data
+        // For now, we'll use appointment counts as a proxy for unique users
         const [
-          { count: userCount, error: userError }, 
           { count: appointmentCount, error: appointmentError },
           { count: doctorCount, error: doctorError },
           { count: pendingCount, error: pendingError },
           { count: messageCount, error: messageError }
         ] = await Promise.all([
-          supabase.from("profiles").select("*", { count: "exact", head: true }),
           supabase.from("appointments").select("*", { count: "exact", head: true }),
           supabase.from("doctors").select("*", { count: "exact", head: true }),
           supabase.from("appointments").select("*", { count: "exact", head: true }).eq("status", "pending"),
           supabase.from("messages").select("*", { count: "exact", head: true }).eq("read", false)
         ]);
         
-        if (userError || appointmentError || doctorError || pendingError || messageError) {
+        // We'll estimate unique users from appointments - not accurate but works until profiles table is created
+        const { data: uniqueUsers, error: userError } = await supabase
+          .from("appointments")
+          .select("user_id", { count: "exact" })
+          .limit(1000);
+        
+        const uniqueUserCount = uniqueUsers ? new Set(uniqueUsers.map(item => item.user_id)).size : 0;
+        
+        if (appointmentError || doctorError || pendingError || messageError || userError) {
           throw new Error("Error fetching dashboard statistics");
         }
         
         setStats({
-          totalUsers: userCount || 0,
+          totalUsers: uniqueUserCount,
           totalAppointments: appointmentCount || 0,
           totalDoctors: doctorCount || 0,
           pendingAppointments: pendingCount || 0,
@@ -184,7 +192,7 @@ const AdminDashboard = () => {
                 
                 <Button variant="outline" className="h-auto flex-col items-start gap-1 p-4 text-left" asChild>
                   <Link to="/admin/health-records">
-                    <ClipboardList className="h-6 w-6 mb-2" />
+                    <Clipboard className="h-6 w-6 mb-2" />
                     <div className="font-semibold">Health Records</div>
                     <div className="text-xs text-muted-foreground">
                       Access and manage patient health records
@@ -204,7 +212,7 @@ const AdminDashboard = () => {
                 
                 <Button variant="outline" className="h-auto flex-col items-start gap-1 p-4 text-left" asChild>
                   <Link to="/admin/settings">
-                    <Settings className="h-6 w-6 mb-2" />
+                    <SettingsIcon className="h-6 w-6 mb-2" />
                     <div className="font-semibold">System Settings</div>
                     <div className="text-xs text-muted-foreground">
                       Configure application settings
