@@ -1,6 +1,6 @@
 
 import { Message } from "@/types/messages";
-import { PatientConversation } from "@/types/conversations";
+import { PatientConversation, PatientMessage } from "@/types/conversations";
 
 export const deriveConversationsFromMessages = (mockMessages: Message[]): PatientConversation[] => {
   // Group messages by sender
@@ -23,13 +23,15 @@ export const deriveConversationsFromMessages = (mockMessages: Message[]): Patien
       };
     }
     
-    // Convert to the conversation message format
-    conversations[senderId].messages.push({
+    // Convert to the conversation message format with explicit typing
+    const patientMessage: PatientMessage = {
       id: message.id,
       content: message.content,
-      sender: "patient", // Use the literal string "patient" instead of a variable
+      sender: "patient", // Use the literal "patient" value to match the union type
       timestamp: message.created_at
-    });
+    };
+    
+    conversations[senderId].messages.push(patientMessage);
     
     // Mark conversation as unread if any message is unread
     if (!message.read) {
@@ -46,12 +48,15 @@ export const deriveConversationsFromMessages = (mockMessages: Message[]): Patien
       );
       
       if (recipientId) {
-        conversations[recipientId].messages.push({
+        // Create doctor message with correct typing
+        const doctorMessage: PatientMessage = {
           id: message.id,
           content: message.content,
-          sender: "doctor", // Use the literal string "doctor" instead of a variable
+          sender: "doctor", // Use the literal "doctor" value to match the union type
           timestamp: message.created_at
-        });
+        };
+        
+        conversations[recipientId].messages.push(doctorMessage);
       }
     }
   });

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { mockMessages } from "@/types/messages";
-import { PatientConversation } from "@/types/conversations";
+import { PatientConversation, PatientMessage } from "@/types/conversations";
 import { deriveConversationsFromMessages } from "@/utils/conversationUtils";
 import ConversationList from "./conversation/ConversationList";
 import MessageView from "./conversation/MessageView";
@@ -28,10 +28,10 @@ const DoctorMessages = () => {
     if (!newMessage.trim() || !selectedConversation) return;
     
     // Create new message with the correct sender type
-    const newMsg = {
+    const newMsg: PatientMessage = {
       id: `m-${Date.now()}`,
       content: newMessage,
-      sender: "doctor" as const, // Use a const assertion to ensure TypeScript knows this is specifically "doctor"
+      sender: "doctor", // Use literal "doctor" value to match the union type
       timestamp: new Date().toISOString()
     };
     
