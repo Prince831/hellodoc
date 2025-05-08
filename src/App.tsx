@@ -1,6 +1,7 @@
 
 import AdminDashboard from "./pages/admin/Dashboard";
 import UsersPage from "./pages/admin/Users";
+import DoctorsPage from "./pages/admin/Doctors";
 import AppointmentsPage from "./pages/admin/Appointments";
 import HealthRecordsPage from "./pages/admin/HealthRecords";
 import MessagesPage from "./pages/admin/Messages";
@@ -86,6 +87,7 @@ const App = () => (
                 {/* Administrator side routes */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<UsersPage />} />
+                <Route path="/admin/doctors" element={<DoctorsPage />} />
                 <Route path="/admin/appointments" element={<AppointmentsPage />} />
                 <Route path="/admin/health-records" element={<HealthRecordsPage />} />
                 <Route path="/admin/messages" element={<MessagesPage />} />

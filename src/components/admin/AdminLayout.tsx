@@ -1,10 +1,11 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -13,12 +14,19 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Redirect non-admin users
-  if (!loading && (!user || user.role !== "admin")) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    // Redirect non-admin users
+    if (!loading && (!user || user.role !== "admin")) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access this area.",
+        variant: "destructive"
+      });
+      navigate("/");
+    }
+  }, [loading, user, navigate, toast]);
 
   if (loading) {
     return (
@@ -26,6 +34,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Don't render anything if the user doesn't have admin rights
+  if (!user || user.role !== "admin") {
+    return null;
   }
 
   return (

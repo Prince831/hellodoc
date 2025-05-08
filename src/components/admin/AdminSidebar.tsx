@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Settings,
   LogOut,
+  Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,9 +26,14 @@ const AdminSidebar = () => {
       icon: LayoutDashboard,
     },
     {
-      name: "User Management",
+      name: "Patient Management",
       href: "/admin/users",
       icon: Users,
+    },
+    {
+      name: "Doctor Management",
+      href: "/admin/doctors",
+      icon: Activity,
     },
     {
       name: "Appointments",

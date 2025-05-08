@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Calendar, Activity, AlertTriangle, MessageSquare, Clipboard, Settings as SettingsIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import DashboardStats from "@/components/admin/DashboardStats";
+import AppointmentsList from "@/components/admin/AppointmentsList";
 
 const AdminDashboard = () => {
   const { toast } = useToast();
@@ -79,90 +81,31 @@ const AdminDashboard = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Administrator Dashboard</h1>
-          <Button asChild>
-            <Link to="/admin/users">Manage Users</Link>
-          </Button>
+          <div className="flex space-x-2">
+            <Button asChild>
+              <Link to="/admin/users">Manage Patients</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/admin/doctors">Manage Doctors</Link>
+            </Button>
+          </div>
         </div>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? 
-                  <div className="h-8 w-16 animate-pulse rounded bg-muted"></div> :
-                  stats.totalUsers
-                }
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Registered users on the platform
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Doctors</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? 
-                  <div className="h-8 w-16 animate-pulse rounded bg-muted"></div> :
-                  stats.totalDoctors
-                }
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Active healthcare providers
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Appointments</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? 
-                  <div className="h-8 w-16 animate-pulse rounded bg-muted"></div> :
-                  stats.pendingAppointments
-                }
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Appointments awaiting approval
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Unread Messages</CardTitle>
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? 
-                  <div className="h-8 w-16 animate-pulse rounded bg-muted"></div> :
-                  stats.recentMessages
-                }
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Messages requiring attention
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <DashboardStats 
+          totalUsers={stats.totalUsers}
+          totalDoctors={stats.totalDoctors}
+          totalAppointments={stats.totalAppointments}
+          pendingAppointments={stats.pendingAppointments}
+          loading={loading}
+        />
 
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Platform Overview</TabsTrigger>
+            <TabsTrigger value="appointments">Recent Appointments</TabsTrigger>
             <TabsTrigger value="alerts">System Alerts</TabsTrigger>
           </TabsList>
+
           <TabsContent value="overview" className="space-y-4">
             <Card>
               <CardHeader>
@@ -173,9 +116,19 @@ const AdminDashboard = () => {
                 <Button variant="outline" className="h-auto flex-col items-start gap-1 p-4 text-left" asChild>
                   <Link to="/admin/users">
                     <Users className="h-6 w-6 mb-2" />
-                    <div className="font-semibold">User Management</div>
+                    <div className="font-semibold">Patient Management</div>
                     <div className="text-xs text-muted-foreground">
-                      Manage user accounts and permissions
+                      Manage patient accounts and records
+                    </div>
+                  </Link>
+                </Button>
+                
+                <Button variant="outline" className="h-auto flex-col items-start gap-1 p-4 text-left" asChild>
+                  <Link to="/admin/doctors">
+                    <Activity className="h-6 w-6 mb-2" />
+                    <div className="font-semibold">Doctor Management</div>
+                    <div className="text-xs text-muted-foreground">
+                      Manage healthcare providers
                     </div>
                   </Link>
                 </Button>
@@ -205,7 +158,7 @@ const AdminDashboard = () => {
                     <MessageSquare className="h-6 w-6 mb-2" />
                     <div className="font-semibold">Message Monitoring</div>
                     <div className="text-xs text-muted-foreground">
-                      Review communications between users
+                      Review communications between patients and doctors
                     </div>
                   </Link>
                 </Button>
@@ -221,6 +174,10 @@ const AdminDashboard = () => {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="appointments">
+            <AppointmentsList />
           </TabsContent>
           
           <TabsContent value="alerts">
