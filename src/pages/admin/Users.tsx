@@ -70,15 +70,22 @@ const UsersPage = () => {
       if (authError) throw authError;
       
       // Get appointment users as a proxy for patients
+      // Using select instead of distinct which isn't available in this version
       const { data: appointmentUsers, error: appointmentError } = await supabase
         .from("appointments")
-        .select("user_id")
-        .distinct();
+        .select("user_id");
         
       if (appointmentError) throw appointmentError;
       
       // Create a set of unique user IDs
-      const userIds = new Set(appointmentUsers?.map(a => a.user_id) || []);
+      const userIds = new Set();
+      
+      // Add unique user IDs from appointments
+      appointmentUsers?.forEach(appointment => {
+        if (appointment.user_id) {
+          userIds.add(appointment.user_id);
+        }
+      });
       
       // Add the current authenticated user
       if (authData.user) {
@@ -87,10 +94,13 @@ const UsersPage = () => {
       
       // Create users from the unique IDs
       const userList: User[] = Array.from(userIds).map((id, index) => {
+        // Explicitly cast id as string to satisfy TypeScript
+        const userId = id as string;
+        
         // The first user is the authenticated one
-        if (authData.user && id === authData.user.id) {
+        if (authData.user && userId === authData.user.id) {
           return {
-            id: id,
+            id: userId,
             email: authData.user.email || "admin@example.com",
             role: "admin",
             created_at: authData.user.created_at || new Date().toISOString(),
@@ -100,7 +110,7 @@ const UsersPage = () => {
         
         // Create mock data for other users
         return {
-          id: id,
+          id: userId,
           email: `patient${index}@example.com`,
           role: "patient",
           created_at: new Date(Date.now() - 86400000 * index).toISOString(),
