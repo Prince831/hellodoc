@@ -22,6 +22,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -33,6 +41,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Search, UserPlus, Edit, Trash2, Check, X, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 interface User {
   id: string;
@@ -46,6 +56,7 @@ const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterRole, setFilterRole] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -53,6 +64,12 @@ const UsersPage = () => {
   const [userHealthRecords, setUserHealthRecords] = useState<any[]>([]);
   const [healthRecordsDialogOpen, setHealthRecordsDialogOpen] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [userStatistics, setUserStatistics] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    patientsWithAppointments: 0,
+    patientsWithHealthRecords: 0,
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -138,6 +155,29 @@ const UsersPage = () => {
       }
       
       setUsers(userList);
+      
+      // Calculate statistics
+      const activeUsers = userList.filter(user => user.active).length;
+      const patients = userList.filter(user => user.role === "patient").length;
+      
+      // Get patients with health records
+      const { data: healthRecords } = await supabase
+        .from("health_records")
+        .select("user_id");
+      
+      const uniquePatientsWithRecords = new Set();
+      healthRecords?.forEach(record => {
+        if (record.user_id) {
+          uniquePatientsWithRecords.add(record.user_id);
+        }
+      });
+      
+      setUserStatistics({
+        totalUsers: userList.length,
+        activeUsers,
+        patientsWithAppointments: userIds.size,
+        patientsWithHealthRecords: uniquePatientsWithRecords.size,
+      });
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
@@ -241,10 +281,12 @@ const UsersPage = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = filterRole === "" || user.role === filterRole;
+    return matchesSearch && matchesRole;
+  });
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
@@ -263,7 +305,7 @@ const UsersPage = () => {
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">User Management</h1>
+          <h1 className="text-3xl font-bold">Patient Management</h1>
           <div className="flex items-center gap-2">
             <Button>
               <UserPlus className="mr-2 h-4 w-4" />
@@ -272,14 +314,100 @@ const UsersPage = () => {
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search users by email or role..."
-            className="max-w-md"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{userStatistics.totalUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                {userStatistics.activeUsers} active users
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Role Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span>Patients</span>
+                  <span>{users.filter(u => u.role === "patient").length}</span>
+                </div>
+                <Progress 
+                  value={(users.filter(u => u.role === "patient").length / users.length) * 100} 
+                  className="h-1.5" 
+                />
+                <div className="flex justify-between text-xs">
+                  <span>Doctors</span>
+                  <span>{users.filter(u => u.role === "doctor").length}</span>
+                </div>
+                <Progress 
+                  value={(users.filter(u => u.role === "doctor").length / users.length) * 100} 
+                  className="h-1.5" 
+                />
+                <div className="flex justify-between text-xs">
+                  <span>Admins</span>
+                  <span>{users.filter(u => u.role === "admin").length}</span>
+                </div>
+                <Progress 
+                  value={(users.filter(u => u.role === "admin").length / users.length) * 100} 
+                  className="h-1.5" 
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Patients w/ Appointments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{userStatistics.patientsWithAppointments}</div>
+              <p className="text-xs text-muted-foreground">
+                {Math.round((userStatistics.patientsWithAppointments / users.filter(u => u.role === "patient").length) * 100)}% of all patients
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Patients w/ Health Records</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{userStatistics.patientsWithHealthRecords}</div>
+              <p className="text-xs text-muted-foreground">
+                {Math.round((userStatistics.patientsWithHealthRecords / users.filter(u => u.role === "patient").length) * 100)}% of all patients
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="grid gap-4 md:grid-cols-[1fr_200px] lg:grid-cols-[1fr_300px]">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users by email or role..."
+              className="max-w-md"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <Select value={filterRole} onValueChange={setFilterRole}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Roles</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="doctor">Doctor</SelectItem>
+              <SelectItem value="patient">Patient</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="rounded-md border">
@@ -309,7 +437,7 @@ const UsersPage = () => {
               ) : (
                 filteredUsers.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell className="font-medium">{user.email}</TableCell>
                     <TableCell>
                       <Badge variant={getRoleBadgeVariant(user.role) as any}>
                         {user.role}
@@ -435,33 +563,61 @@ const UsersPage = () => {
             </DialogDescription>
           </DialogHeader>
           
-          {userHealthRecords.length === 0 ? (
-            <div className="py-4 text-center">
-              <p>No health records found for this patient.</p>
-            </div>
-          ) : (
-            <div className="space-y-4 py-4">
-              {userHealthRecords.map((record) => (
-                <div key={record.id} className="rounded-lg border p-4">
-                  <div className="flex justify-between">
-                    <h3 className="font-medium">Diagnosis: {record.diagnosis}</h3>
-                    <p className="text-sm text-muted-foreground">{new Date(record.date).toLocaleDateString()}</p>
-                  </div>
-                  {record.prescription && (
-                    <p className="mt-2"><span className="font-medium">Prescription:</span> {record.prescription}</p>
-                  )}
-                  {record.notes && (
-                    <p className="mt-2"><span className="font-medium">Notes:</span> {record.notes}</p>
-                  )}
-                  <div className="mt-2">
-                    <Badge variant="outline">
-                      {record.doctors?.name || "Unknown Doctor"} ({record.doctors?.specialization || "Unknown Specialization"})
-                    </Badge>
-                  </div>
+          <Tabs defaultValue="records" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="records">Health Records</TabsTrigger>
+              <TabsTrigger value="appointments">Appointments</TabsTrigger>
+              <TabsTrigger value="summary">Patient Summary</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="records" className="space-y-4 py-4">
+              {userHealthRecords.length === 0 ? (
+                <div className="py-4 text-center">
+                  <p>No health records found for this patient.</p>
                 </div>
-              ))}
-            </div>
-          )}
+              ) : (
+                <div className="space-y-4">
+                  {userHealthRecords.map((record) => (
+                    <Card key={record.id} className="border shadow-sm">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">{record.diagnosis}</CardTitle>
+                        <CardDescription>
+                          {new Date(record.date).toLocaleDateString()} • 
+                          {record.doctors?.name || "Unknown Doctor"} ({record.doctors?.specialization || "Unknown Specialization"})
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {record.prescription && (
+                          <div className="mb-2">
+                            <h4 className="text-sm font-medium">Prescription</h4>
+                            <p className="text-sm">{record.prescription}</p>
+                          </div>
+                        )}
+                        {record.notes && (
+                          <div>
+                            <h4 className="text-sm font-medium">Notes</h4>
+                            <p className="text-sm">{record.notes}</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="appointments">
+              <div className="py-8 text-center text-muted-foreground">
+                <p>Appointment history will be displayed here.</p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="summary">
+              <div className="py-8 text-center text-muted-foreground">
+                <p>Patient summary information will be displayed here.</p>
+              </div>
+            </TabsContent>
+          </Tabs>
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setHealthRecordsDialogOpen(false)}>

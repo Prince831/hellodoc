@@ -9,7 +9,9 @@ import {
   MessageSquare,
   Settings,
   LogOut,
-  Activity
+  Activity,
+  Shield,
+  Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,14 +28,14 @@ const AdminSidebar = () => {
       icon: LayoutDashboard,
     },
     {
+      name: "Doctors Management",
+      href: "/admin/doctors",
+      icon: Activity,
+    },
+    {
       name: "Patient Management",
       href: "/admin/users",
       icon: Users,
-    },
-    {
-      name: "Doctor Management",
-      href: "/admin/doctors",
-      icon: Activity,
     },
     {
       name: "Appointments",
@@ -51,6 +53,16 @@ const AdminSidebar = () => {
       icon: MessageSquare,
     },
     {
+      name: "Notifications",
+      href: "/admin/notifications",
+      icon: Bell,
+    },
+    {
+      name: "System Security",
+      href: "/admin/security",
+      icon: Shield,
+    },
+    {
       name: "Settings",
       href: "/admin/settings",
       icon: Settings,
@@ -66,32 +78,34 @@ const AdminSidebar = () => {
   };
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r bg-background">
-      <div className="p-4">
-        <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
-          Admin Panel
+    <aside className="flex h-full w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
+      <div className="flex h-14 items-center border-b border-slate-200 px-4 dark:border-slate-800">
+        <h2 className="font-semibold text-slate-800 dark:text-slate-200">
+          ADMIN CONTROL PANEL
         </h2>
-        <div className="space-y-1">
+      </div>
+      <div className="flex-1 overflow-auto py-2">
+        <nav className="grid gap-1 px-2">
           {navItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
               className={cn(
-                "flex items-center rounded-md px-2 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 location.pathname === item.href
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50"
+                  : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
               )}
             >
-              <item.icon className="mr-2 h-4 w-4" />
+              <item.icon className="h-4 w-4" />
               {item.name}
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
-      <div className="mt-auto p-4">
+      <div className="border-t border-slate-200 p-4 dark:border-slate-800">
         <Button
-          variant="ghost"
+          variant="outline"
           className="w-full justify-start"
           onClick={handleSignOut}
         >

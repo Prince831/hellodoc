@@ -42,12 +42,14 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-900">
+      <Navbar className="border-b border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950" />
       <div className="flex flex-1">
         <AdminSidebar />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
-          {children}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="mx-auto max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>
