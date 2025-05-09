@@ -11,7 +11,11 @@ import {
   LogOut,
   Activity,
   Shield,
-  Bell
+  Bell,
+  Database,
+  BriefcaseMedical,
+  UserCog,
+  FileAnalytics
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,14 +27,14 @@ const AdminSidebar = () => {
 
   const navItems = [
     {
-      name: "Dashboard",
+      name: "System Overview",
       href: "/admin/dashboard",
       icon: LayoutDashboard,
     },
     {
-      name: "Doctors Management",
+      name: "Doctor Management",
       href: "/admin/doctors",
-      icon: Activity,
+      icon: BriefcaseMedical,
     },
     {
       name: "Patient Management",
@@ -38,7 +42,7 @@ const AdminSidebar = () => {
       icon: Users,
     },
     {
-      name: "Appointments",
+      name: "Appointment Control",
       href: "/admin/appointments",
       icon: Calendar,
     },
@@ -48,22 +52,27 @@ const AdminSidebar = () => {
       icon: Clipboard,
     },
     {
-      name: "Messages",
+      name: "Communication Center",
       href: "/admin/messages",
       icon: MessageSquare,
     },
     {
-      name: "Notifications",
+      name: "System Alerts",
       href: "/admin/notifications",
       icon: Bell,
     },
     {
-      name: "System Security",
+      name: "Security Management",
       href: "/admin/security",
       icon: Shield,
     },
     {
-      name: "Settings",
+      name: "Analytics & Reports",
+      href: "/admin/analytics",
+      icon: FileAnalytics,
+    },
+    {
+      name: "System Configuration",
       href: "/admin/settings",
       icon: Settings,
     },
@@ -78,9 +87,9 @@ const AdminSidebar = () => {
   };
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950">
-      <div className="flex h-14 items-center border-b border-slate-200 px-4 dark:border-slate-800">
-        <h2 className="font-semibold text-slate-800 dark:text-slate-200">
+    <aside className="flex h-full w-64 flex-col border-r border-slate-800 bg-slate-950">
+      <div className="flex h-14 items-center border-b border-slate-800 px-4">
+        <h2 className="font-semibold text-purple-400">
           ADMIN CONTROL PANEL
         </h2>
       </div>
@@ -93,8 +102,8 @@ const AdminSidebar = () => {
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 location.pathname === item.href
-                  ? "bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-50"
-                  : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-50"
+                  ? "bg-purple-900/50 text-purple-200"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -103,10 +112,10 @@ const AdminSidebar = () => {
           ))}
         </nav>
       </div>
-      <div className="border-t border-slate-200 p-4 dark:border-slate-800">
+      <div className="border-t border-slate-800 p-4">
         <Button
           variant="outline"
-          className="w-full justify-start"
+          className="w-full justify-start border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
           onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />

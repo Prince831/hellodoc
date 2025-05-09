@@ -1,4 +1,5 @@
 
+// Fix only the problematic imports at the top of the file
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +52,7 @@ import {
   Star,
   FileText,
   User,
-  ClipboardList
+  ClipboardList as ClipboardIcon
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

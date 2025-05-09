@@ -39,6 +39,9 @@ import DoctorRecords from "./pages/DoctorRecords";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
 import DoctorSettings from "./pages/DoctorSettings";
 import { AuthProvider } from "./hooks/useAuth";
+import AnalyticsPage from "./pages/admin/Analytics";
+import SecurityPage from "./pages/admin/Security";
+import NotificationsPage from "./pages/admin/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -84,7 +87,7 @@ const App = () => (
                 <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
                 <Route path="/doctor-settings" element={<DoctorSettings />} />
                 
-                {/* Administrator side routes */}
+                {/* Administrator side routes - enhanced with new admin pages */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<UsersPage />} />
                 <Route path="/admin/doctors" element={<DoctorsPage />} />
@@ -92,6 +95,9 @@ const App = () => (
                 <Route path="/admin/health-records" element={<HealthRecordsPage />} />
                 <Route path="/admin/messages" element={<MessagesPage />} />
                 <Route path="/admin/settings" element={<SettingsPage />} />
+                <Route path="/admin/analytics" element={<AnalyticsPage />} />
+                <Route path="/admin/security" element={<SecurityPage />} />
+                <Route path="/admin/notifications" element={<NotificationsPage />} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
