@@ -15,7 +15,7 @@ import {
   Database,
   BriefcaseMedical,
   UserCog,
-  FileAnalytics
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,7 +69,7 @@ const AdminSidebar = () => {
     {
       name: "Analytics & Reports",
       href: "/admin/analytics",
-      icon: FileAnalytics,
+      icon: FileText,
     },
     {
       name: "System Configuration",

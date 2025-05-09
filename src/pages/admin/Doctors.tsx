@@ -1,4 +1,3 @@
-
 // Fix only the problematic imports at the top of the file
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -52,7 +51,7 @@ import {
   Star,
   FileText,
   User,
-  ClipboardList as ClipboardIcon
+  Clipboard
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -567,7 +566,7 @@ const DoctorsPage = () => {
                         </div>
                         
                         <div className="rounded-md border p-4 text-center text-muted-foreground">
-                          <ClipboardList className="mx-auto h-8 w-8 mb-2" />
+                          <Clipboard className="mx-auto h-8 w-8 mb-2" />
                           <p>Health records will be displayed here</p>
                         </div>
                       </TabsContent>
