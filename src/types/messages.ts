@@ -1,129 +1,100 @@
 
-export interface AppointmentRequest {
-  date: string;
-  reason: string;
-}
+// This is a temporary mock file that would be replaced by actual Supabase data in production
 
-export interface Attachment {
-  name: string;
-  url?: string;
-  type: string;
-  size: number;
-}
-
-export interface Message {
+interface RawMessage {
   id: string;
   content: string;
-  created_at: string;
-  sender: {
-    id: string;
-    name: string;
-  };
-  read: boolean;
-  appointment_request?: AppointmentRequest | null;
-  appointment_status?: 'pending' | 'accepted' | 'rejected' | null;
-  notification_type?: string | null;
-  attachments?: Attachment[];
+  from_user_id: string;
+  to_user_id: string;
+  timestamp: string;
+  patient_id: string;
+  patient_name: string;
+  patient_avatar?: string;
+  patient_email?: string;
 }
 
-export const mockDoctors = [
+export const mockMessages: RawMessage[] = [
   {
-    id: "d1b792e6-4073-4f47-8c5f-9b035bdb77f3",
-    name: "Dr. John Smith",
+    id: "msg1",
+    content: "Hello Dr. Johnson, I've been having some concerns about my blood pressure medication.",
+    from_user_id: "patient-123",
+    to_user_id: "doctor-456",
+    timestamp: "2025-05-08T09:30:00",
+    patient_id: "patient-123",
+    patient_name: "Michael Brown",
+    patient_email: "michael.brown@example.com"
   },
   {
-    id: "d2c892e6-4073-4f47-8c5f-9b035bdb77f4",
-    name: "Dr. Sarah Johnson",
-  }
-];
-
-export const mockPatients = [
-  {
-    id: "p1",
-    name: "Michael Johnson",
+    id: "msg2",
+    content: "Hi Michael, I'm happy to help. What specific concerns do you have?",
+    from_user_id: "doctor-456",
+    to_user_id: "patient-123",
+    timestamp: "2025-05-08T10:15:00",
+    patient_id: "patient-123",
+    patient_name: "Michael Brown",
+    patient_email: "michael.brown@example.com"
   },
   {
-    id: "p2",
-    name: "Emma Rodriguez",
+    id: "msg3",
+    content: "I've been feeling dizzy sometimes after taking the medication in the morning.",
+    from_user_id: "patient-123",
+    to_user_id: "doctor-456",
+    timestamp: "2025-05-08T10:30:00",
+    patient_id: "patient-123",
+    patient_name: "Michael Brown",
+    patient_email: "michael.brown@example.com"
   },
   {
-    id: "p3",
-    name: "David Kim",
+    id: "msg4",
+    content: "That could be due to a drop in blood pressure. Let's schedule a quick appointment to check your readings.",
+    from_user_id: "doctor-456",
+    to_user_id: "patient-123",
+    timestamp: "2025-05-08T10:45:00",
+    patient_id: "patient-123",
+    patient_name: "Michael Brown",
+    patient_email: "michael.brown@example.com"
   },
   {
-    id: "p4",
-    name: "Sophia Martinez",
-  }
-];
-
-export const mockMessages: Message[] = [
-  {
-    id: "m1",
-    content: "Hello, how are you feeling today?",
-    created_at: new Date().toISOString(),
-    sender: mockDoctors[0],
-    read: false,
+    id: "msg5",
+    content: "Dr. Johnson, my daughter has a fever that hasn't gone down for two days.",
+    from_user_id: "patient-456",
+    to_user_id: "doctor-456",
+    timestamp: "2025-05-08T14:20:00",
+    patient_id: "patient-456",
+    patient_name: "Emma Rodriguez",
+    patient_avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
+    patient_email: "emma.r@example.com"
   },
   {
-    id: "m2",
-    content: "Your test results are ready for review.",
-    created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-    sender: mockDoctors[1],
-    read: true,
+    id: "msg6",
+    content: "Hi Emma, how high is the fever? Has she been taking any medication for it?",
+    from_user_id: "doctor-456",
+    to_user_id: "patient-456",
+    timestamp: "2025-05-08T14:35:00",
+    patient_id: "patient-456",
+    patient_name: "Emma Rodriguez",
+    patient_avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
+    patient_email: "emma.r@example.com"
   },
   {
-    id: "m3",
-    content: "Appointment request for regular checkup",
-    created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-    sender: mockDoctors[0],
-    read: true,
-    appointment_request: {
-      date: "2024-03-01 10:00",
-      reason: "Regular checkup"
-    },
-    appointment_status: "pending",
-    notification_type: "appointment_request"
+    id: "msg7",
+    content: "It's been around 102°F. I've given her children's Tylenol but it only helps temporarily.",
+    from_user_id: "patient-456",
+    to_user_id: "doctor-456",
+    timestamp: "2025-05-08T14:40:00",
+    patient_id: "patient-456",
+    patient_name: "Emma Rodriguez",
+    patient_avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
+    patient_email: "emma.r@example.com"
   },
   {
-    id: "m4",
-    content: "Following up on your last visit",
-    created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-    sender: mockDoctors[1],
-    read: true,
-    appointment_request: {
-      date: "2024-02-15 14:30",
-      reason: "Follow-up consultation"
-    },
-    appointment_status: "accepted",
-    notification_type: "appointment_confirmed",
-    attachments: [
-      {
-        name: "test_results.pdf",
-        type: "application/pdf",
-        size: 1024000
-      }
-    ]
-  },
-  // Patient messages to doctors
-  {
-    id: "m5",
-    content: "I've been experiencing headaches recently.",
-    created_at: new Date(Date.now() - 43200000).toISOString(), // 12 hours ago
-    sender: mockPatients[0],
-    read: false,
-  },
-  {
-    id: "m6",
-    content: "When should I take the new medication?",
-    created_at: new Date(Date.now() - 129600000).toISOString(), // 36 hours ago
-    sender: mockPatients[1],
-    read: true,
-  },
-  {
-    id: "m7",
-    content: "My blood sugar readings have improved.",
-    created_at: new Date(Date.now() - 216000000).toISOString(), // 60 hours ago
-    sender: mockPatients[2],
-    read: false,
+    id: "msg8",
+    content: "Dr. Johnson, when will my test results be available?",
+    from_user_id: "patient-789",
+    to_user_id: "doctor-456",
+    timestamp: "2025-05-08T16:10:00",
+    patient_id: "patient-789",
+    patient_name: "David Kim",
+    patient_email: "david.k@example.com"
   }
 ];

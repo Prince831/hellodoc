@@ -1,72 +1,57 @@
 
-import { Message } from "@/types/messages";
-import { PatientConversation, PatientMessage } from "@/types/conversations";
+import { PatientMessage, PatientConversation } from "@/types/conversations";
 
-export const deriveConversationsFromMessages = (mockMessages: Message[]): PatientConversation[] => {
-  // Group messages by sender
-  const conversations: { [key: string]: PatientConversation } = {};
+interface RawMessage {
+  id: string;
+  content: string;
+  from_user_id: string;
+  to_user_id: string;
+  timestamp: string;
+  patient_id: string;
+  patient_name: string;
+  patient_avatar?: string;
+  patient_email?: string;
+}
+
+/**
+ * Derive conversation objects from flat message arrays
+ */
+export const deriveConversationsFromMessages = (messages: RawMessage[]): PatientConversation[] => {
+  const conversationMap = new Map<string, PatientConversation>();
   
-  mockMessages.forEach(message => {
-    // Skip messages sent by the doctor/current user
-    if (message.sender.id === '00000000-0000-0000-0000-000000000000') return;
-    
-    const senderId = message.sender.id;
-    const senderName = message.sender.name;
-    
-    if (!conversations[senderId]) {
-      conversations[senderId] = {
-        id: `c-${senderId}`,
-        patientId: senderId,
-        patientName: senderName,
-        messages: [],
-        unread: false
-      };
+  // Group messages by patient
+  messages.forEach(message => {
+    if (!conversationMap.has(message.patient_id)) {
+      conversationMap.set(message.patient_id, {
+        id: `conv-${message.patient_id}`,
+        patientId: message.patient_id,
+        patientName: message.patient_name,
+        patientAvatar: message.patient_avatar,
+        patientEmail: message.patient_email,
+        messages: []
+      });
     }
     
-    // Convert to the conversation message format with explicit typing
-    const patientMessage: PatientMessage = {
+    const messageObj: PatientMessage = {
       id: message.id,
       content: message.content,
-      sender: "patient", // Use the literal "patient" value to match the union type
-      timestamp: message.created_at
+      sender: message.from_user_id === message.patient_id ? "patient" : "doctor",
+      timestamp: message.timestamp
     };
     
-    conversations[senderId].messages.push(patientMessage);
-    
-    // Mark conversation as unread if any message is unread
-    if (!message.read) {
-      conversations[senderId].unread = true;
+    const conversation = conversationMap.get(message.patient_id);
+    if (conversation) {
+      conversation.messages.push(messageObj);
     }
   });
   
-  // Add doctor's sent messages
-  mockMessages.forEach(message => {
-    if (message.sender.id === '00000000-0000-0000-0000-000000000000' && message.content) {
-      // Find the conversation this message belongs to
-      const recipientId = Object.keys(conversations).find(id => 
-        conversations[id].messages.some(m => m.timestamp < message.created_at)
-      );
-      
-      if (recipientId) {
-        // Create doctor message with correct typing
-        const doctorMessage: PatientMessage = {
-          id: message.id,
-          content: message.content,
-          sender: "doctor", // Use the literal "doctor" value to match the union type
-          timestamp: message.created_at
-        };
-        
-        conversations[recipientId].messages.push(doctorMessage);
-      }
-    }
-  });
-  
-  // Sort messages in each conversation by timestamp
-  Object.values(conversations).forEach(conversation => {
-    conversation.messages.sort((a, b) => 
+  // Sort each conversation's messages by timestamp
+  const conversations = Array.from(conversationMap.values());
+  conversations.forEach(conv => {
+    conv.messages.sort((a, b) => 
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
   });
   
-  return Object.values(conversations);
+  return conversations;
 };

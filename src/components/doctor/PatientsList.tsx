@@ -1,174 +1,225 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare, FileText, Calendar, Video } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Search, Eye, MessageSquare, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock patient data - would come from Supabase in a real implementation
 interface Patient {
   id: string;
   name: string;
+  email: string;
+  image?: string;
   age: number;
-  gender: string;
   lastVisit: string;
-  condition: string;
-  imageUrl?: string;
+  conditions: string[];
+  status: "active" | "inactive";
 }
 
+// Mock data - would come from Supabase in a real implementation
 const mockPatients: Patient[] = [
   {
     id: "p1",
     name: "Michael Johnson",
-    age: 42,
-    gender: "Male",
-    lastVisit: "2025-04-28",
-    condition: "Hypertension",
-    imageUrl: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100"
+    email: "michael.j@example.com",
+    image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100",
+    age: 45,
+    lastVisit: "2025-04-20",
+    conditions: ["Hypertension", "High Cholesterol"],
+    status: "active"
   },
   {
     id: "p2",
     name: "Emma Rodriguez",
-    age: 35,
-    gender: "Female",
+    email: "emma.r@example.com",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
+    age: 28,
     lastVisit: "2025-05-01",
-    condition: "Asthma",
-    imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100"
+    conditions: ["Asthma"],
+    status: "active"
   },
   {
     id: "p3",
     name: "David Kim",
-    age: 58,
-    gender: "Male",
+    email: "david.k@example.com",
+    age: 52,
     lastVisit: "2025-04-15",
-    condition: "Diabetes",
+    conditions: ["Diabetes Type 2", "Obesity"],
+    status: "active"
   },
   {
     id: "p4",
     name: "Sophia Martinez",
-    age: 29,
-    gender: "Female",
+    email: "sophia.m@example.com",
+    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=100",
+    age: 34,
     lastVisit: "2025-04-22",
-    condition: "Migraines",
-    imageUrl: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=100"
+    conditions: ["Migraines", "Anxiety"],
+    status: "active"
+  },
+  {
+    id: "p5",
+    name: "James Wilson",
+    email: "james.w@example.com",
+    age: 63,
+    lastVisit: "2025-03-10",
+    conditions: ["Arthritis", "Glaucoma"],
+    status: "inactive"
   }
 ];
 
 const PatientsList = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
   
   const filteredPatients = mockPatients.filter(patient => 
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.condition.toLowerCase().includes(searchTerm.toLowerCase())
+    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.conditions.some(condition => condition.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   
-  const handleViewRecords = (patientId: string, patientName: string) => {
+  const calculateDaysSinceLastVisit = (lastVisitDate: string) => {
+    const today = new Date();
+    const lastVisit = new Date(lastVisitDate);
+    const diffTime = Math.abs(today.getTime() - lastVisit.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
+  const handleViewPatient = (patientId: string, patientName: string) => {
     toast({
-      title: "Viewing records",
-      description: `Loading medical records for ${patientName}`,
-    });
-    navigate('/doctor-records', {
-      state: { patientId, patientName }
+      title: "Viewing patient profile",
+      description: `Opening profile for ${patientName}`,
     });
   };
-
-  const handleSendMessage = (patientId: string, patientName: string) => {
+  
+  const handleMessage = (patientId: string, patientName: string) => {
     toast({
-      title: "Message initiated",
+      title: "Opening messages",
       description: `Starting conversation with ${patientName}`,
     });
-    navigate('/doctor-messages', {
-      state: { patientId, patientName, initiateChat: true }
-    });
   };
   
-  const handleScheduleAppointment = (patientId: string, patientName: string) => {
+  const handleSchedule = (patientId: string, patientName: string) => {
     toast({
-      title: "Schedule appointment",
-      description: `Scheduling appointment with ${patientName}`,
-    });
-    navigate('/doctor-appointments', {
-      state: { patientId, patientName, scheduleAppointment: true }
-    });
-  };
-  
-  const handleStartConsultation = (patientId: string, patientName: string) => {
-    toast({
-      title: "Starting consultation",
-      description: `Initiating video call with ${patientName}`,
-    });
-    navigate('/doctor-consultations', {
-      state: { patientId, patientName, startConsultation: true }
+      title: "Scheduling appointment",
+      description: `Opening scheduler for ${patientName}`,
     });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>My Patients</CardTitle>
-        <div className="mt-2">
-          <Input
-            placeholder="Search by name or condition..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <CardTitle>My Patients</CardTitle>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search patients by name or condition..."
+              className="pl-8 w-full md:w-[300px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {filteredPatients.length > 0 ? (
-            filteredPatients.map(patient => (
-              <div key={patient.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="flex flex-col sm:flex-row justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={patient.imageUrl} />
-                      <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-medium">{patient.name}</h3>
-                      <p className="text-sm text-muted-foreground">{patient.age} years, {patient.gender}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    <div className="text-sm mr-4 text-right sm:text-left">
-                      <div>Last visit: <span className="font-medium">{new Date(patient.lastVisit).toLocaleDateString()}</span></div>
-                      <div>Condition: <span className="font-medium">{patient.condition}</span></div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleViewRecords(patient.id, patient.name)}>
-                        <FileText className="h-3.5 w-3.5 mr-1" />
-                        Records
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleSendMessage(patient.id, patient.name)}>
-                        <MessageSquare className="h-3.5 w-3.5 mr-1" />
-                        Message
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleScheduleAppointment(patient.id, patient.name)}>
-                        <Calendar className="h-3.5 w-3.5 mr-1" />
-                        Schedule
-                      </Button>
-                      <Button size="sm" onClick={() => handleStartConsultation(patient.id, patient.name)}>
-                        <Video className="h-3.5 w-3.5 mr-1" />
-                        Call
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-4 text-muted-foreground">
-              No patients found matching your search.
-            </div>
-          )}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead className="hidden md:table-cell">Age</TableHead>
+                <TableHead className="hidden md:table-cell">Last Visit</TableHead>
+                <TableHead>Conditions</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredPatients.length > 0 ? (
+                filteredPatients.map((patient) => (
+                  <TableRow key={patient.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={patient.image} />
+                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{patient.name}</div>
+                          <div className="text-sm text-muted-foreground">{patient.email}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {patient.age}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex flex-col">
+                        <span>{patient.lastVisit}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {calculateDaysSinceLastVisit(patient.lastVisit)} days ago
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {patient.conditions.map((condition, index) => (
+                          <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700">
+                            {condition}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={patient.status === "active" ? "bg-green-500" : "bg-gray-500"}>
+                        {patient.status === "active" ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => handleViewPatient(patient.id, patient.name)}
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => handleMessage(patient.id, patient.name)}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                          <span className="sr-only">Message</span>
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => handleSchedule(patient.id, patient.name)}
+                        >
+                          <Calendar className="h-4 w-4" />
+                          <span className="sr-only">Schedule</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    No patients found matching your criteria
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>

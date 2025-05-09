@@ -3,20 +3,20 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Search, FileText, Download, Plus } from "lucide-react";
+import { Search, FilePlus, FileText, Clock, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 interface Prescription {
   id: string;
   patientName: string;
-  patientImage?: string;
-  date: string;
-  medications: string[];
-  status: "active" | "expired" | "cancelled";
-  refills: number;
+  medication: string;
+  dosage: string;
+  frequency: string;
+  startDate: string;
+  endDate: string;
+  status: "active" | "expired" | "pending" | "refill";
 }
 
 // Mock data - would come from Supabase in a real implementation
@@ -24,76 +24,105 @@ const mockPrescriptions: Prescription[] = [
   {
     id: "p1",
     patientName: "Michael Johnson",
-    patientImage: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100",
-    date: "2025-04-28",
-    medications: ["Lisinopril 10mg", "Amlodipine 5mg"],
-    status: "active",
-    refills: 3
+    medication: "Lisinopril",
+    dosage: "10mg",
+    frequency: "Once daily",
+    startDate: "2025-04-15",
+    endDate: "2025-07-15",
+    status: "active"
   },
   {
     id: "p2",
     patientName: "Emma Rodriguez",
-    patientImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100",
-    date: "2025-05-01",
-    medications: ["Albuterol Inhaler", "Montelukast 10mg"],
-    status: "active",
-    refills: 1
+    medication: "Albuterol",
+    dosage: "90mcg",
+    frequency: "As needed",
+    startDate: "2025-04-01",
+    endDate: "2025-10-01",
+    status: "active"
   },
   {
     id: "p3",
     patientName: "David Kim",
-    date: "2025-04-15",
-    medications: ["Metformin 500mg", "Glipizide 5mg"],
-    status: "active",
-    refills: 2
+    medication: "Metformin",
+    dosage: "500mg",
+    frequency: "Twice daily",
+    startDate: "2025-03-15",
+    endDate: "2025-05-15",
+    status: "refill"
   },
   {
     id: "p4",
     patientName: "Sophia Martinez",
-    patientImage: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?q=80&w=100",
-    date: "2025-04-22",
-    medications: ["Sumatriptan 50mg"],
-    status: "expired",
-    refills: 0
+    medication: "Sumatriptan",
+    dosage: "50mg",
+    frequency: "As needed for migraines",
+    startDate: "2025-02-10",
+    endDate: "2025-05-10",
+    status: "expired"
+  },
+  {
+    id: "p5",
+    patientName: "James Wilson",
+    medication: "Amoxicillin",
+    dosage: "500mg",
+    frequency: "Three times daily",
+    startDate: "2025-05-05",
+    endDate: "2025-05-12",
+    status: "active"
+  },
+  {
+    id: "p6",
+    patientName: "Ava Garcia",
+    medication: "Prednisone",
+    dosage: "10mg",
+    frequency: "Once daily, tapering",
+    startDate: "2025-05-01",
+    endDate: "2025-05-15",
+    status: "active"
   }
 ];
 
 const DoctorPrescriptions = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const { toast } = useToast();
   
-  const filteredPrescriptions = mockPrescriptions.filter(prescription => 
-    prescription.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    prescription.medications.some(med => med.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredPrescriptions = mockPrescriptions.filter(prescription => {
+    const matchesSearch = 
+      prescription.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      prescription.medication.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = 
+      filterStatus === "all" || prescription.status === filterStatus;
+    
+    return matchesSearch && matchesStatus;
+  });
   
-  const handleViewPrescription = (prescriptionId: string) => {
-    toast({
-      title: "Viewing prescription",
-      description: `Opening detailed view for prescription ID: ${prescriptionId}`,
-    });
-  };
-  
-  const handleDownload = (prescriptionId: string) => {
-    toast({
-      title: "Downloading prescription",
-      description: `Starting download for prescription ID: ${prescriptionId}`,
-    });
-  };
-
   const handleNewPrescription = () => {
     toast({
       title: "New prescription",
-      description: "Opening new prescription form",
+      description: "Opening prescription form",
     });
   };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'active': return 'default';  // Changed from 'success' to 'default'
-      case 'expired': return 'secondary';
-      case 'cancelled': return 'destructive';
-      default: return 'outline';
+  
+  const handleRenew = (id: string) => {
+    toast({
+      title: "Prescription renewed",
+      description: `Prescription ${id} has been renewed`,
+    });
+  };
+  
+  const getStatusBadge = (status: Prescription["status"]) => {
+    switch(status) {
+      case "active":
+        return <Badge className="bg-green-500">Active</Badge>;
+      case "expired":
+        return <Badge variant="outline" className="text-gray-500">Expired</Badge>;
+      case "pending":
+        return <Badge variant="outline" className="bg-amber-100 text-amber-800">Pending</Badge>;
+      case "refill":
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Refill Requested</Badge>;
     }
   };
 
@@ -101,19 +130,30 @@ const DoctorPrescriptions = () => {
     <Card>
       <CardHeader>
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-          <CardTitle>Prescriptions</CardTitle>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <CardTitle>Patient Prescriptions</CardTitle>
+          <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search prescriptions..."
-                className="pl-8 w-full md:w-[250px]"
+                className="pl-8 w-full md:w-[240px]"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <select
+              className="border rounded-md px-3 py-2 bg-background"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="refill">Refill Requested</option>
+              <option value="pending">Pending</option>
+            </select>
             <Button onClick={handleNewPrescription}>
-              <Plus className="h-4 w-4 mr-1" />
+              <FilePlus className="mr-2 h-4 w-4" />
               New Prescription
             </Button>
           </div>
@@ -125,10 +165,11 @@ const DoctorPrescriptions = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Patient</TableHead>
-                <TableHead>Medications</TableHead>
-                <TableHead className="hidden md:table-cell">Date</TableHead>
-                <TableHead className="hidden md:table-cell">Status</TableHead>
-                <TableHead className="hidden md:table-cell">Refills</TableHead>
+                <TableHead>Medication</TableHead>
+                <TableHead>Dosage</TableHead>
+                <TableHead className="hidden md:table-cell">Frequency</TableHead>
+                <TableHead>Dates</TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -136,38 +177,31 @@ const DoctorPrescriptions = () => {
               {filteredPrescriptions.length > 0 ? (
                 filteredPrescriptions.map((prescription) => (
                   <TableRow key={prescription.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={prescription.patientImage} />
-                          <AvatarFallback>{prescription.patientName.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{prescription.patientName}</span>
+                    <TableCell className="font-medium">{prescription.patientName}</TableCell>
+                    <TableCell>{prescription.medication}</TableCell>
+                    <TableCell>{prescription.dosage}</TableCell>
+                    <TableCell className="hidden md:table-cell">{prescription.frequency}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="flex flex-col text-sm">
+                        <span className="text-muted-foreground">Start: {prescription.startDate}</span>
+                        <span className="text-muted-foreground">End: {prescription.endDate}</span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        {prescription.medications.map((med, index) => (
-                          <span key={index} className="text-sm">{med}</span>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{new Date(prescription.date).toLocaleDateString()}</TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Badge variant={getStatusBadgeVariant(prescription.status)}>
-                        {prescription.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{prescription.refills}</TableCell>
+                    <TableCell>{getStatusBadge(prescription.status)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleViewPrescription(prescription.id)}>
-                          <FileText className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">View</span>
+                        <Button size="sm" variant="ghost">
+                          <FileText className="h-4 w-4" />
+                          <span className="sr-only">View</span>
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDownload(prescription.id)}>
-                          <Download className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Print</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleRenew(prescription.id)}
+                          disabled={prescription.status === "active"}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          <span className="sr-only md:not-sr-only md:ml-2">Renew</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -175,8 +209,8 @@ const DoctorPrescriptions = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                    No prescriptions found matching your search.
+                  <TableCell colSpan={7} className="text-center py-8">
+                    No prescriptions found matching your criteria
                   </TableCell>
                 </TableRow>
               )}
