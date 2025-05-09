@@ -38,7 +38,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Search, UserPlus, Edit, Trash2, Activity, Check, X, Eye, Calendar, Star } from "lucide-react";
+import { 
+  Search, 
+  UserPlus, 
+  Edit, 
+  Trash2, 
+  Activity, 
+  Check, 
+  X, 
+  Eye, 
+  Calendar, 
+  Star,
+  FileText,
+  User,
+  ClipboardList
+} from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -541,7 +555,7 @@ const DoctorsPage = () => {
                         </div>
                         
                         <div className="rounded-md border p-4 text-center text-muted-foreground">
-                          <Users className="mx-auto h-8 w-8 mb-2" />
+                          <User className="mx-auto h-8 w-8 mb-2" />
                           <p>Patient list will be displayed here</p>
                         </div>
                       </TabsContent>
@@ -552,7 +566,7 @@ const DoctorsPage = () => {
                         </div>
                         
                         <div className="rounded-md border p-4 text-center text-muted-foreground">
-                          <Clipboard className="mx-auto h-8 w-8 mb-2" />
+                          <ClipboardList className="mx-auto h-8 w-8 mb-2" />
                           <p>Health records will be displayed here</p>
                         </div>
                       </TabsContent>
