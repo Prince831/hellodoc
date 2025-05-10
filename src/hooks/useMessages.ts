@@ -37,6 +37,9 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
                 id: '00000000-0000-0000-0000-000000000000',
                 name: 'You'
               },
+              sender_id: '00000000-0000-0000-0000-000000000000',
+              receiver_id: doctorMessage.sender_id,
+              timestamp: new Date().toISOString(),
               read: true
             };
             
@@ -119,6 +122,9 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
           id: '00000000-0000-0000-0000-000000000000',
           name: 'You'
         },
+        sender_id: '00000000-0000-0000-0000-000000000000',
+        receiver_id: selectedMessage.sender_id,
+        timestamp: new Date().toISOString(),
         read: false
       };
 

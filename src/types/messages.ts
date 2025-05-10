@@ -32,6 +32,27 @@ export interface Message {
   }>;
 }
 
+// For backward compatibility with components that expect RawMessage
+export interface RawMessage {
+  from_user_id: string;
+  to_user_id: string;
+  patient_id: string;
+  patient_name: string;
+  // Include other properties from Message to ensure compatibility
+  id: string;
+  content: string;
+  sender_id: string;
+  receiver_id: string;
+  timestamp: string;
+  read: boolean;
+  created_at: string;
+  sender: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+}
+
 // Define a conversation type
 export interface Conversation {
   id: string;
@@ -87,6 +108,17 @@ export const mockDoctors = [
     languages: ["English", "Spanish"],
   }
 ];
+
+// Helper function to convert Message to RawMessage if needed
+export const messageToRawMessage = (message: Message): RawMessage => {
+  return {
+    ...message,
+    from_user_id: message.sender_id,
+    to_user_id: message.receiver_id,
+    patient_id: message.receiver_id, // Assuming receiver is patient
+    patient_name: message.sender.name // Simplification, adjust if needed
+  };
+};
 
 // Mock messages for testing
 export const mockMessages: Message[] = [

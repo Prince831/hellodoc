@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { mockMessages } from "@/types/messages";
+import { mockMessages, messageToRawMessage } from "@/types/messages";
 import { PatientConversation, PatientMessage } from "@/types/conversations";
 import { deriveConversationsFromMessages } from "@/utils/conversationUtils";
 import ConversationList from "./conversation/ConversationList";
@@ -15,8 +15,11 @@ const DoctorMessages = () => {
   const { toast } = useToast();
   
   useEffect(() => {
+    // Transform mockMessages to RawMessage format before deriving conversations
+    const rawMessages = mockMessages.map(msg => messageToRawMessage(msg));
+    
     // Initialize conversations from mock data
-    const derivedConversations = deriveConversationsFromMessages(mockMessages);
+    const derivedConversations = deriveConversationsFromMessages(rawMessages);
     setConversations(derivedConversations);
     
     if (derivedConversations.length > 0) {
