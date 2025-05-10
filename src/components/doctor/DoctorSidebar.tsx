@@ -1,15 +1,22 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { 
-  CalendarDays, Users, MessageSquare, Video, 
-  Clipboard, Heart, FileText, Settings, ChevronLeft, ChevronRight,
-  LayoutDashboard
-} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/contexts/SidebarContext";
-import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  Users, 
+  Calendar, 
+  MessageSquare, 
+  FileText, 
+  Settings,
+  Video,
+  Clipboard,
+  LogOut
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DoctorSidebarProps {
   className?: string;
@@ -17,118 +24,144 @@ interface DoctorSidebarProps {
 
 const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
   const location = useLocation();
-  const { isSidebarCollapsed, toggleSidebar } = useSidebar();
-  
-  const isActive = (path: string) => location.pathname === path;
+  const { toast } = useToast();
 
-  const navItems = [
+  const navigationItems = [
     {
-      name: "Dashboard",
-      path: "/doctor-dashboard",
-      icon: <LayoutDashboard className="h-4 w-4" />
+      title: "Dashboard",
+      icon: LayoutDashboard,
+      href: "/doctor-dashboard",
+      description: "Overview of your activities"
     },
     {
-      name: "Patients",
-      path: "/doctor-patients",
-      icon: <Users className="h-4 w-4" />
+      title: "Appointments",
+      icon: Calendar,
+      href: "/doctor/appointments",
+      description: "Manage your schedule",
+      badge: 8
     },
     {
-      name: "Appointments",
-      path: "/doctor-appointments",
-      icon: <CalendarDays className="h-4 w-4" />
+      title: "Patients",
+      icon: Users,
+      href: "/doctor/patients",
+      description: "Your patient directory"
     },
     {
-      name: "Video Consultations",
-      path: "/doctor-consultations",
-      icon: <Video className="h-4 w-4" />
+      title: "Consultations",
+      icon: Video,
+      href: "/video-consultation",
+      description: "Virtual appointments"
     },
     {
-      name: "Messages",
-      path: "/doctor-messages",
-      icon: <MessageSquare className="h-4 w-4" />
+      title: "Messages",
+      icon: MessageSquare,
+      href: "/doctor/messages",
+      description: "Patient communications",
+      badge: 7
     },
     {
-      name: "Health Records",
-      path: "/doctor-records",
-      icon: <FileText className="h-4 w-4" />
+      title: "Health Records",
+      icon: Clipboard,
+      href: "/doctor/health-records",
+      description: "View patient documents"
     },
     {
-      name: "Prescriptions",
-      path: "/doctor-prescriptions",
-      icon: <Heart className="h-4 w-4" />
+      title: "Prescriptions",
+      icon: FileText,
+      href: "/doctor/prescriptions",
+      description: "Medical prescriptions"
     },
     {
-      name: "Settings",
-      path: "/doctor-settings",
-      icon: <Settings className="h-4 w-4" />
-    }
+      title: "Settings",
+      icon: Settings,
+      href: "/doctor/settings",
+      description: "Account preferences"
+    },
   ];
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Signed out successfully",
+      description: "You have been logged out of your account"
+    });
+  };
+
   return (
-    <motion.div 
-      className={cn(
-        "rounded-lg p-4 space-y-4 relative bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-950 shadow-md transition-all duration-300", 
-        isSidebarCollapsed ? "w-16" : "w-60",
-        className
-      )}
-      animate={{ width: isSidebarCollapsed ? 64 : 240 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="flex items-center justify-center mb-6">
-        {!isSidebarCollapsed && (
-          <div className="flex flex-col items-center space-y-2">
-            <Avatar className="h-16 w-16 border-2 border-primary/20">
-              <AvatarImage src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200" />
-              <AvatarFallback>DR</AvatarFallback>
-            </Avatar>
-            <div className="text-center">
-              <h2 className="font-semibold">Dr. Sarah Johnson</h2>
-              <span className="text-xs text-muted-foreground">General Practitioner</span>
-            </div>
-          </div>
-        )}
-        {isSidebarCollapsed && (
-          <Avatar className="h-8 w-8">
+    <div className={cn("w-64 flex flex-col h-[calc(100vh-4rem)] border-r bg-white dark:bg-slate-800 dark:border-slate-700", className)}>
+      <div className="p-4 border-b dark:border-slate-700">
+        <div className="flex items-center space-x-3">
+          <Avatar>
             <AvatarImage src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200" />
             <AvatarFallback>DR</AvatarFallback>
           </Avatar>
-        )}
+          <div>
+            <p className="font-medium text-sm">Dr. Sarah Johnson</p>
+            <p className="text-xs text-muted-foreground">General Practitioner</p>
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-md bg-green-100 dark:bg-green-900/20 p-2 text-center">
+            <p className="text-xs text-muted-foreground">Status</p>
+            <p className="text-sm font-medium text-green-600 dark:text-green-400">Available</p>
+          </div>
+          <div className="rounded-md bg-blue-100 dark:bg-blue-900/20 p-2 text-center">
+            <p className="text-xs text-muted-foreground">Rating</p>
+            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">4.8 ★</p>
+          </div>
+        </div>
       </div>
 
-      <nav className="space-y-1">
-        {navItems.map((item) => (
-          <Button
-            key={item.path}
-            variant={isActive(item.path) ? "default" : "ghost"}
-            className={cn(
-              "w-full transition-all", 
-              isActive(item.path) ? "bg-primary text-primary-foreground" : "",
-              isSidebarCollapsed ? "justify-center px-0" : "justify-start"
-            )}
-            asChild
-          >
-            <Link to={item.path}>
-              {item.icon}
-              {!isSidebarCollapsed && <span className="ml-2">{item.name}</span>}
-            </Link>
-          </Button>
-        ))}
-      </nav>
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-1">
+          {navigationItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link 
+                key={item.href} 
+                to={item.href}
+                className={cn(
+                  "flex items-center group relative space-x-3 px-3 py-2 rounded-md text-sm transition-colors hover:bg-muted",
+                  isActive ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <item.icon className={cn("h-5 w-5", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span>{item.title}</span>
+                    {item.badge && (
+                      <span className={cn(
+                        "rounded-full h-5 w-5 flex items-center justify-center text-xs font-medium",
+                        isActive ? "bg-primary-foreground text-primary" : "bg-primary text-primary-foreground"
+                      )}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                    {item.description}
+                  </p>
+                </div>
+                {isActive && (
+                  <span className="absolute right-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-l-full bg-foreground" />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </ScrollArea>
 
-      {/* Toggle Button */}
-      <Button 
-        variant="outline" 
-        size="icon"
-        className="absolute -right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 bg-background border rounded-full shadow-md hover:bg-primary hover:text-primary-foreground"
-        onClick={toggleSidebar}
-      >
-        {isSidebarCollapsed ? (
-          <ChevronRight className="h-4 w-4" />
-        ) : (
-          <ChevronLeft className="h-4 w-4" />
-        )}
-      </Button>
-    </motion.div>
+      <div className="p-4 border-t dark:border-slate-700">
+        <Button 
+          variant="outline" 
+          className="w-full justify-start"
+          onClick={handleSignOut}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Sign Out
+        </Button>
+      </div>
+    </div>
   );
 };
 

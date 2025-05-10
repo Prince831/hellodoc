@@ -5,6 +5,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -29,8 +30,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
+          <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">Loading admin dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -46,9 +50,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="bg-white dark:bg-slate-800 border-b shadow-sm py-4 px-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold">Healthcare Administration</h1>
+            <div>
+              <h1 className="text-xl font-bold">Healthcare Administration</h1>
+              <p className="text-sm text-muted-foreground">Manage your healthcare platform</p>
+            </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 px-3 py-1 rounded-full">
+              <Button variant="outline" size="sm" onClick={() => navigate("/")}>
+                View Site
+              </Button>
+              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">
                 Admin Control Panel
               </span>
             </div>
