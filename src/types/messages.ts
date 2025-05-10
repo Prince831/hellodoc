@@ -1,6 +1,34 @@
 
 // This is a temporary mock file that would be replaced by actual Supabase data in production
 
+export interface Message {
+  id: string;
+  content: string;
+  created_at: string;
+  read: boolean;
+  flagged?: boolean;
+  sender: {
+    id: string;
+    name: string;
+    role?: string;
+  };
+  receiver?: {
+    id: string;
+    name: string;
+    role?: string;
+  };
+  appointment_request?: {
+    date: string;
+    reason: string;
+  };
+  appointment_status?: 'pending' | 'accepted' | 'rejected';
+  notification_type?: 'appointment_request' | 'appointment_confirmed' | 'appointment_rejected';
+  attachments?: Array<{
+    name: string;
+    url?: string;
+  }>;
+}
+
 interface RawMessage {
   id: string;
   content: string;
@@ -96,5 +124,33 @@ export const mockMessages: RawMessage[] = [
     patient_id: "patient-789",
     patient_name: "David Kim",
     patient_email: "david.k@example.com"
+  }
+];
+
+// Mock doctors data
+export const mockDoctors = [
+  {
+    id: "d1b792e6-4073-4f47-8c5f-9b035bdb77f3",
+    name: "Dr. Sarah Johnson",
+    specialty: "Family Medicine",
+    rating: 4.8,
+    availability: ["Monday", "Wednesday", "Friday"],
+    avatar: null
+  },
+  {
+    id: "d2c892e6-4073-4f47-8c5f-9b035bdb77f4",
+    name: "Dr. Michael Chen",
+    specialty: "Cardiology",
+    rating: 4.9,
+    availability: ["Tuesday", "Thursday"],
+    avatar: null
+  },
+  {
+    id: "d3d992e6-4073-4f47-8c5f-9b035bdb77f5",
+    name: "Dr. Lisa Wong",
+    specialty: "Pediatrics",
+    rating: 4.7,
+    availability: ["Monday", "Tuesday", "Friday"],
+    avatar: null
   }
 ];
