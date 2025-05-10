@@ -12,14 +12,13 @@ import {
   Activity,
   Shield,
   Bell,
-  Database,
+  FileText,
   BriefcaseMedical,
-  UserCog,
-  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const AdminSidebar = () => {
   const location = useLocation();
@@ -87,35 +86,48 @@ const AdminSidebar = () => {
   };
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-slate-800 bg-slate-950">
-      <div className="flex h-14 items-center border-b border-slate-800 px-4">
-        <h2 className="font-semibold text-purple-400">
-          ADMIN CONTROL PANEL
-        </h2>
+    <aside className="flex h-full w-64 flex-col bg-gradient-to-b from-indigo-950 to-purple-900 text-white">
+      <div className="flex h-16 items-center px-6">
+        <div className="flex items-center space-x-2">
+          <Avatar className="h-8 w-8 bg-white/10 text-white">
+            <AvatarFallback>HC</AvatarFallback>
+          </Avatar>
+          <div>
+            <h2 className="font-semibold text-white">
+              Healthcare Admin
+            </h2>
+            <p className="text-xs text-indigo-300">System Control Panel</p>
+          </div>
+        </div>
       </div>
-      <div className="flex-1 overflow-auto py-2">
-        <nav className="grid gap-1 px-2">
+      <div className="flex-1 overflow-auto py-6 px-4">
+        <nav className="grid gap-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 location.pathname === item.href
-                  ? "bg-purple-900/50 text-purple-200"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "bg-white/10 text-white"
+                  : "text-indigo-200 hover:bg-white/5 hover:text-white"
               )}
             >
               <item.icon className="h-4 w-4" />
               {item.name}
+              {item.name === "System Alerts" && (
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                  2
+                </span>
+              )}
             </Link>
           ))}
         </nav>
       </div>
-      <div className="border-t border-slate-800 p-4">
+      <div className="p-4">
         <Button
           variant="outline"
-          className="w-full justify-start border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="w-full justify-start border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
           onClick={handleSignOut}
         >
           <LogOut className="mr-2 h-4 w-4" />

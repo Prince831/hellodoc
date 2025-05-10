@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,11 +16,9 @@ import {
   TrendingUp,
   UserPlus,
   Check,
-  X,
   Bell
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import DashboardStats from "@/components/admin/DashboardStats";
 import AppointmentsList from "@/components/admin/AppointmentsList";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -164,7 +161,7 @@ const AdminDashboard = () => {
         </div>
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
             </CardHeader>
@@ -177,14 +174,14 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Total Doctors</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{loading ? "..." : stats.totalDoctors}</div>
               <div className="mt-2">
-                <Button variant="ghost" size="sm" className="h-7 px-2" asChild>
+                <Button variant="outline" size="sm" className="h-7 px-2" asChild>
                   <Link to="/admin/doctors">
                     <UserPlus className="mr-1 h-3 w-3" />
                     Add Doctor
@@ -194,7 +191,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Weekly Appointments</CardTitle>
             </CardHeader>
@@ -210,7 +207,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md">
+          <Card className="border-0 shadow-md bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">System Status</CardTitle>
             </CardHeader>

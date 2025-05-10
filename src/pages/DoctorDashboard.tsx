@@ -31,18 +31,6 @@ const DoctorDashboard = () => {
     // Simulate loading doctor data - in a real app, this would fetch from Supabase
     const loadDoctorData = async () => {
       try {
-        // const { data, error } = await supabase
-        //   .from('doctors')
-        //   .select('*')
-        //   .eq('id', userId)
-        //   .single();
-        
-        // if (error) throw error;
-        // if (!data) {
-        //   setIsDoctor(false);
-        //   return;
-        // }
-        
         // Simulating successful data fetch
         setTimeout(() => {
           setDoctorData(mockDoctorData);
@@ -69,7 +57,7 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <Navbar />
       <SidebarProvider>
         <div className="container max-w-7xl py-6">
