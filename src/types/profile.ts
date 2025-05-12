@@ -16,4 +16,5 @@ export interface UserData {
   preferredLanguage: string;
   preferredContactMethod: string;
   communicationPreferences: string;
+  timestamp?: string; // Added optional timestamp field
 }
