@@ -40,7 +40,6 @@ const Index = () => {
         }
 
         if (symptoms && data) {
-          // Map database doctor format to the Doctor interface expected by components
           const mappedDoctors: Doctor[] = data.map(doc => ({
             id: doc.id,
             name: doc.name,
@@ -49,14 +48,11 @@ const Index = () => {
             rating: doc.rating,
             imageUrl: doc.image_url,
             availability: doc.availability,
-            // Since languages and education might not exist in the database, provide defaults
-            languages: [], // Default to empty array
-            education: ''  // Default to empty string
+            languages: [],
+            education: ''
           }));
           
-          // Filter doctors based on keywords in symptoms
           const relevantDoctors = mappedDoctors.filter(doctor => 
-            // Check if the original doctor data has keywords
             data.find(d => d.id === doctor.id)?.keywords?.some(keyword => 
               symptoms.toLowerCase().includes(keyword.toLowerCase())
             )
@@ -65,7 +61,6 @@ const Index = () => {
           console.log(`Found ${relevantDoctors.length} relevant doctors out of ${data.length} total`);
           setDoctors(relevantDoctors.length > 0 ? relevantDoctors : mappedDoctors);
         } else if (data) {
-          // Map all doctors if no symptoms filter
           const mappedDoctors: Doctor[] = data.map(doc => ({
             id: doc.id,
             name: doc.name,
@@ -74,8 +69,8 @@ const Index = () => {
             rating: doc.rating,
             imageUrl: doc.image_url,
             availability: doc.availability,
-            languages: [],  // Default to empty array if not provided
-            education: ''   // Default to empty string if not provided
+            languages: [],
+            education: ''
           }));
           setDoctors(mappedDoctors);
         } else {

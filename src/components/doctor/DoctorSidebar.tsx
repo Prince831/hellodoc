@@ -30,7 +30,7 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
     {
       title: "Dashboard",
       icon: LayoutDashboard,
-      href: "/doctor-dashboard",
+      href: "/doctor/dashboard",
       description: "Overview of your activities"
     },
     {
@@ -43,13 +43,13 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
     {
       title: "Patients",
       icon: Users,
-      href: "/doctor/patients",
+      href: "/doctor/patient-records",
       description: "Your patient directory"
     },
     {
       title: "Consultations",
       icon: Video,
-      href: "/video-consultation",
+      href: "/doctor/video-consultation",
       description: "Virtual appointments"
     },
     {
@@ -60,16 +60,10 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
       badge: 7
     },
     {
-      title: "Health Records",
+      title: "Profile",
       icon: Clipboard,
-      href: "/doctor/health-records",
-      description: "View patient documents"
-    },
-    {
-      title: "Prescriptions",
-      icon: FileText,
-      href: "/doctor/prescriptions",
-      description: "Medical prescriptions"
+      href: "/doctor/profile",
+      description: "Manage your profile"
     },
     {
       title: "Settings",
@@ -88,7 +82,7 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
   };
 
   return (
-    <div className={cn("w-64 flex flex-col h-[calc(100vh-4rem)] border-r bg-white dark:bg-slate-800 dark:border-slate-700", className)}>
+    <div className={cn("fixed left-0 top-16 w-64 flex flex-col h-[calc(100vh-4rem)] border-r bg-white dark:bg-slate-800 dark:border-slate-700 z-40", className)}>
       <div className="p-4 border-b dark:border-slate-700">
         <div className="flex items-center space-x-3">
           <Avatar>

@@ -38,7 +38,6 @@ const DoctorProfile = () => {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   
-  // Default form values
   const defaultValues = {
     name: 'Dr. Jane Doe',
     email: 'jane.doe@example.com',
@@ -67,7 +66,6 @@ const DoctorProfile = () => {
   const handleAvatarUpload = () => {
     setIsUploading(true);
     
-    // Simulate upload delay
     setTimeout(() => {
       setIsUploading(false);
       toast({
@@ -324,7 +322,6 @@ const DoctorProfile = () => {
                       <div>
                         <h3 className="font-medium mb-2">Notification Preferences</h3>
                         <div className="space-y-2">
-                          {/* Add notification settings here */}
                           <p className="text-muted-foreground text-sm">
                             Notification preferences can be configured here
                           </p>
@@ -334,7 +331,6 @@ const DoctorProfile = () => {
                       <div>
                         <h3 className="font-medium mb-2">Privacy Settings</h3>
                         <div className="space-y-2">
-                          {/* Add privacy settings here */}
                           <p className="text-muted-foreground text-sm">
                             Privacy settings can be configured here
                           </p>
