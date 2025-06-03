@@ -18,6 +18,18 @@ export interface DoctorProfile {
   updatedAt?: string;
 }
 
+export interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  years_of_experience: number;
+  rating: number;
+  availability: boolean;
+  image_url?: string | null;
+  keywords: string[];
+  created_at: string;
+}
+
 export interface DoctorContextType {
   currentDoctor: DoctorProfile | null;
   activePatientId: string | null;
