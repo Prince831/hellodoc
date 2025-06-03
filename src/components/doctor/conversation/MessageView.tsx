@@ -1,8 +1,11 @@
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Send, Phone, Video } from "lucide-react";
 import { PatientConversation } from "@/types/conversations";
-import { Send } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MessageViewProps {
   conversation: PatientConversation | null;
@@ -15,106 +18,77 @@ const MessageView = ({
   conversation,
   newMessage,
   onNewMessageChange,
-  onSendMessage,
+  onSendMessage
 }: MessageViewProps) => {
   if (!conversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-4 text-muted-foreground">
-        <p>Select a conversation to start messaging</p>
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        Select a conversation to start messaging
       </div>
     );
   }
 
-  // Format the timestamp
-  const formatTime = (timestamp: string) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      onSendMessage();
-    }
-  };
-
   return (
-    <div className="flex-1 flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 rounded-r-lg">
-      {/* Patient info header */}
-      <div className="px-6 py-4 border-b flex items-center gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={conversation.patientAvatar} />
-          <AvatarFallback>{conversation.patientName.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h3 className="font-semibold">{conversation.patientName}</h3>
-          <p className="text-sm text-muted-foreground">{conversation.patientEmail || "No email available"}</p>
+    <div className="flex flex-col h-full">
+      <CardHeader className="border-b">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src={conversation.patientAvatar} />
+              <AvatarFallback>{conversation.patientName.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-lg">{conversation.patientName}</CardTitle>
+              <p className="text-sm text-muted-foreground">Patient</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline">
+              <Phone className="h-4 w-4" />
+            </Button>
+            <Button size="sm" variant="outline">
+              <Video className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
-
-      {/* Message area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {conversation.messages.map((message) => {
-          const isPatient = message.sender === "patient";
-
-          return (
-            <div
-              key={message.id}
-              className={`flex ${isPatient ? "justify-start" : "justify-end"}`}
-            >
-              <div className="flex gap-2 max-w-[80%]">
-                {isPatient && (
-                  <Avatar className="h-8 w-8 mt-1">
-                    <AvatarImage src={conversation.patientAvatar} />
-                    <AvatarFallback>{conversation.patientName.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                )}
+      </CardHeader>
+      
+      <CardContent className="flex-1 p-0">
+        <ScrollArea className="h-[400px] p-4">
+          <div className="space-y-4">
+            {conversation.messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.sender === 'doctor' ? 'justify-end' : 'justify-start'}`}
+              >
                 <div
-                  className={`rounded-lg py-2 px-3 ${
-                    isPatient
-                      ? "bg-card dark:bg-slate-800"
-                      : "bg-primary text-primary-foreground"
+                  className={`max-w-[70%] rounded-lg p-3 ${
+                    message.sender === 'doctor'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
                   }`}
                 >
                   <p className="text-sm">{message.content}</p>
-                  <p
-                    className={`text-xs mt-1 ${
-                      isPatient
-                        ? "text-muted-foreground"
-                        : "text-primary-foreground/80"
-                    }`}
-                  >
-                    {formatTime(message.timestamp)}
+                  <p className="text-xs opacity-70 mt-1">
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
-                {!isPatient && (
-                  <Avatar className="h-8 w-8 mt-1">
-                    <AvatarFallback>DR</AvatarFallback>
-                  </Avatar>
-                )}
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Message input */}
-      <div className="p-4 border-t">
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+      
+      <div className="border-t p-4">
         <div className="flex gap-2">
-          <textarea
-            className="flex-1 min-h-[80px] resize-none rounded-md border-input bg-transparent p-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          <Input
             placeholder="Type your message..."
             value={newMessage}
             onChange={(e) => onNewMessageChange(e.target.value)}
-            onKeyDown={handleKeyPress}
+            onKeyPress={(e) => e.key === 'Enter' && onSendMessage()}
           />
-          <Button 
-            onClick={onSendMessage}
-            className="self-end bg-primary hover:bg-primary/90"
-            disabled={!newMessage.trim()}
-          >
-            <Send className="h-4 w-4 mr-2" />
-            Send
+          <Button onClick={onSendMessage} disabled={!newMessage.trim()}>
+            <Send className="h-4 w-4" />
           </Button>
         </div>
       </div>

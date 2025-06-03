@@ -45,13 +45,13 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
     {
       title: "Patients",
       icon: Users,
-      href: "/doctor/patient-records",
+      href: "/doctor/patients",
       description: "Your patient directory"
     },
     {
       title: "Consultations",
       icon: Video,
-      href: "/doctor/video-consultation",
+      href: "/doctor/consultations",
       description: "Virtual appointments"
     },
     {
@@ -62,10 +62,16 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
       badge: unreadMessagesCount
     },
     {
-      title: "Profile",
+      title: "Records",
+      icon: FileText,
+      href: "/doctor/records",
+      description: "Patient medical records"
+    },
+    {
+      title: "Prescriptions",
       icon: Clipboard,
-      href: "/doctor/profile",
-      description: "Manage your profile"
+      href: "/doctor/prescriptions",
+      description: "Manage prescriptions"
     },
     {
       title: "Settings",

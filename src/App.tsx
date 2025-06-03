@@ -6,6 +6,9 @@ import AppointmentsPage from "./pages/admin/Appointments";
 import HealthRecordsPage from "./pages/admin/HealthRecords";
 import MessagesPage from "./pages/admin/Messages";
 import SettingsPage from "./pages/admin/Settings";
+import AnalyticsPage from "./pages/admin/Analytics";
+import SecurityPage from "./pages/admin/Security";
+import NotificationsPage from "./pages/admin/Notifications";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,25 +26,17 @@ import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
-import DoctorDashboard from "./pages/doctor/Dashboard";
-import DoctorAppointments from "./pages/doctor/Appointments";
-import DoctorMessages from "./pages/doctor/Messages";
-import DoctorProfile from "./pages/doctor/Profile";
-import DoctorVideoConsultation from "./pages/doctor/VideoConsultation";
-import DoctorPatientRecords from "./pages/doctor/PatientRecords";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { SidebarProvider } from "./contexts/SidebarContext";
-
-// Doctor pages for the new doctor dashboard
-import DoctorPatients from "./pages/DoctorPatients";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorAppointments from "./pages/DoctorAppointments";
+import DoctorMessages from "./pages/DoctorMessages";
 import DoctorConsultations from "./pages/DoctorConsultations";
+import DoctorPatients from "./pages/DoctorPatients";
 import DoctorRecords from "./pages/DoctorRecords";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
 import DoctorSettings from "./pages/DoctorSettings";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { SidebarProvider } from "./contexts/SidebarContext";
 import { AuthProvider } from "./hooks/useAuth";
-import AnalyticsPage from "./pages/admin/Analytics";
-import SecurityPage from "./pages/admin/Security";
-import NotificationsPage from "./pages/admin/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -69,25 +64,17 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
                 
-                {/* Doctor routes - combined from both versions */}
+                {/* Doctor routes */}
                 <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
                 <Route path="/doctor/appointments" element={<DoctorAppointments />} />
                 <Route path="/doctor/messages" element={<DoctorMessages />} />
-                <Route path="/doctor/profile" element={<DoctorProfile />} />
-                <Route path="/doctor/video-consultation" element={<DoctorVideoConsultation />} />
-                <Route path="/doctor/patient-records" element={<DoctorPatientRecords />} />
+                <Route path="/doctor/consultations" element={<DoctorConsultations />} />
+                <Route path="/doctor/patients" element={<DoctorPatients />} />
+                <Route path="/doctor/records" element={<DoctorRecords />} />
+                <Route path="/doctor/prescriptions" element={<DoctorPrescriptions />} />
+                <Route path="/doctor/settings" element={<DoctorSettings />} />
                 
-                {/* New doctor dashboard routes */}
-                <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-                <Route path="/doctor-patients" element={<DoctorPatients />} />
-                <Route path="/doctor-appointments" element={<DoctorAppointments />} />
-                <Route path="/doctor-consultations" element={<DoctorConsultations />} />
-                <Route path="/doctor-messages" element={<DoctorMessages />} />
-                <Route path="/doctor-records" element={<DoctorRecords />} />
-                <Route path="/doctor-prescriptions" element={<DoctorPrescriptions />} />
-                <Route path="/doctor-settings" element={<DoctorSettings />} />
-                
-                {/* Administrator side routes - enhanced with new admin pages */}
+                {/* Admin routes */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
                 <Route path="/admin/users" element={<UsersPage />} />
                 <Route path="/admin/doctors" element={<DoctorsPage />} />

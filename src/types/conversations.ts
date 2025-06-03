@@ -11,6 +11,7 @@ export interface PatientConversation {
   patientId: string;
   patientName: string;
   patientAvatar?: string;
-  patientEmail?: string;
   messages: PatientMessage[];
+  lastMessage?: PatientMessage;
+  unreadCount: number;
 }
