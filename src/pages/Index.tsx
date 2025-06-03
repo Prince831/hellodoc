@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CollapsibleSidebar from "@/components/messages/CollapsibleSidebar";
 import { motion } from "framer-motion";
 import { useSidebar } from "@/contexts/SidebarContext";
-import { Doctor } from "@/components/symptom-checker/DoctorCard";
+import { Doctor } from "@/types/doctor";
 
 // Imported components
 import SymptomAnalysis from "@/components/home/SymptomAnalysis";
@@ -39,40 +39,33 @@ const Index = () => {
           throw new Error(error.message);
         }
 
-        if (symptoms && data) {
+        if (data) {
           const mappedDoctors: Doctor[] = data.map(doc => ({
             id: doc.id,
             name: doc.name,
             specialization: doc.specialization,
-            yearsExperience: doc.years_of_experience,
+            years_of_experience: doc.years_of_experience,
             rating: doc.rating,
-            imageUrl: doc.image_url,
             availability: doc.availability,
-            languages: [],
-            education: ''
+            image_url: doc.image_url,
+            keywords: doc.keywords,
+            created_at: doc.created_at,
+            education: '',
+            languages: []
           }));
           
-          const relevantDoctors = mappedDoctors.filter(doctor => 
-            data.find(d => d.id === doctor.id)?.keywords?.some(keyword => 
-              symptoms.toLowerCase().includes(keyword.toLowerCase())
-            )
-          );
-          
-          console.log(`Found ${relevantDoctors.length} relevant doctors out of ${data.length} total`);
-          setDoctors(relevantDoctors.length > 0 ? relevantDoctors : mappedDoctors);
-        } else if (data) {
-          const mappedDoctors: Doctor[] = data.map(doc => ({
-            id: doc.id,
-            name: doc.name,
-            specialization: doc.specialization,
-            yearsExperience: doc.years_of_experience,
-            rating: doc.rating,
-            imageUrl: doc.image_url,
-            availability: doc.availability,
-            languages: [],
-            education: ''
-          }));
-          setDoctors(mappedDoctors);
+          if (symptoms) {
+            const relevantDoctors = mappedDoctors.filter(doctor => 
+              doctor.keywords?.some(keyword => 
+                symptoms.toLowerCase().includes(keyword.toLowerCase())
+              )
+            );
+            
+            console.log(`Found ${relevantDoctors.length} relevant doctors out of ${data.length} total`);
+            setDoctors(relevantDoctors.length > 0 ? relevantDoctors : mappedDoctors);
+          } else {
+            setDoctors(mappedDoctors);
+          }
         } else {
           setDoctors([]);
         }

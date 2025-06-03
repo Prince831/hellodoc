@@ -18,6 +18,7 @@ export interface DoctorProfile {
   updatedAt?: string;
 }
 
+// Database doctor structure for API responses
 export interface Doctor {
   id: string;
   name: string;
@@ -28,6 +29,8 @@ export interface Doctor {
   image_url?: string | null;
   keywords: string[];
   created_at: string;
+  education?: string;
+  languages?: string[];
 }
 
 export interface DoctorContextType {

@@ -9,21 +9,7 @@ import AnalysisResults from "@/components/symptom-checker/AnalysisResults";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import FeatureSection from "@/components/symptom-checker/FeatureSection";
 import EmergencySection from "@/components/symptom-checker/EmergencySection";
-import { Doctor } from "@/components/symptom-checker/DoctorCard";
-
-// Define interface for database doctor structure
-interface DBDoctor {
-  id: string;
-  name: string;
-  specialization: string;
-  years_of_experience: number;
-  rating: number;
-  keywords: string[];
-  image_url: string | null;
-  availability: boolean | null;
-  education?: string;
-  languages?: string[];
-}
+import { Doctor } from "@/types/doctor";
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
@@ -62,7 +48,6 @@ const SymptomChecker = () => {
     setMatchedDoctors([]);
 
     try {
-      // Get current user ID if logged in
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user?.id;
 
@@ -71,7 +56,7 @@ const SymptomChecker = () => {
       const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
         body: {
           symptoms,
-          userId, // Pass the user ID to the function
+          userId,
         },
       });
 
@@ -82,23 +67,23 @@ const SymptomChecker = () => {
 
       console.log("Analysis results:", data);
       
-      // Set results state
       setAnalysisResults({
         analysis: data.analysis,
         recommendedAction: data.recommendedAction,
         recommendations: data.recommendations
       });
       
-      // Map the doctors data to match our Doctor interface
       const doctorsData = data.matchedDoctors && Array.isArray(data.matchedDoctors) 
-        ? data.matchedDoctors.map((doc: DBDoctor) => ({
+        ? data.matchedDoctors.map((doc: Doctor) => ({
             id: doc.id,
             name: doc.name,
             specialization: doc.specialization,
-            yearsExperience: doc.years_of_experience,
+            years_of_experience: doc.years_of_experience,
             rating: doc.rating,
-            imageUrl: doc.image_url || undefined,
-            availability: doc.availability || false,
+            availability: doc.availability,
+            image_url: doc.image_url,
+            keywords: doc.keywords,
+            created_at: doc.created_at,
             education: doc.education || '',
             languages: doc.languages || []
           }))
@@ -111,9 +96,8 @@ const SymptomChecker = () => {
         description: "Redirecting to specialists matching your symptoms.",
       });
       
-      // Navigate to dashboard with the analysis results and matched doctors
       setTimeout(() => {
-        navigate('/home', { 
+        navigate('/', { 
           state: { 
             symptoms: symptoms,
             analysis: data.analysis,
@@ -122,7 +106,7 @@ const SymptomChecker = () => {
             matchedDoctors: doctorsData
           } 
         });
-      }, 1000); // Short delay to allow the toast to be visible
+      }, 1000);
       
     } catch (error) {
       console.error("Error during analysis:", error);

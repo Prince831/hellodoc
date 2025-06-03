@@ -1,19 +1,14 @@
 
-import AdminDashboard from "./pages/admin/Dashboard";
-import UsersPage from "./pages/admin/Users";
-import DoctorsPage from "./pages/admin/Doctors";
-import AppointmentsPage from "./pages/admin/Appointments";
-import HealthRecordsPage from "./pages/admin/HealthRecords";
-import MessagesPage from "./pages/admin/Messages";
-import SettingsPage from "./pages/admin/Settings";
-import AnalyticsPage from "./pages/admin/Analytics";
-import SecurityPage from "./pages/admin/Security";
-import NotificationsPage from "./pages/admin/Notifications";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { SidebarProvider } from "./contexts/SidebarContext";
+import { AuthProvider } from "./hooks/useAuth";
+
+// Patient pages
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SymptomChecker from "./pages/SymptomChecker";
@@ -26,6 +21,8 @@ import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
+
+// Doctor pages
 import DoctorDashboard from "./pages/DoctorDashboard";
 import DoctorAppointments from "./pages/DoctorAppointments";
 import DoctorMessages from "./pages/DoctorMessages";
@@ -34,9 +31,18 @@ import DoctorPatients from "./pages/DoctorPatients";
 import DoctorRecords from "./pages/DoctorRecords";
 import DoctorPrescriptions from "./pages/DoctorPrescriptions";
 import DoctorSettings from "./pages/DoctorSettings";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { SidebarProvider } from "./contexts/SidebarContext";
-import { AuthProvider } from "./hooks/useAuth";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import UsersPage from "./pages/admin/Users";
+import DoctorsPage from "./pages/admin/Doctors";
+import AppointmentsPage from "./pages/admin/Appointments";
+import HealthRecordsPage from "./pages/admin/HealthRecords";
+import MessagesPage from "./pages/admin/Messages";
+import SettingsPage from "./pages/admin/Settings";
+import AnalyticsPage from "./pages/admin/Analytics";
+import SecurityPage from "./pages/admin/Security";
+import NotificationsPage from "./pages/admin/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -50,11 +56,12 @@ const App = () => (
           <SidebarProvider>
             <BrowserRouter>
               <Routes>
-                {/* Patient routes */}
+                {/* Public routes */}
                 <Route path="/welcome" element={<SplashScreen />} />
                 <Route path="/" element={<Index />} />
-                <Route path="/home" element={<Navigate to="/" replace />} />
                 <Route path="/symptom-checker" element={<SymptomChecker />} />
+                
+                {/* Patient routes */}
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/health-records" element={<HealthRecords />} />
                 <Route path="/appointments" element={<Appointments />} />
@@ -86,6 +93,10 @@ const App = () => (
                 <Route path="/admin/security" element={<SecurityPage />} />
                 <Route path="/admin/notifications" element={<NotificationsPage />} />
                 
+                {/* Redirects */}
+                <Route path="/home" element={<Navigate to="/" replace />} />
+                
+                {/* 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
