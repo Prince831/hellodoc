@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -5,18 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, Clock, MapPin, Phone, Star, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
-
-export interface Doctor {
-  id: string;
-  name: string;
-  specialization: string;
-  yearsExperience: number;
-  rating: number;
-  imageUrl?: string; 
-  availability?: boolean;
-  education?: string;
-  languages?: string[];
-}
+import { Doctor } from "@/types/doctor";
 
 interface DoctorCardProps {
   doctor: Doctor;
@@ -71,7 +61,7 @@ const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = fals
         <Card className="h-full overflow-hidden border-primary/10 transition-all duration-300 hover:shadow-md hover:border-primary/30">
           <div className="flex items-center p-3">
             <Avatar className="h-12 w-12 mr-3 border border-primary/20">
-              <AvatarImage src={doctor.imageUrl || ''} alt={doctor.name} />
+              <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
               <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
                 {getInitials(doctor.name)}
               </AvatarFallback>
@@ -109,7 +99,7 @@ const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = fals
         <CardHeader className="pb-2">
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16 border-2 border-primary/20">
-              <AvatarImage src={doctor.imageUrl || ''} alt={doctor.name} />
+              <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
               <AvatarFallback className="bg-primary/10 text-primary font-bold">
                 {getInitials(doctor.name)}
               </AvatarFallback>
@@ -134,7 +124,7 @@ const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = fals
             <div className="flex items-center gap-2">
               <ThumbsUp className="h-4 w-4 text-primary" />
               <span>Experience:</span>
-              <span className="font-medium ml-auto">{doctor.yearsExperience} years</span>
+              <span className="font-medium ml-auto">{doctor.years_of_experience} years</span>
             </div>
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-primary" />
@@ -182,3 +172,4 @@ const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = fals
 };
 
 export default DoctorCard;
+export { Doctor };
