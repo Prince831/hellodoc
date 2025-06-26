@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { User, Settings, Pill, Activity, Video, LayoutDashboard } from "lucide-react";
+import { User, Settings, Pill, Activity, Video, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -26,37 +27,92 @@ const UserDropdown = () => {
     });
   };
 
+  if (!user) {
+    return (
+      <Button asChild variant="outline">
+        <Link to="/auth">Sign In</Link>
+      </Button>
+    );
+  }
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <User className="h-5 w-5" />
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.avatar_url || ""} alt={user.full_name || ""} />
+            <AvatarFallback>{getInitials(user.full_name)}</AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium">{user.full_name || "User"}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className="text-xs text-primary capitalize">{user.role}</p>
+          </div>
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="cursor-pointer w-full">Profile</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="cursor-pointer w-full">
-            <Activity className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+          <Link to="/profile" className="cursor-pointer w-full">
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/medications" className="cursor-pointer w-full">
-            <Pill className="mr-2 h-4 w-4" />
-            <span>Medications</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/video-consultation" className="cursor-pointer w-full">
-            <Video className="mr-2 h-4 w-4" />
-            <span>Video Consultation</span>
-          </Link>
-        </DropdownMenuItem>
+        
+        {/* Role-based navigation */}
+        {user.role === "patient" && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard" className="cursor-pointer w-full">
+                <Activity className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/medications" className="cursor-pointer w-full">
+                <Pill className="mr-2 h-4 w-4" />
+                <span>Medications</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/video-consultation" className="cursor-pointer w-full">
+                <Video className="mr-2 h-4 w-4" />
+                <span>Video Consultation</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+
+        {user.role === "doctor" && (
+          <DropdownMenuItem asChild>
+            <Link to="/doctor/dashboard" className="cursor-pointer w-full">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Doctor Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {user.role === "admin" && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin/dashboard" className="cursor-pointer w-full">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Admin Panel</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem asChild>
           <Link to="/settings" className="cursor-pointer w-full">
             <Settings className="mr-2 h-4 w-4" />
@@ -64,22 +120,10 @@ const UserDropdown = () => {
           </Link>
         </DropdownMenuItem>
         
-        {/* Admin Access Link - Only shown for users with admin role */}
-        {user?.role === "admin" && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/admin/dashboard" className="cursor-pointer w-full">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                <span>Admin Panel</span>
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
-        
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
-          Log out
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

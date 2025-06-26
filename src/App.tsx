@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import { AuthProvider } from "./hooks/useAuth";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Auth pages
+import AuthPage from "./pages/Auth";
 
 // Patient pages
 import Index from "./pages/Index";
@@ -59,39 +63,144 @@ const App = () => (
                 {/* Public routes */}
                 <Route path="/welcome" element={<SplashScreen />} />
                 <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<AuthPage />} />
                 <Route path="/symptom-checker" element={<SymptomChecker />} />
                 
-                {/* Patient routes */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/health-records" element={<HealthRecords />} />
-                <Route path="/appointments" element={<Appointments />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/medications" element={<Medications />} />
-                <Route path="/video-consultation" element={<VideoConsultation />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
+                {/* Protected Patient routes */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute requiredRole="patient">
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/health-records" element={
+                  <ProtectedRoute requiredRole="patient">
+                    <HealthRecords />
+                  </ProtectedRoute>
+                } />
+                <Route path="/appointments" element={
+                  <ProtectedRoute requiredRole="patient">
+                    <Appointments />
+                  </ProtectedRoute>
+                } />
+                <Route path="/messages" element={
+                  <ProtectedRoute requiredRole="patient">
+                    <Messages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/medications" element={
+                  <ProtectedRoute requiredRole="patient">
+                    <Medications />
+                  </ProtectedRoute>
+                } />
+                <Route path="/video-consultation" element={
+                  <ProtectedRoute requiredRole="patient">
+                    <VideoConsultation />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
                 
-                {/* Doctor routes */}
-                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-                <Route path="/doctor/appointments" element={<DoctorAppointments />} />
-                <Route path="/doctor/messages" element={<DoctorMessages />} />
-                <Route path="/doctor/consultations" element={<DoctorConsultations />} />
-                <Route path="/doctor/patients" element={<DoctorPatients />} />
-                <Route path="/doctor/records" element={<DoctorRecords />} />
-                <Route path="/doctor/prescriptions" element={<DoctorPrescriptions />} />
-                <Route path="/doctor/settings" element={<DoctorSettings />} />
+                {/* Protected Doctor routes */}
+                <Route path="/doctor/dashboard" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/appointments" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorAppointments />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/messages" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorMessages />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/consultations" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorConsultations />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/patients" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorPatients />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/records" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorRecords />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/prescriptions" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorPrescriptions />
+                  </ProtectedRoute>
+                } />
+                <Route path="/doctor/settings" element={
+                  <ProtectedRoute requiredRole="doctor">
+                    <DoctorSettings />
+                  </ProtectedRoute>
+                } />
                 
-                {/* Admin routes */}
-                <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<UsersPage />} />
-                <Route path="/admin/doctors" element={<DoctorsPage />} />
-                <Route path="/admin/appointments" element={<AppointmentsPage />} />
-                <Route path="/admin/health-records" element={<HealthRecordsPage />} />
-                <Route path="/admin/messages" element={<MessagesPage />} />
-                <Route path="/admin/settings" element={<SettingsPage />} />
-                <Route path="/admin/analytics" element={<AnalyticsPage />} />
-                <Route path="/admin/security" element={<SecurityPage />} />
-                <Route path="/admin/notifications" element={<NotificationsPage />} />
+                {/* Protected Admin routes */}
+                <Route path="/admin/dashboard" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/users" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <UsersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/doctors" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <DoctorsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/appointments" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AppointmentsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/health-records" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <HealthRecordsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/messages" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <MessagesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/settings" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <SettingsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/analytics" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/security" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <SecurityPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/notifications" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <NotificationsPage />
+                  </ProtectedRoute>
+                } />
                 
                 {/* Redirects */}
                 <Route path="/home" element={<Navigate to="/" replace />} />
