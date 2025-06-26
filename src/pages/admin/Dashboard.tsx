@@ -1,5 +1,6 @@
-
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import DashboardStats from "@/components/admin/DashboardStats";
 import { StatsRefreshButton } from "@/components/admin/dashboard/StatsRefreshButton";
@@ -13,16 +14,43 @@ import {
 } from "@/components/admin/dashboard/chartData";
 
 const Dashboard = () => {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalDoctors: 0,
-    totalAppointments: 0,
-    pendingAppointments: 0
+  // Fetch real statistics from Supabase
+  const { data: stats, isLoading: loading, refetch } = useQuery({
+    queryKey: ['admin-stats'],
+    queryFn: async () => {
+      // Get total users
+      const { count: totalUsers } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Get total doctors
+      const { count: totalDoctors } = await supabase
+        .from('doctors')
+        .select('*', { count: 'exact', head: true });
+
+      // Get total appointments
+      const { count: totalAppointments } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true });
+
+      // Get pending appointments
+      const { count: pendingAppointments } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      return {
+        totalUsers: totalUsers || 0,
+        totalDoctors: totalDoctors || 0,
+        totalAppointments: totalAppointments || 0,
+        pendingAppointments: pendingAppointments || 0
+      };
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   
-  // Chart data
-  const [chartData, setChartData] = useState({
+  // Chart data (keeping mock data for now since we don't have historical data yet)
+  const [chartData] = useState({
     barChartData: getBarChartData(),
     lineChartData: getLineChartData(),
     pieChartData: getPieChartData(),
@@ -30,40 +58,8 @@ const Dashboard = () => {
     recentMessages: getRecentMessages()
   });
 
-  useEffect(() => {
-    // Simulate fetching data
-    const fetchData = async () => {
-      // In a real application, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      setStats({
-        totalUsers: 2348,
-        totalDoctors: 64,
-        totalAppointments: 895,
-        pendingAppointments: 18
-      });
-      
-      setLoading(false);
-    };
-    
-    fetchData();
-  }, []);
-
   const handleRefreshData = () => {
-    setLoading(true);
-    
-    // Simulate API fetch delay
-    setTimeout(() => {
-      // Update with "new" data
-      setStats({
-        totalUsers: 2352,
-        totalDoctors: 65,
-        totalAppointments: 901,
-        pendingAppointments: 16
-      });
-      
-      setLoading(false);
-    }, 1500);
+    refetch();
   };
 
   return (
@@ -80,10 +76,10 @@ const Dashboard = () => {
         </div>
 
         <DashboardStats 
-          totalUsers={stats.totalUsers}
-          totalDoctors={stats.totalDoctors}
-          totalAppointments={stats.totalAppointments}
-          pendingAppointments={stats.pendingAppointments}
+          totalUsers={stats?.totalUsers || 0}
+          totalDoctors={stats?.totalDoctors || 0}
+          totalAppointments={stats?.totalAppointments || 0}
+          pendingAppointments={stats?.pendingAppointments || 0}
           loading={loading}
         />
 

@@ -1,271 +1,241 @@
 
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Navbar from "@/components/Navbar";
-import SideNav from "@/components/SideNav";
-import { Plus, ChevronRight, ChevronLeft } from "lucide-react";
-import { Appointment } from "@/types/appointments";
-import { AppointmentList } from "@/components/appointments/AppointmentList";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, User, Plus, Video } from "lucide-react";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { motion } from "framer-motion";
+import { useAppointments, useCreateAppointment } from "@/hooks/useAppointments";
+import { useDoctors } from "@/hooks/useDoctors";
+import AppointmentList from "@/components/appointments/AppointmentList";
+import { LoadingScreen } from "@/components/ui/loading";
+
+interface AppointmentFormData {
+  doctorId: string;
+  date: string;
+  time: string;
+  reason: string;
+  notes?: string;
+}
 
 const Appointments = () => {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [newAppointment, setNewAppointment] = useState({
-    doctor: "",
-    date: "",
-    time: "",
-    reason: "",
-  });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const location = useLocation();
   const { toast } = useToast();
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [formData, setFormData] = useState<AppointmentFormData>({
+    doctorId: '',
+    date: '',
+    time: '',
+    reason: '',
+    notes: ''
+  });
 
+  // Hooks for data fetching
+  const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments();
+  const { data: doctors = [], isLoading: doctorsLoading } = useDoctors();
+  const createAppointmentMutation = useCreateAppointment();
+
+  // Handle booking initiation from other pages
   useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('appointments')
-          .select(`
-            id,
-            date,
-            status,
-            reason,
-            notes,
-            doctor:doctor_id (
-              name,
-              specialization
-            )
-          `)
-          .order('date', { ascending: true });
+    const state = location.state as any;
+    if (state?.selectedDoctorId) {
+      setFormData(prev => ({ ...prev, doctorId: state.selectedDoctorId }));
+      setShowBookingForm(true);
+    }
+    if (state?.scheduleVideoConsultation) {
+      setShowBookingForm(true);
+      toast({
+        title: "Video Consultation",
+        description: "Select a doctor and time for your video consultation",
+      });
+    }
+  }, [location.state, toast]);
 
-        if (error) throw error;
-
-        const typedData = (data || []).map(item => ({
-          ...item,
-          status: item.status as 'scheduled' | 'completed' | 'cancelled'
-        }));
-
-        setAppointments(typedData);
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
-  }, []);
-
-  const handleNewAppointment = async () => {
-    // In a real app, this would send data to the backend
-    const newAppt: Appointment = {
-      id: String(Date.now()),
-      date: new Date(`${newAppointment.date}T${newAppointment.time}`).toISOString(),
-      status: 'scheduled',
-      reason: newAppointment.reason,
-      notes: "",
-      doctor: {
-        name: newAppointment.doctor,
-        specialization: "General Practice",
-      },
-    };
-
-    setAppointments(prev => [...prev, newAppt]);
-    setDialogOpen(false);
-    toast({
-      title: "Appointment Scheduled",
-      description: `Your appointment with Dr. ${newAppointment.doctor} has been scheduled.`,
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    // Reset form
-    setNewAppointment({
-      doctor: "",
-      date: "",
-      time: "",
-      reason: "",
-    });
+    if (!formData.doctorId || !formData.date || !formData.time || !formData.reason) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const appointmentDateTime = new Date(`${formData.date}T${formData.time}`).toISOString();
+
+    try {
+      await createAppointmentMutation.mutateAsync({
+        doctor_id: formData.doctorId,
+        date: appointmentDateTime,
+        reason: formData.reason,
+        notes: formData.notes
+      });
+
+      // Reset form
+      setFormData({
+        doctorId: '',
+        date: '',
+        time: '',
+        reason: '',
+        notes: ''
+      });
+      setShowBookingForm(false);
+    } catch (error) {
+      // Error handling is done in the mutation
+    }
   };
 
-  const handleCancelAppointment = (id: string) => {
-    setAppointments(prev => prev.map(app => 
-      app.id === id ? { ...app, status: 'cancelled' } : app
-    ));
-    
-    toast({
-      title: "Appointment Cancelled",
-      description: "Your appointment has been cancelled.",
-    });
-  };
-
-  const now = new Date();
-  const upcomingAppointments = appointments.filter(
-    app => new Date(app.date) > now && app.status !== 'cancelled'
-  ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  const pastAppointments = appointments.filter(
-    app => new Date(app.date) <= now || app.status === 'cancelled'
-  ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  if (appointmentsLoading) {
+    return <LoadingScreen message="Loading your appointments..." />;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="flex">
-        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : ''}`}>
-          <SideNav collapsed={isSidebarCollapsed} />
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`fixed ${
-              isSidebarCollapsed ? 'left-16' : 'left-64'
-            } top-1/2 transform -translate-y-1/2 z-50 bg-white shadow-md hover:bg-gray-100 transition-all duration-300`}
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          >
-            {isSidebarCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
+    <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">My Appointments</h1>
+          <p className="text-muted-foreground">
+            Manage your healthcare appointments
+          </p>
         </div>
-        
-        <main className={`flex-1 p-8 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <div className="max-w-[1600px] mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-                <p className="text-gray-600 mt-1">Manage your upcoming and past appointments</p>
-              </div>
-              
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Schedule New Appointment
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Schedule New Appointment</DialogTitle>
-                    <DialogDescription>
-                      Fill in the details to schedule a new appointment with a doctor.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="doctor" className="text-right">
-                        Doctor
-                      </Label>
-                      <Select 
-                        onValueChange={(value) => setNewAppointment({...newAppointment, doctor: value})}
-                        value={newAppointment.doctor}
-                      >
-                        <SelectTrigger className="col-span-3">
-                          <SelectValue placeholder="Select a doctor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Sarah Johnson">Dr. Sarah Johnson</SelectItem>
-                          <SelectItem value="Michael Chen">Dr. Michael Chen</SelectItem>
-                          <SelectItem value="Lisa Rodriguez">Dr. Lisa Rodriguez</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="date" className="text-right">
-                        Date
-                      </Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={newAppointment.date}
-                        onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="time" className="text-right">
-                        Time
-                      </Label>
-                      <Input
-                        id="time"
-                        type="time"
-                        value={newAppointment.time}
-                        onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="reason" className="text-right">
-                        Reason
-                      </Label>
-                      <Input
-                        id="reason"
-                        placeholder="Reason for visit"
-                        value={newAppointment.reason}
-                        onChange={(e) => setNewAppointment({...newAppointment, reason: e.target.value})}
-                        className="col-span-3"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button 
-                      onClick={handleNewAppointment}
-                      disabled={!newAppointment.doctor || !newAppointment.date || !newAppointment.time || !newAppointment.reason}
-                    >
-                      Schedule
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-            
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <AppointmentList
-                  title="Upcoming Appointments"
-                  icon="calendar"
-                  appointments={upcomingAppointments}
-                  emptyMessage="No upcoming appointments"
-                  showScheduleButton={true}
-                  titleColor="text-blue-600"
-                  onCancelAppointment={handleCancelAppointment}
-                  onScheduleClick={() => setDialogOpen(true)}
-                />
-                <AppointmentList
-                  title="Past Appointments"
-                  icon="clock"
-                  appointments={pastAppointments}
-                  emptyMessage="No past appointments"
-                  titleColor="text-gray-600"
-                />
-              </div>
-            )}
-          </div>
-        </main>
+        <Button 
+          onClick={() => setShowBookingForm(!showBookingForm)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Book Appointment
+        </Button>
       </div>
+
+      {showBookingForm && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Book New Appointment</CardTitle>
+              <CardDescription>
+                Schedule an appointment with one of our healthcare providers
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Select Doctor *
+                    </label>
+                    <select
+                      value={formData.doctorId}
+                      onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
+                      className="w-full p-2 border rounded-md"
+                      required
+                      disabled={doctorsLoading}
+                    >
+                      <option value="">
+                        {doctorsLoading ? "Loading doctors..." : "Choose a doctor"}
+                      </option>
+                      {doctors.map(doctor => (
+                        <option key={doctor.id} value={doctor.id}>
+                          Dr. {doctor.name} - {doctor.specialization}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Appointment Reason *
+                    </label>
+                    <select
+                      value={formData.reason}
+                      onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select reason</option>
+                      <option value="General Consultation">General Consultation</option>
+                      <option value="Follow-up">Follow-up</option>
+                      <option value="Prescription Refill">Prescription Refill</option>
+                      <option value="Symptom Assessment">Symptom Assessment</option>
+                      <option value="Preventive Care">Preventive Care</option>
+                      <option value="Emergency">Emergency</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Date *
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({...formData, date: e.target.value})}
+                      className="w-full p-2 border rounded-md"
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Time *
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => setFormData({...formData, time: e.target.value})}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Additional Notes
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                    className="w-full p-2 border rounded-md"
+                    rows={3}
+                    placeholder="Any additional information or specific concerns..."
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    type="submit" 
+                    disabled={createAppointmentMutation.isPending}
+                  >
+                    {createAppointmentMutation.isPending ? "Booking..." : "Book Appointment"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => setShowBookingForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      <AppointmentList 
+        appointments={appointments}
+        loading={appointmentsLoading}
+      />
     </div>
   );
 };

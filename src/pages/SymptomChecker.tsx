@@ -1,153 +1,125 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { AlertTriangle, Activity, Heart, Brain, Bone, Eye, Ear } from "lucide-react";
 import SymptomInput from "@/components/symptom-checker/SymptomInput";
 import AnalysisResults from "@/components/symptom-checker/AnalysisResults";
 import DoctorList from "@/components/symptom-checker/DoctorList";
-import FeatureSection from "@/components/symptom-checker/FeatureSection";
 import EmergencySection from "@/components/symptom-checker/EmergencySection";
-import { Doctor } from "@/types/doctor";
+import FeatureSection from "@/components/symptom-checker/FeatureSection";
+import { useDoctors } from "@/hooks/useDoctors";
 
 const SymptomChecker = () => {
-  const [symptoms, setSymptoms] = useState("");
+  const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [analysis, setAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResults, setAnalysisResults] = useState<any>(null);
-  const [matchedDoctors, setMatchedDoctors] = useState<Doctor[]>([]);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [showDoctors, setShowDoctors] = useState(false);
+  const [recommendedSpecialization, setRecommendedSpecialization] = useState<string>("");
 
-  // Extract query parameters
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const symptomParam = searchParams.get('symptom');
-    const queryParam = searchParams.get('query');
-    
-    if (symptomParam) {
-      setSymptoms(symptomParam);
-    } else if (queryParam) {
-      setSymptoms(queryParam);
-    }
-  }, [location.search]);
+  // Fetch doctors based on recommended specialization
+  const { data: doctors = [], isLoading: doctorsLoading } = useDoctors(
+    recommendedSpecialization || undefined
+  );
 
-  const analyzeSymptoms = async () => {
-    if (!symptoms.trim()) {
-      toast({
-        title: "Error",
-        description: "Please describe your symptoms",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleAnalyze = async (symptomList: string[]) => {
     setIsAnalyzing(true);
-    setAnalysisResults(null);
-    setMatchedDoctors([]);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id;
-
-      console.log("Analyzing symptoms, user ID:", userId || "not logged in");
+    setSymptoms(symptomList);
+    
+    // Simulate AI analysis
+    setTimeout(() => {
+      const mockAnalysis = {
+        severity: "moderate",
+        possibleConditions: [
+          "Common Cold", 
+          "Seasonal Allergies", 
+          "Upper Respiratory Infection"
+        ],
+        recommendations: [
+          "Get plenty of rest",
+          "Stay hydrated",
+          "Consider over-the-counter remedies",
+          "Monitor symptoms for 2-3 days"
+        ],
+        whenToSeekCare: "If symptoms worsen or persist beyond a week",
+        recommendedSpecialist: "General Practitioner"
+      };
       
-      const { data, error } = await supabase.functions.invoke('analyze-symptoms', {
-        body: {
-          symptoms,
-          userId,
-        },
-      });
-
-      if (error) {
-        console.error("Function error:", error);
-        throw error;
-      }
-
-      console.log("Analysis results:", data);
-      
-      setAnalysisResults({
-        analysis: data.analysis,
-        recommendedAction: data.recommendedAction,
-        recommendations: data.recommendations
-      });
-      
-      const doctorsData = data.matchedDoctors && Array.isArray(data.matchedDoctors) 
-        ? data.matchedDoctors.map((doc: Doctor) => ({
-            id: doc.id,
-            name: doc.name,
-            specialization: doc.specialization,
-            years_of_experience: doc.years_of_experience,
-            rating: doc.rating,
-            availability: doc.availability,
-            image_url: doc.image_url,
-            keywords: doc.keywords,
-            created_at: doc.created_at,
-            education: doc.education || '',
-            languages: doc.languages || []
-          }))
-        : [];
-      
-      setMatchedDoctors(doctorsData);
-
-      toast({
-        title: "Analysis Complete",
-        description: "Redirecting to specialists matching your symptoms.",
-      });
-      
-      setTimeout(() => {
-        navigate('/', { 
-          state: { 
-            symptoms: symptoms,
-            analysis: data.analysis,
-            recommendedAction: data.recommendedAction,
-            recommendations: data.recommendations,
-            matchedDoctors: doctorsData
-          } 
-        });
-      }, 1000);
-      
-    } catch (error) {
-      console.error("Error during analysis:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to analyze symptoms",
-        variant: "destructive",
-      });
-    } finally {
+      setAnalysis(mockAnalysis);
+      setRecommendedSpecialization("General Practice");
+      setShowDoctors(true);
       setIsAnalyzing(false);
-    }
+    }, 2000);
+  };
+
+  const handleReset = () => {
+    setSymptoms([]);
+    setAnalysis(null);
+    setShowDoctors(false);
+    setRecommendedSpecialization("");
+  };
+
+  const specialtyIcons = {
+    "General Practice": Activity,
+    "Cardiology": Heart,
+    "Neurology": Brain,
+    "Orthopedics": Bone,
+    "Ophthalmology": Eye,
+    "ENT": Ear,
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-              How may we help?
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-              Describe your symptoms in detail for a preliminary analysis. Our AI will suggest next steps and appropriate specialists.
-            </p>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
+            AI Symptom Checker
+          </h1>
+          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+            Describe your symptoms and get personalized health insights powered by AI
+          </p>
+        </motion.div>
+
+        <EmergencySection />
+
+        <div className="max-w-4xl mx-auto space-y-8">
+          <SymptomInput onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />
           
-          <SymptomInput 
-            symptoms={symptoms}
-            setSymptoms={setSymptoms}
-            onAnalyze={analyzeSymptoms}
-            isAnalyzing={isAnalyzing}
-          />
-
-          <AnalysisResults analysisResults={analysisResults} />
-
-          <DoctorList doctors={matchedDoctors} />
-
+          {analysis && (
+            <>
+              <AnalysisResults 
+                analysis={analysis} 
+                symptoms={symptoms}
+                onReset={handleReset}
+              />
+              
+              <Separator className="my-8" />
+              
+              {showDoctors && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <DoctorList 
+                    doctors={doctors}
+                    title={`Recommended ${recommendedSpecialization} Specialists`}
+                    loading={doctorsLoading}
+                    onSearch={() => setRecommendedSpecialization("")}
+                  />
+                </motion.div>
+              )}
+            </>
+          )}
+          
           <FeatureSection />
-
-          <EmergencySection />
         </div>
       </div>
     </div>
