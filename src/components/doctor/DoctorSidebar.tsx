@@ -94,7 +94,7 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
       <div className="p-4 border-b dark:border-slate-700">
         <div className="flex items-center space-x-3">
           <Avatar>
-            <AvatarImage src={currentDoctor?.imageUrl || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200"} />
+            <AvatarImage src={currentDoctor?.image_url || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200"} />
             <AvatarFallback>DR</AvatarFallback>
           </Avatar>
           <div>

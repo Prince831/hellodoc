@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Doctor } from '@/components/symptom-checker/DoctorCard';
+import { Doctor } from "@/types/doctor";
 
 interface DoctorContextType {
   currentDoctor: Doctor | null;
@@ -18,12 +18,14 @@ const mockDoctorData: Doctor = {
   id: "d1b792e6-4073-4f47-8c5f-9b035bdb77f3",
   name: "Dr. Sarah Johnson",
   specialization: "General Practitioner",
-  yearsExperience: 12,
+  years_of_experience: 12,
   rating: 4.8,
-  imageUrl: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200",
+  image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200",
   education: "Harvard Medical School",
   availability: true,
   languages: ["English", "Spanish"],
+  keywords: ["general", "internal", "family"],
+  created_at: new Date().toISOString()
 };
 
 export const DoctorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Doctor } from "@/components/symptom-checker/DoctorCard";
+import { Doctor } from "@/types/doctor";
 import { CalendarDays, MessageSquare, Users, Video, TrendingUp, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ const DoctorOverview = ({ doctor }: DoctorOverviewProps) => {
           <CardContent>
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <Avatar className="h-20 w-20 border-2 border-primary/20">
-                <AvatarImage src={doctor.imageUrl} alt={doctor.name} />
+                <AvatarImage src={doctor.image_url} alt={doctor.name} />
                 <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="space-y-2">

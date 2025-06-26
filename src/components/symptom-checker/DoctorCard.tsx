@@ -1,4 +1,5 @@
 
+
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -172,4 +173,4 @@ const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = fals
 };
 
 export default DoctorCard;
-export { Doctor };
+export type { Doctor };
