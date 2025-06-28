@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -31,20 +32,9 @@ const SymptomChecker = () => {
     // Simulate AI analysis
     setTimeout(() => {
       const mockAnalysis = {
-        severity: "moderate",
-        possibleConditions: [
-          "Common Cold", 
-          "Seasonal Allergies", 
-          "Upper Respiratory Infection"
-        ],
-        recommendations: [
-          "Get plenty of rest",
-          "Stay hydrated",
-          "Consider over-the-counter remedies",
-          "Monitor symptoms for 2-3 days"
-        ],
-        whenToSeekCare: "If symptoms worsen or persist beyond a week",
-        recommendedSpecialist: "General Practitioner"
+        analysis: "Based on your symptoms, this appears to be a common respiratory condition that could be related to seasonal allergies or a mild upper respiratory infection.",
+        recommendedAction: "self_care",
+        recommendations: "Get plenty of rest, stay hydrated, consider over-the-counter remedies, and monitor symptoms for 2-3 days. If symptoms worsen or persist beyond a week, consult with a healthcare provider."
       };
       
       setAnalysis(mockAnalysis);
@@ -94,8 +84,7 @@ const SymptomChecker = () => {
           {analysis && (
             <>
               <AnalysisResults 
-                symptoms={symptoms}
-                onReset={handleReset}
+                analysisResults={analysis}
               />
               
               <Separator className="my-8" />

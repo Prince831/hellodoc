@@ -13,7 +13,7 @@ export interface Appointment {
   reason: string;
   notes?: string;
   created_at: string;
-  doctors?: {
+  doctor: {
     name: string;
     specialization: string;
     image_url?: string;
@@ -46,7 +46,11 @@ export const useAppointments = () => {
         throw error;
       }
 
-      return data || [];
+      // Map the data to match our Appointment interface
+      return (data || []).map(appointment => ({
+        ...appointment,
+        doctor: appointment.doctors
+      })) as Appointment[];
     },
     enabled: !!user?.id,
   });
