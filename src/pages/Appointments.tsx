@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Calendar, Clock, User, Plus, Video } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { useAppointments, useCreateAppointment } from "@/hooks/useAppointments";
+import { useAppointments, useCreateAppointment, useCancelAppointment } from "@/hooks/useAppointments";
 import { useDoctors } from "@/hooks/useDoctors";
 import { AppointmentList } from "@/components/appointments/AppointmentList";
 import { LoadingScreen } from "@/components/ui/loading";
@@ -36,6 +37,7 @@ const Appointments = () => {
   const { data: appointments = [], isLoading: appointmentsLoading } = useAppointments();
   const { data: doctors = [], isLoading: doctorsLoading } = useDoctors();
   const createAppointmentMutation = useCreateAppointment();
+  const cancelAppointmentMutation = useCancelAppointment();
 
   useEffect(() => {
     const state = location.state as any;
@@ -83,6 +85,14 @@ const Appointments = () => {
         notes: ''
       });
       setShowBookingForm(false);
+    } catch (error) {
+      // Error handling is done in the mutation
+    }
+  };
+
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      await cancelAppointmentMutation.mutateAsync(appointmentId);
     } catch (error) {
       // Error handling is done in the mutation
     }
@@ -233,6 +243,7 @@ const Appointments = () => {
       <AppointmentList 
         appointments={appointments}
         loading={appointmentsLoading}
+        onCancelAppointment={handleCancelAppointment}
       />
     </div>
   );

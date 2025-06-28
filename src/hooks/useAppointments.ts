@@ -128,3 +128,37 @@ export const useUpdateAppointment = () => {
     },
   });
 };
+
+export const useCancelAppointment = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (appointmentId: string) => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .update({ status: 'cancelled' })
+        .eq('id', appointmentId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      toast({
+        title: "Appointment cancelled",
+        description: "Your appointment has been cancelled successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error('Error cancelling appointment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel appointment. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+};
