@@ -3,22 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-
-export interface Appointment {
-  id: string;
-  user_id: string;
-  doctor_id: string;
-  date: string;
-  status: 'pending' | 'approved' | 'completed' | 'cancelled';
-  reason: string;
-  notes?: string;
-  created_at: string;
-  doctor: {
-    name: string;
-    specialization: string;
-    image_url?: string;
-  };
-}
+import { Appointment } from "@/types/appointments";
 
 export const useAppointments = () => {
   const { user } = useAuth();
