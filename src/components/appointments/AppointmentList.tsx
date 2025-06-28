@@ -7,27 +7,45 @@ import { Appointment } from "@/types/appointments";
 import { AppointmentCard } from "./AppointmentCard";
 
 interface AppointmentListProps {
-  title: string;
-  icon: "calendar" | "clock";
+  title?: string;
+  icon?: "calendar" | "clock";
   appointments: Appointment[];
-  emptyMessage: string;
+  emptyMessage?: string;
   showScheduleButton?: boolean;
-  titleColor: string;
+  titleColor?: string;
   onCancelAppointment?: (id: string) => void;
   onScheduleClick?: () => void;
+  loading?: boolean;
 }
 
 export const AppointmentList = ({
-  title,
-  icon,
+  title = "My Appointments",
+  icon = "calendar",
   appointments,
-  emptyMessage,
+  emptyMessage = "No appointments found",
   showScheduleButton = false,
-  titleColor,
+  titleColor = "text-gray-900",
   onCancelAppointment,
-  onScheduleClick
+  onScheduleClick,
+  loading = false
 }: AppointmentListProps) => {
   const Icon = icon === "calendar" ? Calendar : Clock;
+  
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-2">
+          <h2 className={`text-2xl font-bold ${titleColor} flex items-center gap-2 border-b pb-4`}>
+            <Icon className="h-5 w-5" />
+            {title}
+          </h2>
+        </div>
+        <Card className="p-8 text-center">
+          <p className="text-muted-foreground">Loading appointments...</p>
+        </Card>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -64,7 +82,7 @@ export const AppointmentList = ({
               <AppointmentCard 
                 key={appointment.id} 
                 appointment={appointment} 
-                onCancel={onCancelAppointment && appointment.status === 'scheduled' ? 
+                onCancel={onCancelAppointment && (appointment.status === 'pending' || appointment.status === 'approved') ? 
                   () => onCancelAppointment(appointment.id) : undefined}
               />
             ))

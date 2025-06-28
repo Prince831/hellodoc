@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +37,6 @@ const Appointments = () => {
   const { data: doctors = [], isLoading: doctorsLoading } = useDoctors();
   const createAppointmentMutation = useCreateAppointment();
 
-  // Handle booking initiation from other pages
   useEffect(() => {
     const state = location.state as any;
     if (state?.selectedDoctorId) {
