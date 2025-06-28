@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Shield, Clock, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { DoctorSection } from "@/components/home/DoctorSection";
-import { SymptomAnalysis } from "@/components/home/SymptomAnalysis";
-import { CallToAction } from "@/components/home/CallToAction";
+import DoctorSection from "@/components/home/DoctorSection";
+import SymptomAnalysis from "@/components/home/SymptomAnalysis";
+import CallToAction from "@/components/home/CallToAction";
 
 const Index = () => {
   return (
@@ -17,7 +17,7 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         {/* Hero Section */}
         <motion.section 
-          className="text-center mb-16 lg:mb-20"
+          className="text-center mb-12 lg:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -30,16 +30,16 @@ const Index = () => {
               Your Health,{" "}
               <span className="text-primary">Our Priority</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 px-4 sm:px-0 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 px-2 sm:px-0 max-w-2xl mx-auto leading-relaxed">
               Get instant medical advice, book appointments with qualified doctors, and manage your health records all in one place.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
-              <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8" asChild>
+              <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 h-12" asChild>
                 <Link to="/symptom-checker">
                   Check Symptoms <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8" asChild>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 h-12" asChild>
                 <Link to="/auth">Get Started</Link>
               </Button>
             </div>
@@ -48,7 +48,7 @@ const Index = () => {
 
         {/* Features Section */}
         <motion.section 
-          className="mb-16 lg:mb-20"
+          className="mb-12 lg:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -75,14 +75,14 @@ const Index = () => {
                   description: "Connect with certified healthcare professionals and specialists in various fields."
                 }
               ].map((feature, index) => (
-                <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300 h-full">
                   <CardHeader className="pb-3 sm:pb-4">
                     <div className="flex justify-center mb-3 sm:mb-4">
                       {feature.icon}
                     </div>
                     <CardTitle className="text-lg sm:text-xl mb-2">{feature.title}</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex-1">
                     <CardDescription className="text-sm sm:text-base leading-relaxed">
                       {feature.description}
                     </CardDescription>
@@ -97,7 +97,7 @@ const Index = () => {
         <SymptomAnalysis />
 
         {/* Doctor Section */}
-        <DoctorSection />
+        <DoctorSection doctors={[]} loading={false} />
 
         {/* Call to Action */}
         <CallToAction />
