@@ -13,32 +13,32 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
         {/* Hero Section */}
         <motion.section 
-          className="text-center mb-12 lg:mb-16"
+          className="text-center mb-8 sm:mb-12 lg:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-4 sm:mb-6 text-xs sm:text-sm" variant="secondary">
+            <Badge className="mb-3 sm:mb-4 lg:mb-6 text-xs sm:text-sm px-2 py-1" variant="secondary">
               AI-Powered Healthcare Platform
             </Badge>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 lg:mb-6 leading-tight px-2">
               Your Health,{" "}
               <span className="text-primary">Our Priority</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 px-2 sm:px-0 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-2 max-w-3xl mx-auto leading-relaxed">
               Get instant medical advice, book appointments with qualified doctors, and manage your health records all in one place.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
-              <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 h-12" asChild>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-2">
+              <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 lg:px-8 h-10 sm:h-11 lg:h-12" asChild>
                 <Link to="/symptom-checker">
-                  Check Symptoms <ArrowRight className="ml-2 h-4 w-4" />
+                  Check Symptoms <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 h-12" asChild>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 lg:px-8 h-10 sm:h-11 lg:h-12" asChild>
                 <Link to="/auth">Get Started</Link>
               </Button>
             </div>
@@ -47,42 +47,42 @@ const Index = () => {
 
         {/* Features Section */}
         <motion.section 
-          className="mb-12 lg:mb-16"
+          className="mb-8 sm:mb-12 lg:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white px-4 sm:px-0">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 text-gray-900 dark:text-white px-2">
               Why Choose HelloDoc?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-2 sm:px-0">
               {[
                 {
-                  icon: <Shield className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
+                  icon: <Shield className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />,
                   title: "Secure & Private",
                   description: "Your health data is encrypted and protected with industry-leading security measures."
                 },
                 {
-                  icon: <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
+                  icon: <Clock className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />,
                   title: "24/7 Availability",
                   description: "Access healthcare services anytime, anywhere with our round-the-clock platform."
                 },
                 {
-                  icon: <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
+                  icon: <Users className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />,
                   title: "Expert Doctors",
                   description: "Connect with certified healthcare professionals and specialists in various fields."
                 }
               ].map((feature, index) => (
                 <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300 h-full">
-                  <CardHeader className="pb-3 sm:pb-4">
-                    <div className="flex justify-center mb-3 sm:mb-4">
+                  <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+                    <div className="flex justify-center mb-2 sm:mb-3 lg:mb-4">
                       {feature.icon}
                     </div>
-                    <CardTitle className="text-lg sm:text-xl mb-2">{feature.title}</CardTitle>
+                    <CardTitle className="text-base sm:text-lg lg:text-xl mb-2">{feature.title}</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex-1">
-                    <CardDescription className="text-sm sm:text-base leading-relaxed">
+                  <CardContent className="flex-1 px-4 sm:px-6">
+                    <CardDescription className="text-xs sm:text-sm lg:text-base leading-relaxed">
                       {feature.description}
                     </CardDescription>
                   </CardContent>

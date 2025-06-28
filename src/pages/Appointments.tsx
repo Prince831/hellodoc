@@ -102,153 +102,157 @@ const Appointments = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6 max-w-6xl">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold">My Appointments</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Manage your healthcare appointments
-          </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 max-w-6xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="space-y-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">My Appointments</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
+              Manage your healthcare appointments
+            </p>
+          </div>
+          <Button 
+            onClick={() => setShowBookingForm(!showBookingForm)}
+            className="flex items-center gap-2 w-full sm:w-auto text-sm"
+            size="sm"
+          >
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+            Book Appointment
+          </Button>
         </div>
-        <Button 
-          onClick={() => setShowBookingForm(!showBookingForm)}
-          className="flex items-center gap-2 w-full sm:w-auto"
-          size="sm"
-        >
-          <Plus className="h-4 w-4" />
-          Book Appointment
-        </Button>
-      </div>
 
-      {showBookingForm && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg sm:text-xl">Book New Appointment</CardTitle>
-              <CardDescription className="text-sm">
-                Schedule an appointment with one of our healthcare providers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Select Doctor *
-                    </label>
-                    <select
-                      value={formData.doctorId}
-                      onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
-                      className="w-full p-3 border rounded-md text-sm"
-                      required
-                      disabled={doctorsLoading}
-                    >
-                      <option value="">
-                        {doctorsLoading ? "Loading doctors..." : "Choose a doctor"}
-                      </option>
-                      {doctors.map(doctor => (
-                        <option key={doctor.id} value={doctor.id}>
-                          Dr. {doctor.name} - {doctor.specialization}
+        {showBookingForm && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <Card>
+              <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+                <CardTitle className="text-base sm:text-lg lg:text-xl">Book New Appointment</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Schedule an appointment with one of our healthcare providers
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6">
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                        Select Doctor *
+                      </label>
+                      <select
+                        value={formData.doctorId}
+                        onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
+                        className="w-full p-2 sm:p-3 border rounded-md text-xs sm:text-sm"
+                        required
+                        disabled={doctorsLoading}
+                      >
+                        <option value="">
+                          {doctorsLoading ? "Loading doctors..." : "Choose a doctor"}
                         </option>
-                      ))}
-                    </select>
+                        {doctors.map(doctor => (
+                          <option key={doctor.id} value={doctor.id}>
+                            Dr. {doctor.name} - {doctor.specialization}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                        Appointment Reason *
+                      </label>
+                      <select
+                        value={formData.reason}
+                        onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                        className="w-full p-2 sm:p-3 border rounded-md text-xs sm:text-sm"
+                        required
+                      >
+                        <option value="">Select reason</option>
+                        <option value="General Consultation">General Consultation</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Prescription Refill">Prescription Refill</option>
+                        <option value="Symptom Assessment">Symptom Assessment</option>
+                        <option value="Preventive Care">Preventive Care</option>
+                        <option value="Emergency">Emergency</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                          Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.date}
+                          onChange={(e) => setFormData({...formData, date: e.target.value})}
+                          className="w-full p-2 sm:p-3 border rounded-md text-xs sm:text-sm"
+                          min={format(new Date(), 'yyyy-MM-dd')}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                          Time *
+                        </label>
+                        <input
+                          type="time"
+                          value={formData.time}
+                          onChange={(e) => setFormData({...formData, time: e.target.value})}
+                          className="w-full p-2 sm:p-3 border rounded-md text-xs sm:text-sm"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+                        Additional Notes
+                      </label>
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        className="w-full p-2 sm:p-3 border rounded-md text-xs sm:text-sm resize-none"
+                        rows={3}
+                        placeholder="Any additional information or specific concerns..."
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Appointment Reason *
-                    </label>
-                    <select
-                      value={formData.reason}
-                      onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                      className="w-full p-3 border rounded-md text-sm"
-                      required
+                  <div className="flex flex-col-reverse sm:flex-row gap-2 pt-3 sm:pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => setShowBookingForm(false)}
+                      className="w-full sm:w-auto text-xs sm:text-sm"
+                      size="sm"
                     >
-                      <option value="">Select reason</option>
-                      <option value="General Consultation">General Consultation</option>
-                      <option value="Follow-up">Follow-up</option>
-                      <option value="Prescription Refill">Prescription Refill</option>
-                      <option value="Symptom Assessment">Symptom Assessment</option>
-                      <option value="Preventive Care">Preventive Care</option>
-                      <option value="Emergency">Emergency</option>
-                    </select>
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={createAppointmentMutation.isPending}
+                      className="w-full sm:w-auto text-xs sm:text-sm"
+                      size="sm"
+                    >
+                      {createAppointmentMutation.isPending ? "Booking..." : "Book Appointment"}
+                    </Button>
                   </div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Date *
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        className="w-full p-3 border rounded-md text-sm"
-                        min={format(new Date(), 'yyyy-MM-dd')}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Time *
-                      </label>
-                      <input
-                        type="time"
-                        value={formData.time}
-                        onChange={(e) => setFormData({...formData, time: e.target.value})}
-                        className="w-full p-3 border rounded-md text-sm"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Additional Notes
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                      className="w-full p-3 border rounded-md text-sm resize-none"
-                      rows={3}
-                      placeholder="Any additional information or specific concerns..."
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col-reverse sm:flex-row gap-2 pt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => setShowBookingForm(false)}
-                    className="w-full sm:w-auto"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    disabled={createAppointmentMutation.isPending}
-                    className="w-full sm:w-auto"
-                  >
-                    {createAppointmentMutation.isPending ? "Booking..." : "Book Appointment"}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      <AppointmentList 
-        appointments={appointments}
-        loading={appointmentsLoading}
-        onCancelAppointment={handleCancelAppointment}
-      />
+        <AppointmentList 
+          appointments={appointments}
+          loading={appointmentsLoading}
+          onCancelAppointment={handleCancelAppointment}
+        />
+      </div>
     </div>
   );
 };
