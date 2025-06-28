@@ -5,13 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
 interface SymptomInputProps {
-  symptoms: string;
-  setSymptoms: (symptoms: string) => void;
-  onAnalyze: () => void;
+  onAnalyze: (symptomList: string[]) => void;
   isAnalyzing: boolean;
 }
 
-const SymptomInput = ({ symptoms, setSymptoms, onAnalyze, isAnalyzing }: SymptomInputProps) => {
+const SymptomInput = ({ onAnalyze, isAnalyzing }: SymptomInputProps) => {
+  const [symptoms, setSymptoms] = useState("");
   const { toast } = useToast();
   
   const handleAnalyze = () => {
@@ -23,7 +22,10 @@ const SymptomInput = ({ symptoms, setSymptoms, onAnalyze, isAnalyzing }: Symptom
       });
       return;
     }
-    onAnalyze();
+    
+    // Convert symptoms string to array of symptoms
+    const symptomList = symptoms.split(/[,.;]/).map(s => s.trim()).filter(s => s.length > 0);
+    onAnalyze(symptomList);
   };
 
   return (

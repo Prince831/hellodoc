@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useAppointments, useCreateAppointment } from "@/hooks/useAppointments";
 import { useDoctors } from "@/hooks/useDoctors";
-import AppointmentList from "@/components/appointments/AppointmentList";
+import { AppointmentList } from "@/components/appointments/AppointmentList";
 import { LoadingScreen } from "@/components/ui/loading";
 
 interface AppointmentFormData {

@@ -28,16 +28,7 @@ export const useDoctors = (specialization?: string, searchTerm?: string) => {
         throw error;
       }
 
-      return (data || []).map(doctor => ({
-        id: doctor.id,
-        name: doctor.name,
-        specialization: doctor.specialization,
-        yearsOfExperience: doctor.years_of_experience,
-        rating: Number(doctor.rating),
-        availability: doctor.availability,
-        imageUrl: doctor.image_url,
-        keywords: doctor.keywords || []
-      })) as Doctor[];
+      return (data || []) as Doctor[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -58,16 +49,7 @@ export const useDoctor = (doctorId: string) => {
         throw error;
       }
 
-      return {
-        id: data.id,
-        name: data.name,
-        specialization: data.specialization,
-        yearsOfExperience: data.years_of_experience,
-        rating: Number(data.rating),
-        availability: data.availability,
-        imageUrl: data.image_url,
-        keywords: data.keywords || []
-      } as Doctor;
+      return data as Doctor;
     },
     enabled: !!doctorId,
   });

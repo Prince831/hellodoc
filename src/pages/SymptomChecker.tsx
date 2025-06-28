@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -95,7 +94,6 @@ const SymptomChecker = () => {
           {analysis && (
             <>
               <AnalysisResults 
-                analysis={analysis} 
                 symptoms={symptoms}
                 onReset={handleReset}
               />
