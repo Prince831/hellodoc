@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,17 +102,18 @@ const Appointments = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">My Appointments</h1>
-          <p className="text-muted-foreground">
+    <div className="container mx-auto px-4 py-6 space-y-6 max-w-6xl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">My Appointments</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Manage your healthcare appointments
           </p>
         </div>
         <Button 
           onClick={() => setShowBookingForm(!showBookingForm)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 w-full sm:w-auto"
+          size="sm"
         >
           <Plus className="h-4 w-4" />
           Book Appointment
@@ -127,15 +127,15 @@ const Appointments = () => {
           exit={{ opacity: 0, height: 0 }}
         >
           <Card>
-            <CardHeader>
-              <CardTitle>Book New Appointment</CardTitle>
-              <CardDescription>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg sm:text-xl">Book New Appointment</CardTitle>
+              <CardDescription className="text-sm">
                 Schedule an appointment with one of our healthcare providers
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Select Doctor *
@@ -143,7 +143,7 @@ const Appointments = () => {
                     <select
                       value={formData.doctorId}
                       onChange={(e) => setFormData({...formData, doctorId: e.target.value})}
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-3 border rounded-md text-sm"
                       required
                       disabled={doctorsLoading}
                     >
@@ -165,7 +165,7 @@ const Appointments = () => {
                     <select
                       value={formData.reason}
                       onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                      className="w-full p-2 border rounded-md"
+                      className="w-full p-3 border rounded-md text-sm"
                       required
                     >
                       <option value="">Select reason</option>
@@ -178,60 +178,64 @@ const Appointments = () => {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Date *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({...formData, date: e.target.value})}
-                      className="w-full p-2 border rounded-md"
-                      min={format(new Date(), 'yyyy-MM-dd')}
-                      required
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Date *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        className="w-full p-3 border rounded-md text-sm"
+                        min={format(new Date(), 'yyyy-MM-dd')}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Time *
+                      </label>
+                      <input
+                        type="time"
+                        value={formData.time}
+                        onChange={(e) => setFormData({...formData, time: e.target.value})}
+                        className="w-full p-3 border rounded-md text-sm"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                      Time *
+                      Additional Notes
                     </label>
-                    <input
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) => setFormData({...formData, time: e.target.value})}
-                      className="w-full p-2 border rounded-md"
-                      required
+                    <textarea
+                      value={formData.notes}
+                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                      className="w-full p-3 border rounded-md text-sm resize-none"
+                      rows={3}
+                      placeholder="Any additional information or specific concerns..."
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Additional Notes
-                  </label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    className="w-full p-2 border rounded-md"
-                    rows={3}
-                    placeholder="Any additional information or specific concerns..."
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button 
-                    type="submit" 
-                    disabled={createAppointmentMutation.isPending}
-                  >
-                    {createAppointmentMutation.isPending ? "Booking..." : "Book Appointment"}
-                  </Button>
+                <div className="flex flex-col-reverse sm:flex-row gap-2 pt-4">
                   <Button 
                     type="button" 
                     variant="outline"
                     onClick={() => setShowBookingForm(false)}
+                    className="w-full sm:w-auto"
                   >
                     Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createAppointmentMutation.isPending}
+                    className="w-full sm:w-auto"
+                  >
+                    {createAppointmentMutation.isPending ? "Booking..." : "Book Appointment"}
                   </Button>
                 </div>
               </form>

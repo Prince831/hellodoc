@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ const AuthPage = () => {
           title: "Welcome back!",
           description: "You have been logged in successfully.",
         });
-        navigate("/");
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -147,35 +147,35 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 px-4 py-8">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            Hello Doc
+          <Link to="/" className="text-2xl sm:text-3xl font-bold text-primary">
+            HelloDoc
           </Link>
           <p className="text-sm text-muted-foreground mt-2">
             Your health companion
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>
+        <Card className="shadow-lg">
+          <CardHeader className="space-y-2 pb-4">
+            <CardTitle className="text-xl sm:text-2xl">Welcome</CardTitle>
+            <CardDescription className="text-sm">
               Sign in to your account or create a new one
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 h-10">
+                <TabsTrigger value="login" className="text-sm">Login</TabsTrigger>
+                <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="login">
+              <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -183,10 +183,11 @@ const AuthPage = () => {
                       value={loginData.email}
                       onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
                       required
+                      className="h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
                     <div className="relative">
                       <Input
                         id="login-password"
@@ -195,12 +196,13 @@ const AuthPage = () => {
                         value={loginData.password}
                         onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
                         required
+                        className="h-10 pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-10 w-10 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -211,17 +213,17 @@ const AuthPage = () => {
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full h-10" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In
                   </Button>
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup">
+              <TabsContent value="signup" className="space-y-4">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
                     <Input
                       id="signup-name"
                       type="text"
@@ -229,10 +231,11 @@ const AuthPage = () => {
                       value={signupData.fullName}
                       onChange={(e) => setSignupData(prev => ({ ...prev, fullName: e.target.value }))}
                       required
+                      className="h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -240,17 +243,18 @@ const AuthPage = () => {
                       value={signupData.email}
                       onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
                       required
+                      className="h-10"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-role">Account Type</Label>
+                    <Label htmlFor="signup-role" className="text-sm font-medium">Account Type</Label>
                     <Select
                       value={signupData.role}
                       onValueChange={(value: "patient" | "doctor" | "admin") => 
                         setSignupData(prev => ({ ...prev, role: value }))
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="h-10">
                         <SelectValue placeholder="Select account type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -261,7 +265,7 @@ const AuthPage = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
@@ -270,12 +274,13 @@ const AuthPage = () => {
                         value={signupData.password}
                         onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
                         required
+                        className="h-10 pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-10 w-10 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
@@ -287,7 +292,7 @@ const AuthPage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                    <Label htmlFor="signup-confirm-password" className="text-sm font-medium">Confirm Password</Label>
                     <div className="relative">
                       <Input
                         id="signup-confirm-password"
@@ -296,12 +301,13 @@ const AuthPage = () => {
                         value={signupData.confirmPassword}
                         onChange={(e) => setSignupData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                         required
+                        className="h-10 pr-10"
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-10 w-10 hover:bg-transparent"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
                         {showConfirmPassword ? (
@@ -312,7 +318,7 @@ const AuthPage = () => {
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full h-10" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
                   </Button>
@@ -323,8 +329,9 @@ const AuthPage = () => {
         </Card>
 
         <div className="text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-primary">
-            ← Back to Home
+          <Link to="/" className="text-sm text-muted-foreground hover:text-primary flex items-center justify-center gap-1">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
           </Link>
         </div>
       </div>

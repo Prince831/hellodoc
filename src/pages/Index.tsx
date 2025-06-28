@@ -1,128 +1,107 @@
 
-import { useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
-import CollapsibleSidebar from "@/components/messages/CollapsibleSidebar";
 import { motion } from "framer-motion";
-import { useSidebar } from "@/contexts/SidebarContext";
-import { Doctor } from "@/types/doctor";
-
-// Imported components
-import SymptomAnalysis from "@/components/home/SymptomAnalysis";
-import DoctorSection from "@/components/home/DoctorSection";
-import CallToAction from "@/components/home/CallToAction";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Shield, Clock, Users, Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import { DoctorSection } from "@/components/home/DoctorSection";
+import { SymptomAnalysis } from "@/components/home/SymptomAnalysis";
+import { CallToAction } from "@/components/home/CallToAction";
 
 const Index = () => {
-  const location = useLocation();
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { isSidebarCollapsed, toggleSidebar } = useSidebar();
-  
-  const symptoms = location.state?.symptoms || '';
-  const analysis = location.state?.analysis || '';
-  const recommendedAction = location.state?.recommendedAction || '';
-
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        setLoading(true);
-        console.log("Fetching doctors, symptoms:", symptoms ? `"${symptoms}"` : "none");
-
-        const { data, error } = await supabase
-          .from('doctors')
-          .select('*');
-
-        if (error) {
-          console.error("Error fetching doctors:", error);
-          throw new Error(error.message);
-        }
-
-        if (data) {
-          const mappedDoctors: Doctor[] = data.map(doc => ({
-            id: doc.id,
-            name: doc.name,
-            specialization: doc.specialization,
-            years_of_experience: doc.years_of_experience,
-            rating: doc.rating,
-            availability: doc.availability,
-            image_url: doc.image_url,
-            keywords: doc.keywords,
-            created_at: doc.created_at,
-            education: '',
-            languages: []
-          }));
-          
-          if (symptoms) {
-            const relevantDoctors = mappedDoctors.filter(doctor => 
-              doctor.keywords?.some(keyword => 
-                symptoms.toLowerCase().includes(keyword.toLowerCase())
-              )
-            );
-            
-            console.log(`Found ${relevantDoctors.length} relevant doctors out of ${data.length} total`);
-            setDoctors(relevantDoctors.length > 0 ? relevantDoctors : mappedDoctors);
-          } else {
-            setDoctors(mappedDoctors);
-          }
-        } else {
-          setDoctors([]);
-        }
-      } catch (error) {
-        console.error('Error fetching doctors:', error);
-        setError(error instanceof Error ? error : new Error('An unknown error occurred'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDoctors();
-  }, [symptoms]);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
       <Navbar />
-      <div className="flex">
-        <CollapsibleSidebar 
-          collapsed={isSidebarCollapsed} 
-          onToggle={toggleSidebar}
-        />
-        
-        <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} pt-16`}>
-          <motion.div
-            className="container mx-auto py-6 px-4 md:px-6"
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-          >
-            <SymptomAnalysis 
-              symptoms={symptoms} 
-              analysis={analysis} 
-              recommendedAction={recommendedAction} 
-            />
+      <main className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+        {/* Hero Section */}
+        <motion.section 
+          className="text-center mb-16 lg:mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="max-w-4xl mx-auto">
+            <Badge className="mb-4 sm:mb-6 text-xs sm:text-sm" variant="secondary">
+              AI-Powered Healthcare Platform
+            </Badge>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
+              Your Health,{" "}
+              <span className="text-primary">Our Priority</span>
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 px-4 sm:px-0 max-w-2xl mx-auto">
+              Get instant medical advice, book appointments with qualified doctors, and manage your health records all in one place.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0">
+              <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8" asChild>
+                <Link to="/symptom-checker">
+                  Check Symptoms <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8" asChild>
+                <Link to="/auth">Get Started</Link>
+              </Button>
+            </div>
+          </div>
+        </motion.section>
 
-            <DoctorSection 
-              doctors={doctors} 
-              loading={loading} 
-              symptoms={symptoms}
-              error={error}
-            />
+        {/* Features Section */}
+        <motion.section 
+          className="mb-16 lg:mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 text-gray-900 dark:text-white px-4 sm:px-0">
+              Why Choose HelloDoc?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-4 sm:px-0">
+              {[
+                {
+                  icon: <Shield className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
+                  title: "Secure & Private",
+                  description: "Your health data is encrypted and protected with industry-leading security measures."
+                },
+                {
+                  icon: <Clock className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
+                  title: "24/7 Availability",
+                  description: "Access healthcare services anytime, anywhere with our round-the-clock platform."
+                },
+                {
+                  icon: <Users className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
+                  title: "Expert Doctors",
+                  description: "Connect with certified healthcare professionals and specialists in various fields."
+                }
+              ].map((feature, index) => (
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow duration-300">
+                  <CardHeader className="pb-3 sm:pb-4">
+                    <div className="flex justify-center mb-3 sm:mb-4">
+                      {feature.icon}
+                    </div>
+                    <CardTitle className="text-lg sm:text-xl mb-2">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm sm:text-base leading-relaxed">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </motion.section>
 
-            <CallToAction />
-          </motion.div>
-        </main>
-      </div>
+        {/* Symptom Analysis Section */}
+        <SymptomAnalysis />
+
+        {/* Doctor Section */}
+        <DoctorSection />
+
+        {/* Call to Action */}
+        <CallToAction />
+      </main>
     </div>
   );
 };
