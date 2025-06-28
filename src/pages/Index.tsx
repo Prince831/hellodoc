@@ -7,7 +7,6 @@ import { ArrowRight, Shield, Clock, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import DoctorSection from "@/components/home/DoctorSection";
-import SymptomAnalysis from "@/components/home/SymptomAnalysis";
 import CallToAction from "@/components/home/CallToAction";
 
 const Index = () => {
@@ -92,9 +91,6 @@ const Index = () => {
             </div>
           </div>
         </motion.section>
-
-        {/* Symptom Analysis Section */}
-        <SymptomAnalysis />
 
         {/* Doctor Section */}
         <DoctorSection doctors={[]} loading={false} />
