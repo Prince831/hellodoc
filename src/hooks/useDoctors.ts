@@ -8,6 +8,8 @@ export const useDoctors = (specialization?: string, searchTerm?: string) => {
   return useQuery({
     queryKey: ['doctors', specialization, searchTerm],
     queryFn: async () => {
+      console.log('Fetching doctors with params:', { specialization, searchTerm });
+      
       let query = supabase
         .from('doctors')
         .select('*')
@@ -28,6 +30,7 @@ export const useDoctors = (specialization?: string, searchTerm?: string) => {
         throw error;
       }
 
+      console.log('Fetched doctors:', data);
       return (data || []) as Doctor[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -38,6 +41,8 @@ export const useDoctor = (doctorId: string) => {
   return useQuery({
     queryKey: ['doctor', doctorId],
     queryFn: async () => {
+      console.log('Fetching doctor with ID:', doctorId);
+      
       const { data, error } = await supabase
         .from('doctors')
         .select('*')
@@ -49,6 +54,7 @@ export const useDoctor = (doctorId: string) => {
         throw error;
       }
 
+      console.log('Fetched doctor:', data);
       return data as Doctor;
     },
     enabled: !!doctorId,

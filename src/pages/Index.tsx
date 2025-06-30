@@ -8,8 +8,11 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import DoctorSection from "@/components/home/DoctorSection";
 import CallToAction from "@/components/home/CallToAction";
+import { useDoctors } from "@/hooks/useDoctors";
 
 const Index = () => {
+  const { data: doctors = [], isLoading } = useDoctors();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
       <Navbar />
@@ -93,7 +96,7 @@ const Index = () => {
         </motion.section>
 
         {/* Doctor Section */}
-        <DoctorSection doctors={[]} loading={false} />
+        <DoctorSection doctors={doctors} loading={isLoading} />
 
         {/* Call to Action */}
         <CallToAction />

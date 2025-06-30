@@ -11,7 +11,12 @@ export const useAppointments = () => {
   return useQuery({
     queryKey: ['appointments', user?.id],
     queryFn: async () => {
-      if (!user?.id) return [];
+      if (!user?.id) {
+        console.log('No user ID found, returning empty appointments');
+        return [];
+      }
+      
+      console.log('Fetching appointments for user:', user.id);
       
       const { data, error } = await supabase
         .from('appointments')
@@ -30,6 +35,8 @@ export const useAppointments = () => {
         console.error('Error fetching appointments:', error);
         throw error;
       }
+
+      console.log('Fetched appointments:', data);
 
       // Map the data to match our Appointment interface
       return (data || []).map(appointment => ({
@@ -53,7 +60,11 @@ export const useCreateAppointment = () => {
       reason: string;
       notes?: string;
     }) => {
-      if (!user?.id) throw new Error('User not authenticated');
+      if (!user?.id) {
+        throw new Error('User not authenticated. Please sign in to book an appointment.');
+      }
+
+      console.log('Creating appointment:', { ...appointmentData, user_id: user.id });
 
       const { data, error } = await supabase
         .from('appointments')
@@ -68,7 +79,12 @@ export const useCreateAppointment = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating appointment:', error);
+        throw error;
+      }
+      
+      console.log('Created appointment:', data);
       return data;
     },
     onSuccess: () => {
@@ -78,11 +94,11 @@ export const useCreateAppointment = () => {
         description: "Your appointment has been scheduled successfully.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating appointment:', error);
       toast({
         title: "Error",
-        description: "Failed to schedule appointment. Please try again.",
+        description: error.message || "Failed to schedule appointment. Please try again.",
         variant: "destructive",
       });
     },

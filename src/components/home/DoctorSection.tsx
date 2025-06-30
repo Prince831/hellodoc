@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Doctor } from "@/components/symptom-checker/DoctorCard";
+import { Doctor } from "@/types/doctor";
 import { useNavigate } from "react-router-dom";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import { AlertCircle } from "lucide-react";
@@ -34,16 +34,6 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
     navigate('/symptom-checker');
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
@@ -52,9 +42,9 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
   return (
     <motion.section 
       variants={itemVariants} 
-      className="mb-8"
+      className="mb-8 sm:mb-12 lg:mb-16"
     >
-      <h2 className="text-3xl font-bold mb-8">
+      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 text-gray-900 dark:text-white px-2">
         {symptoms ? 'Recommended Doctors' : 'Our Specialists'}
       </h2>
       
@@ -75,6 +65,8 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
           doctors={doctors} 
           onSearch={symptoms ? handleSearchAgain : undefined}
           loading={loading}
+          title=""
+          compact={false}
         />
       ) : (
         <Card className="p-8 text-center">
