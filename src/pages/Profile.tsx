@@ -75,40 +75,66 @@ const Profile = () => {
       <Navbar />
       <SideNav />
       <main className="pt-16 pl-0 md:pl-64">
-        <div className="container mx-auto py-6 px-4 md:px-6">
+        <div className="container mx-auto py-8 px-4 md:px-6 max-w-6xl">
           <ProfileHeader 
             onSave={handleSaveProfile} 
             isLoading={isLoading} 
             userData={userData}
           />
 
-          <Tabs defaultValue="personal" className="mt-8 space-y-6">
-            <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-2 md:grid-cols-4 gap-2">
-              <TabsTrigger value="personal">Personal Info</TabsTrigger>
-              <TabsTrigger value="medical">Medical Info</TabsTrigger>
-              <TabsTrigger value="appointments">Appointment History</TabsTrigger>
-              <TabsTrigger value="summary">Health Summary</TabsTrigger>
-            </TabsList>
+          <div className="mt-8">
+            <Tabs defaultValue="personal" className="w-full">
+              <div className="border-b border-border mb-6">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 rounded-lg">
+                  <TabsTrigger 
+                    value="personal" 
+                    className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    Personal Info
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="medical" 
+                    className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    Medical Info
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="appointments" 
+                    className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    Appointments
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="summary" 
+                    className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
+                    Health Summary
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-            <TabsContent value="personal" className="space-y-6">
-              <PersonalInformation 
-                userData={userData}
-                onUpdateUserData={handleUpdateUserData}
-              />
-            </TabsContent>
+              <div className="space-y-6">
+                <TabsContent value="personal" className="mt-0">
+                  <PersonalInformation 
+                    userData={userData}
+                    onUpdateUserData={handleUpdateUserData}
+                  />
+                </TabsContent>
 
-            <TabsContent value="medical" className="space-y-6">
-              <MedicalInformation />
-            </TabsContent>
+                <TabsContent value="medical" className="mt-0">
+                  <MedicalInformation />
+                </TabsContent>
 
-            <TabsContent value="appointments" className="space-y-6">
-              <AppointmentHistory />
-            </TabsContent>
+                <TabsContent value="appointments" className="mt-0">
+                  <AppointmentHistory />
+                </TabsContent>
 
-            <TabsContent value="summary" className="space-y-6">
-              <HealthSummary />
-            </TabsContent>
-          </Tabs>
+                <TabsContent value="summary" className="mt-0">
+                  <HealthSummary />
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
         </div>
       </main>
     </div>

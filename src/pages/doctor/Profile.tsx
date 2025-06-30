@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -12,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, Mail, Phone, Building } from "lucide-react";
-import DoctorSidebar from "@/components/doctor/DoctorSidebar";
+import DoctorLayout from "@/components/doctor/DoctorLayout";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -76,66 +75,79 @@ const DoctorProfile = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <DoctorSidebar />
-      
-      <div className="flex-1 pt-16">
-        <div className="container max-w-6xl py-8 px-4 md:px-6">
-          <h1 className="text-3xl font-bold mb-6">Doctor Profile</h1>
-          
-          <div className="mb-8 p-6 bg-card border rounded-lg shadow-sm">
-            <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-              <div className="relative">
-                <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-                  <AvatarImage src="/placeholder.svg" alt={defaultValues.name} />
-                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {defaultValues.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <Button 
-                  variant="secondary" 
-                  size="icon" 
-                  className="absolute bottom-0 right-0 rounded-full h-8 w-8 shadow"
-                  onClick={handleAvatarUpload}
-                  disabled={isUploading}
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold">{defaultValues.name}</h2>
-                <p className="text-muted-foreground">{defaultValues.specialization}</p>
-                <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-4 w-4" />
-                    <span>{defaultValues.email}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-4 w-4" />
-                    <span>{defaultValues.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Building className="h-4 w-4" />
-                    <span>{defaultValues.hospital}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <Button variant="default" onClick={form.handleSubmit(handleSave)}>
-                Save Changes
+    <DoctorLayout title="Doctor Profile" description="Manage your professional profile and account settings">
+      <div className="space-y-8">
+        <div className="p-6 bg-card border rounded-lg shadow-sm">
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            <div className="relative">
+              <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                <AvatarImage src="/placeholder.svg" alt={defaultValues.name} />
+                <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                  {defaultValues.name.split(' ').map(n => n[0]).join('')}
+                </AvatarFallback>
+              </Avatar>
+              <Button 
+                variant="secondary" 
+                size="icon" 
+                className="absolute bottom-0 right-0 rounded-full h-8 w-8 shadow"
+                onClick={handleAvatarUpload}
+                disabled={isUploading}
+              >
+                <Upload className="h-4 w-4" />
               </Button>
             </div>
+            
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold">{defaultValues.name}</h2>
+              <p className="text-muted-foreground">{defaultValues.specialization}</p>
+              <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  <span>{defaultValues.email}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Phone className="h-4 w-4" />
+                  <span>{defaultValues.phone}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Building className="h-4 w-4" />
+                  <span>{defaultValues.hospital}</span>
+                </div>
+              </div>
+            </div>
+            
+            <Button variant="default" onClick={form.handleSubmit(handleSave)}>
+              Save Changes
+            </Button>
+          </div>
+        </div>
+        
+        <Tabs defaultValue="personal" className="w-full">
+          <div className="border-b border-border mb-6">
+            <TabsList className="grid w-full grid-cols-3 h-auto p-1 bg-muted/50 rounded-lg">
+              <TabsTrigger 
+                value="personal" 
+                className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Personal Info
+              </TabsTrigger>
+              <TabsTrigger 
+                value="professional" 
+                className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Professional Info
+              </TabsTrigger>
+              <TabsTrigger 
+                value="settings" 
+                className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                Account Settings
+              </TabsTrigger>
+            </TabsList>
           </div>
           
-          <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="personal">Personal Info</TabsTrigger>
-              <TabsTrigger value="professional">Professional Info</TabsTrigger>
-              <TabsTrigger value="settings">Account Settings</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="personal">
+          <div className="space-y-6">
+            <TabsContent value="personal" className="mt-0">
               <Card>
                 <CardHeader>
                   <CardTitle>Personal Information</CardTitle>
@@ -207,7 +219,7 @@ const DoctorProfile = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="professional">
+            <TabsContent value="professional" className="mt-0">
               <Card>
                 <CardHeader>
                   <CardTitle>Professional Information</CardTitle>
@@ -310,7 +322,7 @@ const DoctorProfile = () => {
               </Card>
             </TabsContent>
             
-            <TabsContent value="settings">
+            <TabsContent value="settings" className="mt-0">
               <Card>
                 <CardHeader>
                   <CardTitle>Account Settings</CardTitle>
@@ -343,10 +355,10 @@ const DoctorProfile = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
-        </div>
+          </div>
+        </Tabs>
       </div>
-    </div>
+    </DoctorLayout>
   );
 };
 
