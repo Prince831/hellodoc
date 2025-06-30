@@ -25,44 +25,47 @@ const Navbar = () => {
       exit={{ opacity: 0, y: -20 }}
       className="md:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-md border-b shadow-lg z-40"
     >
-      <div className="container mx-auto px-4 py-4 space-y-4">
+      <div className="container mx-auto px-4 py-6 space-y-4">
         {/* Mobile Search */}
         <div className="w-full">
           <GlobalSearch />
         </div>
         
         {/* Navigation Links */}
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-3">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/appointments">Appointments</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
-                <Link to="/video-consultation">Video Consultation</Link>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+                <Link to="/video-consultation">
+                  <Video className="mr-2 h-4 w-4" />
+                  Video Consultation
+                </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/health-records">Health Records</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/messages">Messages</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/profile">Profile</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/settings">Settings</Link>
               </Button>
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/symptom-checker">Symptom Checker</Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild className="justify-start h-12" onClick={closeMenu}>
+              <Button size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/auth">Sign In</Link>
               </Button>
             </>
@@ -71,7 +74,7 @@ const Navbar = () => {
         
         {/* User Actions */}
         <div className="flex items-center justify-between pt-4 border-t">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ThemeToggle />
             {user && <NotificationsPopover />}
           </div>
@@ -83,11 +86,26 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-        <div className="container flex h-14 sm:h-16 items-center justify-between px-4">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
           {/* Left side - Logo */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-6">
             <Logo />
+            
+            {/* Desktop Quick Navigation */}
+            {user && (
+              <nav className="hidden lg:flex items-center gap-1">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/dashboard">Dashboard</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/appointments">Appointments</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/health-records">Records</Link>
+                </Button>
+              </nav>
+            )}
           </div>
           
           {/* Center - Search (Desktop only) */}
@@ -96,13 +114,13 @@ const Navbar = () => {
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
             {/* Desktop navigation */}
             <div className="hidden md:flex items-center gap-2">
               {user && (
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/video-consultation">
-                    <Video className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Video className="h-4 w-4" />
                     <span className="sr-only">Video Call</span>
                   </Link>
                 </Button>

@@ -48,24 +48,24 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       <AdminSidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="bg-white dark:bg-slate-800 border-b shadow-sm py-4 px-6">
-          <div className="flex items-center justify-between">
+        <header className="bg-white dark:bg-slate-800 border-b shadow-sm">
+          <div className="flex items-center justify-between px-6 py-4">
             <div>
-              <h1 className="text-xl font-bold">Healthcare Administration</h1>
-              <p className="text-sm text-muted-foreground">Manage your healthcare platform</p>
+              <h1 className="text-2xl font-bold tracking-tight">Healthcare Administration</h1>
+              <p className="text-sm text-muted-foreground mt-1">Manage your healthcare platform</p>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="outline" size="sm" onClick={() => navigate("/")}>
                 View Site
               </Button>
-              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">
+              <span className="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">
                 Admin Control Panel
               </span>
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="mx-auto max-w-7xl">
+        <main className="flex-1 overflow-auto">
+          <div className="container max-w-none p-6">
             {children}
           </div>
         </main>

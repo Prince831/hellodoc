@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SideNav from "@/components/SideNav";
@@ -10,24 +10,20 @@ interface CollapsibleSidebarProps {
   onToggle: () => void;
 }
 
-const SIDEBAR_STATE_KEY = "hellodoc-sidebar-collapsed";
-
 const CollapsibleSidebar: React.FC<CollapsibleSidebarProps> = ({ collapsed, onToggle }) => {
   return (
     <motion.div 
-      className={`transition-all duration-300 fixed left-0 top-0 pt-16 h-full ${collapsed ? 'w-16' : 'w-64'} border-r border-border bg-background z-20`}
+      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] ${collapsed ? 'w-16' : 'w-64'} border-r border-border bg-background z-30 flex flex-col`}
       animate={{ width: collapsed ? 64 : 256 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      <div className="h-full overflow-y-auto">
+      <div className="flex-1 overflow-hidden">
         <SideNav collapsed={collapsed} />
       </div>
       <Button
-        variant="secondary"
+        variant="ghost"
         size="icon"
-        className={`fixed ${
-          collapsed ? 'left-16' : 'left-64'
-        } top-1/2 transform -translate-y-1/2 z-30 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300 shadow-md border border-border`}
+        className="absolute -right-4 top-1/2 transform -translate-y-1/2 z-40 bg-background/95 backdrop-blur hover:bg-muted/80 transition-all duration-300 shadow-md border border-border"
         onClick={onToggle}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >

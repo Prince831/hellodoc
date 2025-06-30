@@ -90,36 +90,36 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
   };
 
   return (
-    <div className={cn("fixed left-0 top-16 w-64 flex flex-col h-[calc(100vh-4rem)] border-r bg-white dark:bg-slate-800 dark:border-slate-700 z-40", className)}>
-      <div className="p-4 border-b dark:border-slate-700">
+    <div className={cn("flex flex-col h-full w-64 bg-white dark:bg-slate-800 border-r dark:border-slate-700", className)}>
+      <div className="p-6 border-b dark:border-slate-700">
         <div className="flex items-center space-x-3">
-          <Avatar>
+          <Avatar className="h-10 w-10">
             <AvatarImage src={currentDoctor?.image_url || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=200"} />
             <AvatarFallback>DR</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium text-sm">{currentDoctor?.name || "Dr. Sarah Johnson"}</p>
+            <p className="font-semibold text-sm">{currentDoctor?.name || "Dr. Sarah Johnson"}</p>
             <p className="text-xs text-muted-foreground">{currentDoctor?.specialization || "General Practitioner"}</p>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-md bg-green-100 dark:bg-green-900/20 p-2 text-center">
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-3 text-center">
             <p className="text-xs text-muted-foreground">Status</p>
-            <p className="text-sm font-medium text-green-600 dark:text-green-400">
+            <p className="text-sm font-semibold text-green-600 dark:text-green-400">
               {currentDoctor?.availability ? "Available" : "Offline"}
             </p>
           </div>
-          <div className="rounded-md bg-blue-100 dark:bg-blue-900/20 p-2 text-center">
+          <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-center">
             <p className="text-xs text-muted-foreground">Rating</p>
-            <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+            <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
               {currentDoctor?.rating || "4.8"} ★
             </p>
           </div>
         </div>
       </div>
 
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-1">
+      <ScrollArea className="flex-1 px-3">
+        <div className="py-4 space-y-1">
           {navigationItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -127,30 +127,27 @@ const DoctorSidebar = ({ className }: DoctorSidebarProps) => {
                 key={item.href} 
                 to={item.href}
                 className={cn(
-                  "flex items-center group relative space-x-3 px-3 py-2 rounded-md text-sm transition-colors hover:bg-muted",
-                  isActive ? "bg-primary text-primary-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                  "flex items-center group relative space-x-3 px-3 py-3 rounded-lg text-sm transition-all duration-200 hover:bg-muted",
+                  isActive ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <item.icon className={cn("h-5 w-5", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
-                <div className="flex-1">
+                <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span>{item.title}</span>
+                    <span className="font-medium truncate">{item.title}</span>
                     {item.badge && item.badge > 0 && (
                       <span className={cn(
-                        "rounded-full h-5 w-5 flex items-center justify-center text-xs font-medium",
+                        "rounded-full h-5 w-5 flex items-center justify-center text-xs font-semibold flex-shrink-0 ml-2",
                         isActive ? "bg-primary-foreground text-primary" : "bg-primary text-primary-foreground"
                       )}>
                         {item.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                  <p className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground mt-1 truncate">
                     {item.description}
                   </p>
                 </div>
-                {isActive && (
-                  <span className="absolute right-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-l-full bg-foreground" />
-                )}
               </Link>
             );
           })}

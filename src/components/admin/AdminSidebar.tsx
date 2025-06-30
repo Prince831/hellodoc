@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const AdminSidebar = () => {
@@ -99,21 +98,21 @@ const AdminSidebar = () => {
   };
 
   return (
-    <aside className="hidden md:flex h-screen w-72 flex-col bg-white dark:bg-slate-800 border-r dark:border-slate-700 shadow-sm">
-      <div className="flex h-16 items-center gap-2 border-b dark:border-slate-700 px-6">
-        <Avatar className="h-8 w-8 bg-primary">
-          <AvatarFallback>HC</AvatarFallback>
+    <aside className="flex h-screen w-72 flex-col bg-white dark:bg-slate-800 border-r dark:border-slate-700 shadow-sm">
+      <div className="flex items-center gap-3 border-b dark:border-slate-700 px-6 py-4">
+        <Avatar className="h-9 w-9 bg-primary">
+          <AvatarFallback className="text-primary-foreground font-semibold">HC</AvatarFallback>
         </Avatar>
         <div>
-          <h2 className="font-semibold text-foreground">
+          <h2 className="font-semibold text-foreground text-base">
             Healthcare Admin
           </h2>
           <p className="text-xs text-muted-foreground">System Control Center</p>
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-4 py-6">
-        <nav className="grid gap-2">
+      <ScrollArea className="flex-1 px-3">
+        <nav className="grid gap-1 py-4">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -121,32 +120,29 @@ const AdminSidebar = () => {
                 key={item.href}
                 to={item.href}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "group relative flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-muted",
                   isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <item.icon className={cn("h-5 w-5 shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
-                <div className="flex-1">
+                <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span>{item.name}</span>
+                    <span className="truncate">{item.name}</span>
                     {item.badge && (
                       <span className={cn(
-                        "ml-auto flex h-5 w-5 items-center justify-center rounded-full text-xs font-medium",
+                        "ml-2 flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold flex-shrink-0",
                         isActive ? "bg-primary-foreground text-primary" : "bg-primary text-primary-foreground"
                       )}>
                         {item.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground">
+                  <p className="text-xs opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground mt-1 truncate">
                     {item.description}
                   </p>
                 </div>
-                {isActive && (
-                  <span className="absolute right-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-l-full bg-foreground" />
-                )}
               </Link>
             );
           })}
@@ -154,7 +150,7 @@ const AdminSidebar = () => {
       </ScrollArea>
 
       <div className="border-t dark:border-slate-700 p-4">
-        <div className="mb-2 px-3">
+        <div className="mb-3 px-3">
           <p className="text-xs text-muted-foreground">Logged in as <span className="font-medium text-foreground">Admin User</span></p>
         </div>
         <Button

@@ -17,21 +17,21 @@ const DoctorLayout = ({ children, title, description }: DoctorLayoutProps) => {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <Navbar />
         <SidebarProvider>
-          <div className="container max-w-7xl pt-6 pb-12">
-            <div className="flex flex-col md:flex-row gap-6">
-              <DoctorSidebar className="hidden md:block shrink-0" />
-              <main className="flex-1 space-y-6">
+          <div className="flex h-[calc(100vh-4rem)]">
+            <DoctorSidebar className="hidden md:flex shrink-0" />
+            <main className="flex-1 overflow-auto">
+              <div className="container max-w-none p-6 space-y-6">
                 {title && (
                   <div className="mb-6">
-                    <h1 className="text-3xl font-bold">{title}</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
                     {description && (
-                      <p className="text-muted-foreground mt-1">{description}</p>
+                      <p className="text-muted-foreground mt-2 text-lg">{description}</p>
                     )}
                   </div>
                 )}
                 {children}
-              </main>
-            </div>
+              </div>
+            </main>
           </div>
         </SidebarProvider>
       </div>

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface SideNavProps {
   collapsed?: boolean;
@@ -17,14 +18,6 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
   const { toast } = useToast();
   
   const isActive = (path: string) => location.pathname === path;
-
-  const handleComingSoonClick = (feature: string) => {
-    toast({
-      title: "Coming Soon",
-      description: `The ${feature} feature will be available soon!`,
-      duration: 3000,
-    });
-  };
 
   const navigationItems = [
     { path: "/", icon: Home, label: "Home" },
@@ -37,18 +30,22 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
   ];
   
   return (
-    <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent pb-24">
-      <nav className="space-y-2 p-4">
+    <div className="h-full overflow-y-auto">
+      <nav className="space-y-1 p-3">
         {navigationItems.map((item) => (
-          <motion.div key={item.path} whileHover={{ x: 3 }} transition={{ duration: 0.2 }}>
+          <motion.div key={item.path} whileHover={{ x: collapsed ? 0 : 3 }} transition={{ duration: 0.2 }}>
             <Button
               variant={isActive(item.path) ? "secondary" : "ghost"}
-              className={`w-full justify-start ${collapsed ? 'px-0 justify-center' : ''}`}
+              className={cn(
+                "w-full transition-all duration-200",
+                collapsed ? 'px-0 justify-center h-12' : 'justify-start h-11 px-3',
+                isActive(item.path) && "bg-primary/10 text-primary border-primary/20"
+              )}
               asChild
             >
-              <Link to={item.path}>
-                <item.icon className="h-4 w-4" />
-                {!collapsed && <span className="ml-2">{item.label}</span>}
+              <Link to={item.path} className="flex items-center gap-3">
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {!collapsed && <span className="truncate font-medium">{item.label}</span>}
               </Link>
             </Button>
           </motion.div>
