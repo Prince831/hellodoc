@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,11 +13,14 @@ import ErrorBoundary from "./components/ErrorBoundary";
 // Auth pages
 import AuthPage from "./pages/Auth";
 
-// Patient pages
+// Public pages
+import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SymptomChecker from "./pages/SymptomChecker";
 import SplashScreen from "./pages/SplashScreen";
+
+// Patient pages
 import HealthRecords from "./pages/HealthRecords";
 import Appointments from "./pages/Appointments";
 import Messages from "./pages/Messages";
@@ -71,7 +75,8 @@ const App = () => (
                 <Routes>
                   {/* Public routes */}
                   <Route path="/welcome" element={<SplashScreen />} />
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/home" element={<Index />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/symptom-checker" element={<SymptomChecker />} />
                   
@@ -210,9 +215,6 @@ const App = () => (
                       <NotificationsPage />
                     </ProtectedRoute>
                   } />
-                  
-                  {/* Redirects */}
-                  <Route path="/home" element={<Navigate to="/" replace />} />
                   
                   {/* 404 */}
                   <Route path="*" element={<NotFound />} />
