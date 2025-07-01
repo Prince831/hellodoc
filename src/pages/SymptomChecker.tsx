@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,8 +14,7 @@ import {
   Eye, 
   Ear, 
   RefreshCw,
-  Sparkles,
-  Users
+  Sparkles 
 } from "lucide-react";
 import SymptomInput from "@/components/symptom-checker/SymptomInput";
 import AnalysisResults from "@/components/symptom-checker/AnalysisResults";
@@ -25,17 +25,22 @@ import { useDoctors } from "@/hooks/useDoctors";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [analysis, setAnalysis] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showDoctors, setShowDoctors] = useState(false);
   const [recommendedSpecialization, setRecommendedSpecialization] = useState<string>("");
+  const [matchedDoctors, setMatchedDoctors] = useState<any[]>([]);
   
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+
+  // Fetch doctors based on recommended specialization
+  const { data: doctors = [], isLoading: doctorsLoading } = useDoctors(
+    recommendedSpecialization || undefined
+  );
 
   const handleAnalyze = async (symptomList: string[]) => {
     setIsAnalyzing(true);
@@ -62,13 +67,16 @@ const SymptomChecker = () => {
         const mockAnalysis = {
           analysis: "Based on your symptoms, we recommend consulting with a healthcare professional for proper diagnosis.",
           recommendedAction: "virtual_consultation",
-          recommendations: "Schedule a consultation with a doctor to discuss your symptoms in detail."
+          recommendations: "Schedule a consultation with a doctor to discuss your symptoms in detail.",
+          matchedDoctors: []
         };
         
         setAnalysis(mockAnalysis);
+        setMatchedDoctors([]);
         setRecommendedSpecialization("General Practice");
       } else {
         setAnalysis(data);
+        setMatchedDoctors(data.matchedDoctors || []);
         
         // Determine specialization based on analysis
         const specializations = ["General Practice", "Cardiology", "Neurology", "Orthopedics"];
@@ -81,6 +89,8 @@ const SymptomChecker = () => {
           description: "Your symptoms have been analyzed successfully.",
         });
       }
+      
+      setShowDoctors(true);
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
@@ -93,19 +103,12 @@ const SymptomChecker = () => {
     }
   };
 
-  const handleViewDoctors = () => {
-    navigate('/doctors', { 
-      state: { 
-        recommendedSpecialization,
-        fromSymptomChecker: true
-      } 
-    });
-  };
-
   const handleReset = () => {
     setSymptoms([]);
     setAnalysis(null);
+    setShowDoctors(false);
     setRecommendedSpecialization("");
+    setMatchedDoctors([]);
   };
 
   return (
@@ -144,15 +147,7 @@ const SymptomChecker = () => {
             >
               <AnalysisResults analysisResults={analysis} />
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={handleViewDoctors}
-                  className="flex items-center gap-2"
-                  size="lg"
-                >
-                  <Users className="h-4 w-4" />
-                  Find Doctors
-                </Button>
+              <div className="flex justify-center">
                 <Button 
                   onClick={handleReset}
                   variant="outline"
@@ -162,6 +157,32 @@ const SymptomChecker = () => {
                   Start New Analysis
                 </Button>
               </div>
+              
+              <Separator className="my-8" />
+              
+              {showDoctors && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {matchedDoctors.length > 0 ? (
+                    <DoctorList 
+                      doctors={matchedDoctors}
+                      title="AI-Matched Specialists"
+                      loading={false}
+                      onSearch={() => setRecommendedSpecialization("")}
+                    />
+                  ) : (
+                    <DoctorList 
+                      doctors={doctors}
+                      title={`Recommended ${recommendedSpecialization} Specialists`}
+                      loading={doctorsLoading}
+                      onSearch={() => setRecommendedSpecialization("")}
+                    />
+                  )}
+                </motion.div>
+              )}
             </motion.div>
           )}
           

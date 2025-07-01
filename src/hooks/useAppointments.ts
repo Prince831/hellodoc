@@ -3,23 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-
-export interface Appointment {
-  id: string;
-  user_id: string;
-  doctor_id: string;
-  date: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  reason: string;
-  notes?: string;
-  created_at: string;
-  doctor?: {
-    id: string;
-    name: string;
-    specialization: string;
-    image_url?: string;
-  };
-}
+import { Appointment } from "@/types/appointments";
 
 export const useAppointments = () => {
   const { user } = useAuth();
@@ -28,15 +12,17 @@ export const useAppointments = () => {
     queryKey: ['appointments', user?.id],
     queryFn: async () => {
       if (!user?.id) {
+        console.log('No user ID found, returning empty appointments');
         return [];
       }
+      
+      console.log('Fetching appointments for user:', user.id);
       
       const { data, error } = await supabase
         .from('appointments')
         .select(`
           *,
           doctors (
-            id,
             name,
             specialization,
             image_url
@@ -50,7 +36,13 @@ export const useAppointments = () => {
         throw error;
       }
 
-      return data || [];
+      console.log('Fetched appointments:', data);
+
+      // Map the data to match our Appointment interface
+      return (data || []).map(appointment => ({
+        ...appointment,
+        doctor: appointment.doctors
+      })) as Appointment[];
     },
     enabled: !!user?.id,
   });
@@ -67,41 +59,46 @@ export const useCreateAppointment = () => {
       date: string;
       reason: string;
       notes?: string;
-      isVideoConsultation?: boolean;
     }) => {
       if (!user?.id) {
-        throw new Error('User not authenticated');
+        throw new Error('User not authenticated. Please sign in to book an appointment.');
       }
 
-      const { data, error } = await supabase.functions.invoke('book-appointment', {
-        body: {
-          doctorId: appointmentData.doctor_id,
+      console.log('Creating appointment:', { ...appointmentData, user_id: user.id });
+
+      const { data, error } = await supabase
+        .from('appointments')
+        .insert({
+          user_id: user.id,
+          doctor_id: appointmentData.doctor_id,
           date: appointmentData.date,
           reason: appointmentData.reason,
           notes: appointmentData.notes,
-          isVideoConsultation: appointmentData.isVideoConsultation || false
-        }
-      });
+          status: 'pending'
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error creating appointment:', error);
         throw error;
       }
       
+      console.log('Created appointment:', data);
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       toast({
-        title: "Appointment Booked",
+        title: "Appointment scheduled",
         description: "Your appointment has been scheduled successfully.",
       });
     },
     onError: (error: any) => {
       console.error('Error creating appointment:', error);
       toast({
-        title: "Booking Failed",
-        description: error.message || "Failed to book appointment. Please try again.",
+        title: "Error",
+        description: error.message || "Failed to schedule appointment. Please try again.",
         variant: "destructive",
       });
     },
@@ -133,14 +130,14 @@ export const useUpdateAppointment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       toast({
-        title: "Appointment Updated",
+        title: "Appointment updated",
         description: "Your appointment has been updated successfully.",
       });
     },
     onError: (error) => {
       console.error('Error updating appointment:', error);
       toast({
-        title: "Update Failed",
+        title: "Error",
         description: "Failed to update appointment. Please try again.",
         variant: "destructive",
       });
@@ -167,14 +164,14 @@ export const useCancelAppointment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
       toast({
-        title: "Appointment Cancelled",
+        title: "Appointment cancelled",
         description: "Your appointment has been cancelled successfully.",
       });
     },
     onError: (error) => {
       console.error('Error cancelling appointment:', error);
       toast({
-        title: "Cancellation Failed",
+        title: "Error",
         description: "Failed to cancel appointment. Please try again.",
         variant: "destructive",
       });

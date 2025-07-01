@@ -33,9 +33,6 @@ const Navbar = () => {
         
         {/* Navigation Links */}
         <div className="flex flex-col space-y-3">
-          <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-            <Link to="/symptom-checker">Symptom Checker</Link>
-          </Button>
           {user ? (
             <>
               <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
@@ -56,11 +53,22 @@ const Navbar = () => {
               <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/messages">Messages</Link>
               </Button>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+                <Link to="/profile">Profile</Link>
+              </Button>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+                <Link to="/settings">Settings</Link>
+              </Button>
             </>
           ) : (
-            <Button size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-              <Link to="/auth">Sign In</Link>
-            </Button>
+            <>
+              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+                <Link to="/symptom-checker">Symptom Checker</Link>
+              </Button>
+              <Button size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            </>
           )}
         </div>
         
@@ -85,21 +93,19 @@ const Navbar = () => {
             <Logo />
             
             {/* Desktop Quick Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/symptom-checker">Symptom Checker</Link>
-              </Button>
-              {user && (
-                <>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/dashboard">Dashboard</Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/appointments">Appointments</Link>
-                  </Button>
-                </>
-              )}
-            </nav>
+            {user && (
+              <nav className="hidden lg:flex items-center gap-1">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/dashboard">Dashboard</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/appointments">Appointments</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/health-records">Records</Link>
+                </Button>
+              </nav>
+            )}
           </div>
           
           {/* Center - Search (Desktop only) */}

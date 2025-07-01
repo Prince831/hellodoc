@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { User, Settings, Pill, Activity, Video, LogOut } from "lucide-react";
+import { User, Settings, Pill, Activity, Video, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -60,6 +60,7 @@ const UserDropdown = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{user.full_name || "User"}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className="text-xs text-primary capitalize">{user.role}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -69,24 +70,49 @@ const UserDropdown = () => {
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="cursor-pointer w-full">
-            <Activity className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/medications" className="cursor-pointer w-full">
-            <Pill className="mr-2 h-4 w-4" />
-            <span>Medications</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/video-consultation" className="cursor-pointer w-full">
-            <Video className="mr-2 h-4 w-4" />
-            <span>Video Consultation</span>
-          </Link>
-        </DropdownMenuItem>
+        
+        {/* Role-based navigation */}
+        {user.role === "patient" && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard" className="cursor-pointer w-full">
+                <Activity className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/medications" className="cursor-pointer w-full">
+                <Pill className="mr-2 h-4 w-4" />
+                <span>Medications</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/video-consultation" className="cursor-pointer w-full">
+                <Video className="mr-2 h-4 w-4" />
+                <span>Video Consultation</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
+
+        {user.role === "doctor" && (
+          <DropdownMenuItem asChild>
+            <Link to="/doctor/dashboard" className="cursor-pointer w-full">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Doctor Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
+        {user.role === "admin" && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin/dashboard" className="cursor-pointer w-full">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Admin Panel</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem asChild>
           <Link to="/settings" className="cursor-pointer w-full">
             <Settings className="mr-2 h-4 w-4" />

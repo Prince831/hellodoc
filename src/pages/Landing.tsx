@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -112,16 +113,11 @@ const Landing = () => {
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
               {user ? (
-                <>
-                  <Button size="lg" className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all" asChild>
-                    <Link to="/dashboard">
-                      Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all" asChild>
-                    <Link to="/doctors">Browse Doctors</Link>
-                  </Button>
-                </>
+                <Button size="lg" className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all" asChild>
+                  <Link to="/dashboard">
+                    Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
               ) : (
                 <>
                   <Button size="lg" className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all" asChild>
@@ -130,7 +126,7 @@ const Landing = () => {
                     </Link>
                   </Button>
                   <Button variant="outline" size="lg" className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all" asChild>
-                    <Link to="/doctors">Browse Doctors</Link>
+                    <Link to="/auth">Get Started Free</Link>
                   </Button>
                 </>
               )}
@@ -295,7 +291,7 @@ const Landing = () => {
                     className="text-lg px-8 py-6 h-auto border-white text-white hover:bg-white hover:text-primary transition-all"
                     asChild
                   >
-                    <Link to="/doctors">Browse Doctors</Link>
+                    <Link to="/symptom-checker">Try Symptom Checker</Link>
                   </Button>
                 </>
               )}
