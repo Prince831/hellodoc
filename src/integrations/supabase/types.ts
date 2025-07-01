@@ -57,36 +57,102 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          id: string
+          last_message_at: string | null
+          patient_id: string
+          status: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          id?: string
+          last_message_at?: string | null
+          patient_id: string
+          status?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          id?: string
+          last_message_at?: string | null
+          patient_id?: string
+          status?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctors: {
         Row: {
           availability: boolean | null
+          bio: string | null
+          consultation_fee: number | null
           created_at: string
+          education: string | null
+          email: string | null
+          hospital: string | null
           id: string
           image_url: string | null
           keywords: string[]
+          languages: string[] | null
           name: string
+          phone: string | null
           rating: number
           specialization: string
           years_of_experience: number
         }
         Insert: {
           availability?: boolean | null
+          bio?: string | null
+          consultation_fee?: number | null
           created_at?: string
+          education?: string | null
+          email?: string | null
+          hospital?: string | null
           id?: string
           image_url?: string | null
           keywords: string[]
+          languages?: string[] | null
           name: string
+          phone?: string | null
           rating: number
           specialization: string
           years_of_experience: number
         }
         Update: {
           availability?: boolean | null
+          bio?: string | null
+          consultation_fee?: number | null
           created_at?: string
+          education?: string | null
+          email?: string | null
+          hospital?: string | null
           id?: string
           image_url?: string | null
           keywords?: string[]
+          languages?: string[] | null
           name?: string
+          phone?: string | null
           rating?: number
           specialization?: string
           years_of_experience?: number
@@ -141,11 +207,72 @@ export type Database = {
           },
         ]
       }
+      medications: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          dosage: string
+          end_date: string | null
+          frequency: string
+          id: string
+          instructions: string | null
+          name: string
+          prescribed_by: string | null
+          start_date: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          dosage: string
+          end_date?: string | null
+          frequency: string
+          id?: string
+          instructions?: string | null
+          name: string
+          prescribed_by?: string | null
+          start_date: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          dosage?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          instructions?: string | null
+          name?: string
+          prescribed_by?: string | null
+          start_date?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medications_prescribed_by_fkey"
+            columns: ["prescribed_by"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           appointment_request: Json | null
           appointment_status: string | null
           content: string
+          conversation_id: string | null
           created_at: string
           id: string
           notification_type: string | null
@@ -157,6 +284,7 @@ export type Database = {
           appointment_request?: Json | null
           appointment_status?: string | null
           content: string
+          conversation_id?: string | null
           created_at?: string
           id?: string
           notification_type?: string | null
@@ -168,6 +296,7 @@ export type Database = {
           appointment_request?: Json | null
           appointment_status?: string | null
           content?: string
+          conversation_id?: string | null
           created_at?: string
           id?: string
           notification_type?: string | null
@@ -176,6 +305,13 @@ export type Database = {
           sender_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_receiver_id_fkey"
             columns: ["receiver_id"]
@@ -186,6 +322,47 @@ export type Database = {
           {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -260,6 +437,47 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      video_consultations: {
+        Row: {
+          appointment_id: string
+          created_at: string | null
+          end_time: string | null
+          id: string
+          recording_url: string | null
+          room_id: string
+          start_time: string | null
+          status: string | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          recording_url?: string | null
+          room_id: string
+          start_time?: string | null
+          status?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          recording_url?: string | null
+          room_id?: string
+          start_time?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_consultations_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
