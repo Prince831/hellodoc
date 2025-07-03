@@ -3,7 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Doctor } from "@/types/doctor";
+import { Doctor } from "@/components/symptom-checker/types";
 import { useNavigate } from "react-router-dom";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import { AlertCircle } from "lucide-react";

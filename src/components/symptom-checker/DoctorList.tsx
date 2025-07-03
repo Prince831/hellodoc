@@ -1,7 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import DoctorCard from "./DoctorCard";
-import { Doctor } from "@/types/doctor";
+import { Doctor } from "./types";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
