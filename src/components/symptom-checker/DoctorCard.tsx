@@ -32,6 +32,8 @@ interface DoctorCardProps {
   doctor: Doctor;
   showBookingButton?: boolean;
   onMessageClick?: () => void;
+  onBookAppointment?: (doctorId: string) => void;
+  onContactDoctor?: (doctorId: string) => void;
   compact?: boolean;
 }
 
@@ -39,6 +41,8 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
   doctor, 
   showBookingButton = true,
   onMessageClick,
+  onBookAppointment,
+  onContactDoctor,
   compact = false
 }) => {
   const navigate = useNavigate();
@@ -47,6 +51,11 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
   const createAppointmentMutation = useCreateAppointment();
 
   const handleBookAppointment = () => {
+    if (onBookAppointment) {
+      onBookAppointment(doctor.id);
+      return;
+    }
+
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -67,6 +76,11 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
   };
 
   const handleMessageDoctor = () => {
+    if (onContactDoctor) {
+      onContactDoctor(doctor.id);
+      return;
+    }
+
     if (!user) {
       toast({
         title: "Authentication Required",
