@@ -32,12 +32,14 @@ interface DoctorCardProps {
   doctor: Doctor;
   showBookingButton?: boolean;
   onMessageClick?: () => void;
+  compact?: boolean;
 }
 
 const DoctorCard: React.FC<DoctorCardProps> = ({ 
   doctor, 
   showBookingButton = true,
-  onMessageClick 
+  onMessageClick,
+  compact = false
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -106,6 +108,39 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
       notes: "Quick booking from symptom checker"
     });
   };
+
+  if (compact) {
+    return (
+      <Card className="w-full hover:shadow-md transition-shadow duration-200">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={doctor.image_url} alt={doctor.name} />
+              <AvatarFallback className="text-sm">
+                {doctor.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm truncate">{doctor.name}</h3>
+              <p className="text-xs text-primary">{doctor.specialization}</p>
+              <div className="flex items-center gap-1 mt-1">
+                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                <span className="text-xs">{doctor.rating}</span>
+              </div>
+            </div>
+            <div className="flex gap-1">
+              <Button size="sm" variant="outline" onClick={onMessageClick || handleMessageDoctor}>
+                <MessageCircle className="h-3 w-3" />
+              </Button>
+              <Button size="sm" onClick={handleBookAppointment} disabled={!doctor.availability}>
+                <Calendar className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md hover:shadow-lg transition-shadow duration-200">

@@ -93,11 +93,11 @@ export function useMessages() {
     }) => {
       if (!user?.id) throw new Error('User not authenticated');
 
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-message`, {
+      const response = await fetch(`https://pjlfdlejeimqxluebweb.supabase.co/functions/v1/send-message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbGZkbGVqZWltcXhsdWVid2ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzkzNzkyMzAsImV4cCI6MjA1NDk1NTIzMH0.KlnYHdVh7UrfXjrMq3fsNjI1pnPuA7Gxu8_3HTYRW_w`,
         },
         body: JSON.stringify({
           senderId: user.id,

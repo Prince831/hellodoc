@@ -26,7 +26,7 @@ const MessagesContainer: React.FC = () => {
     handleAppointmentResponse,
     markAsRead,
     handleSendMessage
-  } = useMessages(doctorId, initiateChat);
+  } = useMessages();
 
   return (
     <div className="h-[calc(100vh-4rem)] flex bg-background">

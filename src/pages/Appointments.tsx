@@ -1,7 +1,7 @@
 
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import AppointmentList from "@/components/appointments/AppointmentList";
+import { AppointmentList } from "@/components/appointments/AppointmentList";
 import { useAppointments } from "@/hooks/useAppointments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, Plus } from "lucide-react";
