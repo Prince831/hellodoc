@@ -1,176 +1,244 @@
 
-
-import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Clock, MapPin, Phone, Star, ThumbsUp } from "lucide-react";
-import { motion } from "framer-motion";
-import { Doctor } from "@/types/doctor";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Star, MessageCircle, Calendar, MapPin, Languages, GraduationCap, Clock, DollarSign } from "lucide-react";
+import { useCreateAppointment } from "@/hooks/useAppointments";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
+  years_of_experience: number;
+  rating: number;
+  availability: boolean;
+  keywords: string[];
+  image_url?: string;
+  phone?: string;
+  email?: string;
+  bio?: string;
+  education?: string;
+  languages?: string[];
+  consultation_fee?: number;
+  hospital?: string;
+}
 
 interface DoctorCardProps {
   doctor: Doctor;
-  onBookAppointment?: (doctorId: string) => void;
-  onContactDoctor?: (doctorId: string) => void;
-  compact?: boolean;
+  showBookingButton?: boolean;
+  onMessageClick?: () => void;
 }
 
-const DoctorCard = ({ doctor, onBookAppointment, onContactDoctor, compact = false }: DoctorCardProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase();
-  };
-
-  const getRatingStars = (rating: number) => {
-    return (
-      <div className="flex items-center">
-        {[...Array(5)].map((_, i) => (
-          <Star 
-            key={i} 
-            className={`h-3 w-3 ${i < Math.floor(rating) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
-          />
-        ))}
-        <span className="ml-1 text-xs font-medium">({rating.toFixed(1)})</span>
-      </div>
-    );
-  };
+const DoctorCard: React.FC<DoctorCardProps> = ({ 
+  doctor, 
+  showBookingButton = true,
+  onMessageClick 
+}) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const createAppointmentMutation = useCreateAppointment();
 
   const handleBookAppointment = () => {
-    if (onBookAppointment) {
-      onBookAppointment(doctor.id);
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to book an appointment.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
     }
+
+    navigate("/appointments", { 
+      state: { 
+        selectedDoctorId: doctor.id,
+        doctorName: doctor.name,
+        doctorSpecialization: doctor.specialization 
+      } 
+    });
   };
 
-  const handleContactDoctor = () => {
-    if (onContactDoctor) {
-      onContactDoctor(doctor.id);
+  const handleMessageDoctor = () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to message doctors.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
     }
+
+    navigate("/messages", { 
+      state: { 
+        doctorId: doctor.id,
+        initiateChat: true 
+      } 
+    });
   };
 
-  if (compact) {
-    return (
-      <motion.div
-        whileHover={{ y: -3, scale: 1.01 }}
-        className="h-full"
-      >
-        <Card className="h-full overflow-hidden border-primary/10 transition-all duration-300 hover:shadow-md hover:border-primary/30">
-          <div className="flex items-center p-3">
-            <Avatar className="h-12 w-12 mr-3 border border-primary/20">
-              <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
-              <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
-                {getInitials(doctor.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{doctor.name}</p>
-              <p className="text-xs text-muted-foreground">{doctor.specialization}</p>
-              <div className="mt-1">{getRatingStars(doctor.rating)}</div>
-            </div>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="ml-auto h-7 w-7 p-0"
-              onClick={handleBookAppointment}
-            >
-              <CalendarDays className="h-4 w-4 text-primary" />
-            </Button>
-          </div>
-        </Card>
-      </motion.div>
-    );
-  }
+  const handleQuickBook = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to book an appointment.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    // Quick booking for next available slot (demo purposes)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(10, 0, 0, 0);
+
+    createAppointmentMutation.mutate({
+      doctor_id: doctor.id,
+      date: tomorrow.toISOString(),
+      reason: "General consultation",
+      notes: "Quick booking from symptom checker"
+    });
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -5 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="h-full"
-    >
-      <Card className={`h-full overflow-hidden border-primary/10 transition-all duration-300 ${isHovered ? 'shadow-lg border-primary/30' : 'shadow-sm'}`}>
-        <CardHeader className="pb-2">
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-16 w-16 border-2 border-primary/20">
-              <AvatarImage src={doctor.image_url || ''} alt={doctor.name} />
-              <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                {getInitials(doctor.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-xl">{doctor.name}</CardTitle>
-              <CardDescription className="flex items-center gap-1">
-                <Badge variant="outline" className="font-medium">
-                  {doctor.specialization}
-                </Badge>
-                {doctor.availability && (
-                  <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                    Available
-                  </Badge>
-                )}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm space-y-3">
-            <div className="flex items-center gap-2">
-              <ThumbsUp className="h-4 w-4 text-primary" />
-              <span>Experience:</span>
-              <span className="font-medium ml-auto">{doctor.years_of_experience} years</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-primary" />
-              <span>Rating:</span>
-              <span className="ml-auto">{getRatingStars(doctor.rating)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              <span>Availability:</span>
-              <span className={`ml-auto ${doctor.availability ? "text-green-500" : "text-red-500"} font-medium`}>
-                {doctor.availability ? "Available Today" : "Next Available: Tomorrow"}
+    <Card className="w-full max-w-md hover:shadow-lg transition-shadow duration-200">
+      <CardHeader className="pb-4">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={doctor.image_url} alt={doctor.name} />
+            <AvatarFallback className="text-lg">
+              {doctor.name.split(' ').map(n => n[0]).join('')}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-xl font-semibold text-foreground truncate">
+              {doctor.name}
+            </CardTitle>
+            <p className="text-sm text-primary font-medium">{doctor.specialization}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm font-medium">{doctor.rating}</span>
+              <span className="text-xs text-muted-foreground">
+                ({doctor.years_of_experience} years exp.)
               </span>
             </div>
-            <div className="flex flex-wrap mt-2 gap-1">
-              {doctor.languages && doctor.languages.slice(0, 3).map((language, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {language}
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            {doctor.availability ? (
+              <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                Available
+              </Badge>
+            ) : (
+              <Badge variant="secondary" className="bg-red-100 text-red-800 border-red-200">
+                Busy
+              </Badge>
+            )}
+            {doctor.consultation_fee && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <DollarSign className="h-3 w-3" />
+                <span>${doctor.consultation_fee}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {doctor.bio && (
+          <p className="text-sm text-muted-foreground line-clamp-2">{doctor.bio}</p>
+        )}
+
+        {doctor.hospital && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">{doctor.hospital}</span>
+          </div>
+        )}
+
+        {doctor.education && (
+          <div className="flex items-start gap-2 text-sm text-muted-foreground">
+            <GraduationCap className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <span className="text-xs leading-relaxed">{doctor.education}</span>
+          </div>
+        )}
+
+        {doctor.languages && doctor.languages.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Languages className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <div className="flex flex-wrap gap-1">
+              {doctor.languages.slice(0, 3).map((lang, index) => (
+                <Badge key={index} variant="outline" className="text-xs py-0">
+                  {lang}
                 </Badge>
               ))}
+              {doctor.languages.length > 3 && (
+                <Badge variant="outline" className="text-xs py-0">
+                  +{doctor.languages.length - 3}
+                </Badge>
+              )}
             </div>
           </div>
-        </CardContent>
-        <CardFooter className="pt-2 flex justify-between gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex-1"
-            onClick={handleContactDoctor}
-          >
-            <Phone className="h-4 w-4 mr-2" />
-            Contact
-          </Button>
-          <Button 
-            size="sm" 
-            className="flex-1"
-            onClick={handleBookAppointment}
-          >
-            <CalendarDays className="h-4 w-4 mr-2" />
-            Book
-          </Button>
-        </CardFooter>
-      </Card>
-    </motion.div>
+        )}
+
+        <div className="flex flex-wrap gap-1">
+          {doctor.keywords.slice(0, 4).map((keyword, index) => (
+            <Badge key={index} variant="secondary" className="text-xs">
+              {keyword}
+            </Badge>
+          ))}
+          {doctor.keywords.length > 4 && (
+            <Badge variant="secondary" className="text-xs">
+              +{doctor.keywords.length - 4}
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+
+      <CardFooter className="pt-4 gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1"
+          onClick={onMessageClick || handleMessageDoctor}
+        >
+          <MessageCircle className="h-4 w-4 mr-1" />
+          Message
+        </Button>
+        
+        {showBookingButton && (
+          <>
+            <Button
+              size="sm"
+              className="flex-1"
+              onClick={handleBookAppointment}
+              disabled={!doctor.availability}
+            >
+              <Calendar className="h-4 w-4 mr-1" />
+              Book
+            </Button>
+            
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleQuickBook}
+              disabled={!doctor.availability || createAppointmentMutation.isPending}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Clock className="h-4 w-4 mr-1" />
+              Quick Book
+            </Button>
+          </>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 
 export default DoctorCard;
-export type { Doctor };

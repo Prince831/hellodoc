@@ -1,75 +1,151 @@
 
 import { useState, useEffect } from "react";
-import { Message, mockMessages } from "@/types/messages";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
-export function useMessages(doctorId?: string, initiateChat?: boolean) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newMessage, setNewMessage] = useState("");
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+interface MessageUser {
+  id: string;
+  name: string;
+  avatar_url?: string;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  created_at: string;
+  sender: MessageUser;
+  sender_id: string;
+  receiver_id: string;
+  timestamp: string;
+  read: boolean;
+  appointment_request?: {
+    date: string;
+    reason: string;
+  };
+  appointment_status?: 'pending' | 'accepted' | 'rejected';
+  notification_type?: string;
+  conversation_id?: string;
+}
+
+export function useMessages() {
+  const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [newMessage, setNewMessage] = useState("");
 
-  useEffect(() => {
-    const loadMockData = () => {
-      setTimeout(() => {
-        // Create a deep copy to avoid reference issues
-        const messagesCopy = JSON.parse(JSON.stringify(mockMessages));
-        setMessages(messagesCopy);
-        setLoading(false);
-        
-        // If we're coming from the home page to initiate a chat with a doctor
-        if (doctorId && initiateChat) {
-          const doctorMessage = messagesCopy.find(msg => 
-            msg.sender.id === doctorId || 
-            (doctorId === undefined && msg.sender.name !== 'You')
-          );
-          
-          if (doctorMessage) {
-            setSelectedMessage(doctorMessage);
-            
-            // Send initial greeting message
-            const initialGreeting: Message = {
-              id: `m${Date.now()}`,
-              content: "Good day doctor, I'd like to discuss my recent symptoms.",
-              created_at: new Date().toISOString(),
-              sender: {
-                id: '00000000-0000-0000-0000-000000000000',
-                name: 'You'
-              },
-              sender_id: '00000000-0000-0000-0000-000000000000',
-              receiver_id: doctorMessage.sender_id,
-              timestamp: new Date().toISOString(),
-              read: true
-            };
-            
-            setMessages(prevMessages => [initialGreeting, ...prevMessages]);
-            
-            // Show a toast to indicate chat is ready
-            toast({
-              title: "Chat Started",
-              description: `You can now chat with ${doctorMessage.sender.name}`,
-            });
-          }
-        }
-      }, 1000);
-    };
+  // Fetch messages from Supabase
+  const { data: messages = [], isLoading: loading } = useQuery({
+    queryKey: ['messages', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
 
-    loadMockData();
-  }, [doctorId, initiateChat, toast]);
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url),
+          receiver:profiles!messages_receiver_id_fkey(id, full_name, avatar_url)
+        `)
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching messages:', error);
+        throw error;
+      }
+
+      // Transform data to match expected format
+      return (data || []).map(msg => ({
+        id: msg.id,
+        content: msg.content,
+        created_at: msg.created_at,
+        sender: {
+          id: msg.sender.id,
+          name: msg.sender.full_name || 'Unknown User',
+          avatar_url: msg.sender.avatar_url
+        },
+        sender_id: msg.sender_id,
+        receiver_id: msg.receiver_id,
+        timestamp: msg.created_at,
+        read: msg.read,
+        appointment_request: msg.appointment_request,
+        appointment_status: msg.appointment_status,
+        notification_type: msg.notification_type,
+        conversation_id: msg.conversation_id
+      })) as Message[];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async ({ 
+      receiverId, 
+      content, 
+      conversationId 
+    }: { 
+      receiverId: string; 
+      content: string; 
+      conversationId?: string;
+    }) => {
+      if (!user?.id) throw new Error('User not authenticated');
+
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+        },
+        body: JSON.stringify({
+          senderId: user.id,
+          receiverId,
+          content,
+          conversationId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      setNewMessage("");
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent successfully.",
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleAppointmentResponse = async (messageId: string, status: 'accepted' | 'rejected') => {
     try {
-      setMessages(messages.map(msg => 
-        msg.id === messageId
-          ? {
-              ...msg,
-              appointment_status: status,
-              notification_type: status === 'accepted' ? 'appointment_confirmed' : 'appointment_rejected'
-            }
-          : msg
-      ));
+      const { error } = await supabase
+        .from('messages')
+        .update({ 
+          appointment_status: status,
+          notification_type: status === 'accepted' ? 'appointment_confirmed' : 'appointment_rejected'
+        })
+        .eq('id', messageId);
 
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
       toast({
         title: "Appointment Response Sent",
         description: `Appointment ${status === 'accepted' ? 'accepted' : 'rejected'} successfully.`,
@@ -86,79 +162,33 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
 
   const markAsRead = async (messageId: string) => {
     try {
-      setMessages(messages.map(msg => 
-        msg.id === messageId ? { ...msg, read: true } : msg
-      ));
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('id', messageId);
+
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
     } catch (error) {
       console.error('Error marking message as read:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to mark message as read.",
-      });
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
-
-    if (!selectedMessage?.sender.id) {
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !selectedMessage?.sender.id) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please select a recipient before sending a message.",
+        description: "Please select a recipient and enter a message.",
       });
       return;
     }
 
-    try {
-      const appointmentMatch = newMessage.match(/\/schedule\s+"([^"]+)"\s+"([^"]+)"/);
-      
-      const newMsg: Message = {
-        id: `m${Date.now()}`,
-        content: newMessage,
-        created_at: new Date().toISOString(),
-        sender: {
-          id: '00000000-0000-0000-0000-000000000000',
-          name: 'You'
-        },
-        sender_id: '00000000-0000-0000-0000-000000000000',
-        receiver_id: selectedMessage.sender_id,
-        timestamp: new Date().toISOString(),
-        read: false
-      };
-
-      if (appointmentMatch) {
-        newMsg.appointment_request = {
-          date: appointmentMatch[1],
-          reason: appointmentMatch[2]
-        };
-        newMsg.appointment_status = 'pending';
-        newMsg.notification_type = 'appointment_request';
-      }
-
-      // Add message to the global messages list
-      setMessages(prevMessages => [newMsg, ...prevMessages]);
-      setNewMessage("");
-      
-      // In a real application, this would send the message to a Supabase table
-      // which both the doctor and patient UIs would subscribe to
-      console.log("Message sent:", newMsg);
-      
-      toast({
-        title: "Message Sent",
-        description: appointmentMatch 
-          ? "Appointment request sent successfully."
-          : "Message sent successfully.",
-      });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-      });
-    }
+    sendMessageMutation.mutate({
+      receiverId: selectedMessage.sender_id === user?.id ? selectedMessage.receiver_id : selectedMessage.sender_id,
+      content: newMessage,
+      conversationId: selectedMessage.conversation_id,
+    });
   };
 
   return {
@@ -170,6 +200,8 @@ export function useMessages(doctorId?: string, initiateChat?: boolean) {
     setSelectedMessage,
     handleAppointmentResponse,
     markAsRead,
-    handleSendMessage
+    handleSendMessage,
+    sendMessage: sendMessageMutation.mutate,
+    isLoading: sendMessageMutation.isPending,
   };
 }

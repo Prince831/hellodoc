@@ -1,246 +1,216 @@
 
-import Navbar from "@/components/Navbar";
-import SideNav from "@/components/SideNav";
 import { useState } from "react";
+import { Plus, Pill, Calendar, Clock, User } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Clock, Calendar, Plus, AlarmClock, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import AddMedicationDialog from "@/components/medications/AddMedicationDialog";
 
-// Sample medication data
-const medicationData = [
-  {
-    id: 1,
-    name: "Lisinopril",
-    dosage: "10mg",
-    frequency: "Once daily",
-    timeOfDay: "Morning",
-    refillDate: "2024-06-01",
-    daysRemaining: 14,
-    instructions: "Take with food",
-    prescribedBy: "Dr. Johnson",
-    status: "active"
-  },
-  {
-    id: 2,
-    name: "Metformin",
-    dosage: "500mg",
-    frequency: "Twice daily",
-    timeOfDay: "Morning and Evening",
-    refillDate: "2024-05-20",
-    daysRemaining: 5,
-    instructions: "Take with meals",
-    prescribedBy: "Dr. Smith",
-    status: "active"
-  },
-  {
-    id: 3,
-    name: "Atorvastatin",
-    dosage: "20mg",
-    frequency: "Once daily",
-    timeOfDay: "Evening",
-    refillDate: "2024-06-15",
-    daysRemaining: 30,
-    instructions: "Take at bedtime",
-    prescribedBy: "Dr. Johnson",
-    status: "active"
-  },
-  {
-    id: 4,
-    name: "Amoxicillin",
-    dosage: "500mg",
-    frequency: "Three times daily",
-    timeOfDay: "Morning, Afternoon, Evening",
-    refillDate: "N/A",
-    daysRemaining: 3,
-    instructions: "Take until completed",
-    prescribedBy: "Dr. Adams",
-    status: "temporary"
-  }
-];
-
-// Sample schedule for today
-const todaySchedule = [
-  { id: 1, medicationId: 1, name: "Lisinopril", dosage: "10mg", time: "8:00 AM", taken: true },
-  { id: 2, medicationId: 2, name: "Metformin", dosage: "500mg", time: "8:00 AM", taken: true },
-  { id: 3, medicationId: 2, name: "Metformin", dosage: "500mg", time: "6:00 PM", taken: false },
-  { id: 4, medicationId: 3, name: "Atorvastatin", dosage: "20mg", time: "9:00 PM", taken: false },
-  { id: 5, medicationId: 4, name: "Amoxicillin", dosage: "500mg", time: "8:00 AM", taken: true },
-  { id: 6, medicationId: 4, name: "Amoxicillin", dosage: "500mg", time: "2:00 PM", taken: false },
-  { id: 7, medicationId: 4, name: "Amoxicillin", dosage: "500mg", time: "8:00 PM", taken: false },
-];
+interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  start_date: string;
+  end_date?: string;
+  instructions?: string;
+  active: boolean;
+  prescribed_by?: string;
+  doctors?: {
+    name: string;
+    specialization: string;
+  };
+}
 
 const Medications = () => {
-  const [showSideNav, setShowSideNav] = useState(true);
-  const { toast } = useToast();
-  const [schedule, setSchedule] = useState(todaySchedule);
-  
-  const handleMedicationTaken = (id: number) => {
-    setSchedule(schedule.map(item => 
-      item.id === id ? { ...item, taken: true } : item
-    ));
-    
-    toast({
-      title: "Medication marked as taken",
-      description: "Your medication record has been updated",
-    });
-  };
-  
+  const { user } = useAuth();
+  const [showAddDialog, setShowAddDialog] = useState(false);
+
+  const { data: medications = [], isLoading } = useQuery({
+    queryKey: ['medications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+
+      const { data, error } = await supabase
+        .from('medications')
+        .select(`
+          *,
+          doctors (
+            name,
+            specialization
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('start_date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching medications:', error);
+        return [];
+      }
+
+      return data as Medication[];
+    },
+    enabled: !!user?.id,
+  });
+
+  const activeMedications = medications.filter(med => med.active);
+  const inactiveMedications = medications.filter(med => !med.active);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex">
-        {showSideNav && <SideNav />}
-        <div className={`flex-1 p-6 ${showSideNav ? 'ml-64' : ''}`}>
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">Medication Tracker</h1>
-            <Button variant="outline" onClick={() => setShowSideNav(!showSideNav)}>
-              {showSideNav ? "Hide Sidebar" : "Show Sidebar"}
-            </Button>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Medications</h1>
+            <p className="text-muted-foreground">
+              Track and manage your current and past medications
+            </p>
           </div>
-          
-          <Tabs defaultValue="schedule" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="schedule">Today's Schedule</TabsTrigger>
-              <TabsTrigger value="medications">My Medications</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="schedule" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Today's Medication Schedule</CardTitle>
-                  <CardDescription>
-                    {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {["Morning", "Afternoon", "Evening"].map((timeOfDay) => (
-                      <div key={timeOfDay} className="border rounded-lg p-4">
-                        <h3 className="font-medium mb-3 flex items-center">
-                          <Clock className="h-4 w-4 mr-2 text-primary" />
-                          {timeOfDay}
-                        </h3>
-                        <div className="space-y-3">
-                          {schedule
-                            .filter(item => {
-                              const hour = parseInt(item.time.split(':')[0]);
-                              if (timeOfDay === "Morning" && hour < 12) return true;
-                              if (timeOfDay === "Afternoon" && hour >= 12 && hour < 17) return true;
-                              if (timeOfDay === "Evening" && hour >= 17) return true;
-                              return false;
-                            })
-                            .map(item => (
-                              <div key={item.id} className="flex justify-between items-center p-2 border-b last:border-0">
-                                <div>
-                                  <div className="font-medium">{item.name} {item.dosage}</div>
-                                  <div className="text-sm text-muted-foreground">{item.time}</div>
-                                </div>
-                                {item.taken ? (
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Taken</Badge>
-                                ) : (
-                                  <Button size="sm" onClick={() => handleMedicationTaken(item.id)}>
-                                    Mark as Taken
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
+          <Button 
+            onClick={() => setShowAddDialog(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Medication
+          </Button>
+        </div>
+
+        <div className="grid gap-6">
+          {/* Active Medications */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Pill className="h-5 w-5 text-primary" />
+                Active Medications ({activeMedications.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : activeMedications.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {activeMedications.map((medication) => (
+                    <Card key={medication.id} className="border-l-4 border-l-primary">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">{medication.name}</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              {medication.dosage} • {medication.frequency}
+                            </p>
+                          </div>
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            Active
+                          </Badge>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="medications" className="space-y-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Current Medications</h2>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="sm"><Plus className="h-4 w-4 mr-2" />Add Medication</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Add New Medication</DialogTitle>
-                      <DialogDescription>
-                        Enter the details of your new medication here.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                      <p className="text-muted-foreground">Medication creation form will be displayed here</p>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline">Cancel</Button>
-                      <Button>Save Medication</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              
-              <div className="grid gap-4 md:grid-cols-2">
-                {medicationData.map(med => (
-                  <Card key={med.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle>{med.name}</CardTitle>
-                        <Badge variant={med.status === "active" ? "default" : "outline"}>
-                          {med.status === "active" ? "Active" : "Temporary"}
-                        </Badge>
-                      </div>
-                      <CardDescription>{med.dosage} - {med.frequency}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Time:</span>
-                          <span>{med.timeOfDay}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Instructions:</span>
-                          <span>{med.instructions}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Prescribed by:</span>
-                          <span>{med.prescribedBy}</span>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>Started: {format(new Date(medication.start_date), 'MMM dd, yyyy')}</span>
                         </div>
                         
-                        {med.daysRemaining <= 7 && (
-                          <div className="mt-3 flex items-center text-amber-600">
-                            <AlertCircle className="h-4 w-4 mr-1" />
-                            <span className="text-xs font-medium">Refill needed in {med.daysRemaining} days</span>
+                        {medication.end_date && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>Until: {format(new Date(medication.end_date), 'MMM dd, yyyy')}</span>
                           </div>
                         )}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between pt-2">
-                      <Button variant="outline" size="sm">View Details</Button>
-                      <Button variant="outline" size="sm">Request Refill</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Medication History</CardTitle>
-                  <CardDescription>
-                    View your past medication adherence and history
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-80 flex items-center justify-center">
-                  <p className="text-muted-foreground">Medication history and adherence charts will be displayed here</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+
+                        {medication.doctors && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <User className="h-4 w-4" />
+                            <span>Dr. {medication.doctors.name}</span>
+                          </div>
+                        )}
+
+                        {medication.instructions && (
+                          <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
+                            {medication.instructions}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No active medications</p>
+                  <p className="text-sm">Add your first medication to start tracking</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Past Medications */}
+          {inactiveMedications.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  Past Medications ({inactiveMedications.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {inactiveMedications.map((medication) => (
+                    <Card key={medication.id} className="border-l-4 border-l-muted opacity-75">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">{medication.name}</CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              {medication.dosage} • {medication.frequency}
+                            </p>
+                          </div>
+                          <Badge variant="secondary">
+                            Inactive
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span>Started: {format(new Date(medication.start_date), 'MMM dd, yyyy')}</span>
+                        </div>
+                        
+                        {medication.end_date && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4" />
+                            <span>Ended: {format(new Date(medication.end_date), 'MMM dd, yyyy')}</span>
+                          </div>
+                        )}
+
+                        {medication.doctors && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <User className="h-4 w-4" />
+                            <span>Dr. {medication.doctors.name}</span>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
+
+        <AddMedicationDialog 
+          open={showAddDialog} 
+          onOpenChange={setShowAddDialog} 
+        />
       </div>
     </div>
   );

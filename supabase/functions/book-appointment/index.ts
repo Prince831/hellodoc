@@ -13,10 +13,10 @@ serve(async (req) => {
   }
 
   try {
-    const { senderId, receiverId, content, conversationId } = await req.json();
+    const { userId, doctorId, date, reason, notes } = await req.json();
 
-    if (!senderId || !receiverId || !content) {
-      return new Response(JSON.stringify({ error: 'Missing senderId, receiverId, or content' }), {
+    if (!userId || !doctorId || !date || !reason) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -27,38 +27,39 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Insert the message
-    const { data: messageData, error: messageError } = await supabaseClient
-      .from('messages')
+    // Create appointment
+    const { data: appointmentData, error: appointmentError } = await supabaseClient
+      .from('appointments')
       .insert({
-        sender_id: senderId,
-        receiver_id: receiverId,
-        content,
-        conversation_id: conversationId,
-        read: false,
+        user_id: userId,
+        doctor_id: doctorId,
+        date,
+        reason,
+        notes,
+        status: 'pending'
       })
       .select()
       .single();
 
-    if (messageError) {
-      return new Response(JSON.stringify({ error: messageError.message }), {
+    if (appointmentError) {
+      return new Response(JSON.stringify({ error: appointmentError.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Create notification for the receiver
+    // Create notification for the user
     await supabaseClient
       .from('notifications')
       .insert({
-        user_id: receiverId,
-        title: 'New Message',
-        message: `You have received a new message: ${content.substring(0, 50)}${content.length > 50 ? '...' : ''}`,
-        type: 'info',
-        action_url: '/messages',
+        user_id: userId,
+        title: 'Appointment Scheduled',
+        message: `Your appointment for ${reason} has been scheduled and is pending confirmation.`,
+        type: 'success',
+        action_url: '/appointments',
       });
 
-    return new Response(JSON.stringify({ success: true, message: messageData }), {
+    return new Response(JSON.stringify({ success: true, appointment: appointmentData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 

@@ -25,7 +25,10 @@ export const useAppointments = () => {
           doctors (
             name,
             specialization,
-            image_url
+            image_url,
+            phone,
+            email,
+            hospital
           )
         `)
         .eq('user_id', user.id)
@@ -38,7 +41,6 @@ export const useAppointments = () => {
 
       console.log('Fetched appointments:', data);
 
-      // Map the data to match our Appointment interface
       return (data || []).map(appointment => ({
         ...appointment,
         doctor: appointment.doctors
@@ -66,29 +68,34 @@ export const useCreateAppointment = () => {
 
       console.log('Creating appointment:', { ...appointmentData, user_id: user.id });
 
-      const { data, error } = await supabase
-        .from('appointments')
-        .insert({
-          user_id: user.id,
-          doctor_id: appointmentData.doctor_id,
+      // Use the book-appointment edge function for enhanced functionality
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/book-appointment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          doctorId: appointmentData.doctor_id,
           date: appointmentData.date,
           reason: appointmentData.reason,
           notes: appointmentData.notes,
-          status: 'pending'
-        })
-        .select()
-        .single();
+        }),
+      });
 
-      if (error) {
-        console.error('Error creating appointment:', error);
-        throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create appointment');
       }
-      
-      console.log('Created appointment:', data);
-      return data;
+
+      const result = await response.json();
+      console.log('Created appointment:', result.appointment);
+      return result.appointment;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
       toast({
         title: "Appointment scheduled",
         description: "Your appointment has been scheduled successfully.",
