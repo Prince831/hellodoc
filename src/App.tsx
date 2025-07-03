@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -51,6 +50,7 @@ import SettingsPage from "./pages/admin/Settings";
 import AnalyticsPage from "./pages/admin/Analytics";
 import SecurityPage from "./pages/admin/Security";
 import NotificationsPage from "./pages/admin/Notifications";
+import Doctors from "./pages/Doctors";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,8 +75,9 @@ const App = () => (
                 <Routes>
                   {/* Public routes */}
                   <Route path="/welcome" element={<SplashScreen />} />
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/home" element={<Index />} />
+                  <Route path="/landing" element={<Landing />} />
+                  <Route path="/" element={<Index />} />
+                  <Route path="/doctors" element={<Doctors />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/symptom-checker" element={<SymptomChecker />} />
                   

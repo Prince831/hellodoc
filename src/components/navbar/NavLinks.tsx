@@ -4,11 +4,14 @@ import { Link } from "react-router-dom";
 const NavLinks = () => {
   return (
     <nav className="hidden md:flex items-center gap-6 text-sm">
-      <Link to="/dashboard" className="transition-colors hover:text-primary">
-        Dashboard
+      <Link to="/doctors" className="transition-colors hover:text-primary">
+        Doctors
       </Link>
       <Link to="/symptom-checker" className="transition-colors hover:text-primary">
-        Symptom Checker
+        Find by Symptoms
+      </Link>
+      <Link to="/dashboard" className="transition-colors hover:text-primary">
+        Dashboard
       </Link>
       <Link to="/appointments" className="transition-colors hover:text-primary">
         Appointments
