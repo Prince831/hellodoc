@@ -57,9 +57,16 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
-      <Navbar />
-      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Gradient Background Layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-primary/5" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/3 to-accent/5" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+      
+      <div className="relative z-10">
+        <Navbar />
+        <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
         {/* Hero Section */}
         <motion.section 
           className="text-center mb-8 sm:mb-12 lg:mb-16"
@@ -117,12 +124,14 @@ const Index = () => {
 
         {/* Stats Section */}
         <motion.section 
-          className="py-8 sm:py-12 mb-8 sm:mb-12 lg:mb-16 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl"
+          className="py-8 sm:py-12 mb-8 sm:mb-12 lg:mb-16 relative"
           initial="initial"
           animate="animate"
           variants={staggerChildren}
         >
-          <div className="container mx-auto px-4">
+          <div className="relative backdrop-blur-sm bg-card/80 rounded-2xl shadow-xl border border-border/20 p-6">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-2xl blur-lg opacity-60" />
+            <div className="relative container mx-auto px-4">
             <motion.div
               className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8"
               variants={staggerChildren}
@@ -142,6 +151,7 @@ const Index = () => {
                 </motion.div>
               ))}
             </motion.div>
+            </div>
           </div>
         </motion.section>
 
@@ -318,6 +328,7 @@ const Index = () => {
           </motion.section>
         )}
       </main>
+      </div>
     </div>
   );
 };

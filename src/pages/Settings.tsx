@@ -46,14 +46,21 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="flex">
-        <CollapsibleSidebar 
-          collapsed={isSidebarCollapsed} 
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
-        <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} pt-16`}>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Gradient Background Layers */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-primary/5" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/3 to-accent/5" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+      
+      <div className="relative z-10">
+        <Navbar />
+        <div className="flex">
+          <CollapsibleSidebar 
+            collapsed={isSidebarCollapsed} 
+            onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          />
+          <main className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'} pt-16`}>
           <motion.div 
             className="container mx-auto py-6 px-4 md:px-6"
             initial="hidden"
@@ -88,18 +95,23 @@ const Settings = () => {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              <Tabs 
-                defaultValue="account" 
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="space-y-6"
-              >
-                <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-2 md:grid-cols-4 gap-2">
-                  <TabsTrigger value="account">Account</TabsTrigger>
-                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                  <TabsTrigger value="privacy">Privacy & Security</TabsTrigger>
-                  <TabsTrigger value="appearance">Appearance</TabsTrigger>
-                </TabsList>
+              {/* Floating Tabs Container */}
+              <div className="relative backdrop-blur-sm bg-card/80 rounded-2xl shadow-2xl border border-border/20 p-6">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl blur-lg opacity-50" />
+                
+                <div className="relative">
+                  <Tabs 
+                    defaultValue="account" 
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="space-y-6"
+                  >
+                    <TabsList className="grid w-full md:w-auto md:inline-flex grid-cols-2 md:grid-cols-4 gap-2 bg-muted/50 backdrop-blur-sm">
+                      <TabsTrigger value="account" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Account</TabsTrigger>
+                      <TabsTrigger value="notifications" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Notifications</TabsTrigger>
+                      <TabsTrigger value="privacy" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Privacy & Security</TabsTrigger>
+                      <TabsTrigger value="appearance" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Appearance</TabsTrigger>
+                    </TabsList>
 
                 <TabsContent value="account" className="space-y-6">
                   <AccountSettings />
@@ -116,10 +128,13 @@ const Settings = () => {
                 <TabsContent value="appearance" className="space-y-6">
                   <AppearanceSettings />
                 </TabsContent>
-              </Tabs>
+                  </Tabs>
+                </div>
+              </div>
             </motion.div>
-          </motion.div>
-        </main>
+            </motion.div>
+          </main>
+        </div>
       </div>
     </div>
   );
