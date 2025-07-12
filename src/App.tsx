@@ -13,7 +13,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AuthPage from "./pages/Auth";
 
 // Public pages
-import Landing from "./pages/Landing";
+
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SymptomChecker from "./pages/SymptomChecker";
@@ -75,7 +75,7 @@ const App = () => (
                 <Routes>
                   {/* Public routes */}
                   <Route path="/welcome" element={<SplashScreen />} />
-                  <Route path="/landing" element={<Landing />} />
+                  
                   <Route path="/" element={<Index />} />
                   <Route path="/doctors" element={<Doctors />} />
                   <Route path="/auth" element={<AuthPage />} />

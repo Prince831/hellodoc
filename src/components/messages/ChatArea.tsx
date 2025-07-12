@@ -114,10 +114,7 @@ const ChatArea = ({
             </div>
           </ScrollArea>
           <MessageInput
-            selectedMessage={selectedMessages[0] || null}
-            newMessage={newMessage}
-            onMessageChange={onMessageChange}
-            onSendMessage={onSendMessage}
+            onSendMessage={() => onSendMessage()}
           />
         </>
       ) : (
