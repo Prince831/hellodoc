@@ -73,91 +73,116 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Gradient Background Layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-primary/5" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/3 to-accent/5" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
+      <Navbar />
+      <SideNav />
       
-      <div className="relative z-10">
-        <Navbar />
-        <SideNav />
-        <main className="pt-16 pl-0 md:pl-64">
-          <div className="container mx-auto py-8 px-4 md:px-6 max-w-6xl">
-          <ProfileHeader 
-            onSave={handleSaveProfile} 
-            isLoading={isLoading} 
-            userData={userData}
-          />
+      <main className="pt-16 pl-0 md:pl-64">
+        <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
+          {/* Clean Profile Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <ProfileHeader 
+              onSave={handleSaveProfile} 
+              isLoading={isLoading} 
+              userData={userData}
+            />
+          </motion.div>
 
-          <div className="mt-8">
-            {/* Floating Tabs Container */}
-            <div className="relative backdrop-blur-sm bg-card/80 rounded-2xl shadow-2xl border border-border/20 p-6">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl blur-lg opacity-50" />
-              
-              <div className="relative">
-                <Tabs defaultValue="personal" className="w-full">
-                  <div className="border-b border-border/20 mb-6">
-                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted/50 backdrop-blur-sm rounded-lg">
-                      <TabsTrigger 
-                        value="personal" 
-                        className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background/80 data-[state=active]:shadow-md"
-                      >
-                        <User className="w-4 h-4 mr-2" />
-                        Personal Info
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="medical" 
-                        className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background/80 data-[state=active]:shadow-md"
-                      >
-                        <Heart className="w-4 h-4 mr-2" />
-                        Medical Info
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="appointments" 
-                        className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background/80 data-[state=active]:shadow-md"
-                      >
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Appointments
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="summary" 
-                        className="text-sm font-medium px-4 py-2.5 data-[state=active]:bg-background/80 data-[state=active]:shadow-md"
-                      >
-                        <Activity className="w-4 h-4 mr-2" />
-                        Health Summary
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-
-                  <div className="space-y-6">
-                    <TabsContent value="personal" className="mt-0">
-                      <PersonalInformation 
-                        userData={userData}
-                        onUpdateUserData={handleUpdateUserData}
-                      />
-                    </TabsContent>
-
-                    <TabsContent value="medical" className="mt-0">
-                      <MedicalInformation />
-                    </TabsContent>
-
-                    <TabsContent value="appointments" className="mt-0">
-                      <AppointmentHistory />
-                    </TabsContent>
-
-                    <TabsContent value="summary" className="mt-0">
-                      <HealthSummary />
-                    </TabsContent>
-                  </div>
-                </Tabs>
+          {/* Modern Tabs Container */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-card/95 backdrop-blur-xl rounded-3xl shadow-xl border border-border/50 overflow-hidden"
+          >
+            <Tabs defaultValue="personal" className="w-full">
+              {/* Enhanced Tab Navigation */}
+              <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 px-6 pt-6">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-14 p-1 bg-background/80 backdrop-blur-sm rounded-2xl shadow-inner">
+                  <TabsTrigger 
+                    value="personal" 
+                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Personal</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="medical" 
+                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                  >
+                    <Heart className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Medical</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="appointments" 
+                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Appointments</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="summary" 
+                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
+                  >
+                    <Activity className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Health</span>
+                  </TabsTrigger>
+                </TabsList>
               </div>
-            </div>
-          </div>
-          </div>
-        </main>
-      </div>
+
+              {/* Tab Content */}
+              <div className="p-6">
+                <TabsContent value="personal" className="mt-0">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <PersonalInformation 
+                      userData={userData}
+                      onUpdateUserData={handleUpdateUserData}
+                    />
+                  </motion.div>
+                </TabsContent>
+
+                <TabsContent value="medical" className="mt-0">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <MedicalInformation />
+                  </motion.div>
+                </TabsContent>
+
+                <TabsContent value="appointments" className="mt-0">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <AppointmentHistory />
+                  </motion.div>
+                </TabsContent>
+
+                <TabsContent value="summary" className="mt-0">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <HealthSummary />
+                  </motion.div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </motion.div>
+        </div>
+      </main>
     </div>
   );
 };
