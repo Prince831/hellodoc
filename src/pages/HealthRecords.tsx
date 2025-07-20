@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
-import SideNav from "@/components/SideNav";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import { FileText, Activity, TestTube, Heart } from "lucide-react";
 import PatientOverview from "@/components/health-records/PatientOverview";
 import PatientDetails from "@/components/health-records/PatientDetails";
 import MedicalHistory from "@/components/health-records/MedicalHistory";
@@ -13,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const HealthRecords = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<HealthRecordsType | null>(null);
   const { toast } = useToast();
@@ -101,50 +102,153 @@ const HealthRecords = () => {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
       <Navbar />
-      <div className="flex h-[calc(100vh-4rem)]">
-        <div className={`transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'} border-r border-border bg-background`}>
-          <SideNav collapsed={isSidebarCollapsed} />
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`fixed ${
-              isSidebarCollapsed ? 'left-16' : 'left-64'
-            } top-1/2 transform -translate-y-1/2 z-50 bg-background/80 backdrop-blur hover:bg-muted/50 transition-all duration-300`}
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      
+      <main className="pt-16">
+        <div className="container mx-auto py-6 px-4 md:px-6 max-w-7xl">
+          {/* Hero Health Records Section */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative mb-8 bg-gradient-to-br from-primary via-primary/90 to-accent rounded-3xl p-8 text-primary-foreground overflow-hidden"
           >
-            {isSidebarCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
-            ) : (
-              <ChevronLeft className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-        
-        <main className={`flex-1 overflow-y-auto transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl" />
+            
+            <div className="relative z-10">
+              <h1 className="text-4xl font-bold mb-2">Health Records</h1>
+              <p className="text-primary-foreground/80 text-lg">Comprehensive health records and medical history</p>
+            </div>
+          </motion.div>
+
           {loading ? (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : data ? (
-            <div className="p-8">
-              <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
-                  <h1 className="text-3xl font-bold mb-2">Health Records</h1>
-                  <p className="text-muted-foreground">
-                    Complete medical history and health information
-                  </p>
+            /* Main Content Grid */
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Navigation Sidebar */}
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="lg:col-span-1"
+              >
+                <div className="sticky top-24 space-y-3">
+                  <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-lg">
+                    <h3 className="font-semibold text-lg mb-4 text-foreground">Records Sections</h3>
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" orientation="vertical">
+                      <TabsList className="grid w-full grid-rows-4 h-auto p-1 bg-muted/50 rounded-xl">
+                        <TabsTrigger 
+                          value="overview" 
+                          className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                        >
+                          <FileText className="w-4 h-4 mr-3" />
+                          Overview
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="details" 
+                          className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                        >
+                          <Heart className="w-4 h-4 mr-3" />
+                          Patient Details
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="history" 
+                          className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                        >
+                          <Activity className="w-4 h-4 mr-3" />
+                          Medical History
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="labs" 
+                          className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                        >
+                          <TestTube className="w-4 h-4 mr-3" />
+                          Lab Results
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
                 </div>
+              </motion.div>
 
-                <PatientOverview patient={data.patient} />
-                <PatientDetails patient={data.patient} />
-                <LabResultsChart patientId={data.patient.id} />
-                <MedicalHistory records={data.records} />
-              </div>
+              {/* Content Area */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="lg:col-span-3"
+              >
+                <Tabs value={activeTab} className="w-full">
+                  <div className="space-y-6">
+                    <TabsContent value="overview" className="mt-0">
+                      <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                        <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                          <h2 className="text-xl font-bold text-foreground flex items-center">
+                            <FileText className="w-5 h-5 mr-3 text-primary" />
+                            Patient Overview
+                          </h2>
+                          <p className="text-muted-foreground text-sm mt-1">General health summary and key metrics</p>
+                        </div>
+                        <div className="p-6">
+                          <PatientOverview patient={data.patient} />
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="details" className="mt-0">
+                      <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                        <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                          <h2 className="text-xl font-bold text-foreground flex items-center">
+                            <Heart className="w-5 h-5 mr-3 text-red-500" />
+                            Patient Details
+                          </h2>
+                          <p className="text-muted-foreground text-sm mt-1">Detailed patient information and demographics</p>
+                        </div>
+                        <div className="p-6">
+                          <PatientDetails patient={data.patient} />
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="history" className="mt-0">
+                      <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                        <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                          <h2 className="text-xl font-bold text-foreground flex items-center">
+                            <Activity className="w-5 h-5 mr-3 text-blue-500" />
+                            Medical History
+                          </h2>
+                          <p className="text-muted-foreground text-sm mt-1">Complete medical history and treatment records</p>
+                        </div>
+                        <div className="p-6">
+                          <MedicalHistory records={data.records} />
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="labs" className="mt-0">
+                      <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                        <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                          <h2 className="text-xl font-bold text-foreground flex items-center">
+                            <TestTube className="w-5 h-5 mr-3 text-green-500" />
+                            Lab Results
+                          </h2>
+                          <p className="text-muted-foreground text-sm mt-1">Laboratory test results and trends</p>
+                        </div>
+                        <div className="p-6">
+                          <LabResultsChart patientId={data.patient.id} />
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </motion.div>
             </div>
           ) : (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center h-64">
               <div className="text-center p-8">
                 <h2 className="text-2xl font-bold mb-2">No health records found</h2>
                 <p className="text-muted-foreground mb-4">
@@ -153,8 +257,8 @@ const HealthRecords = () => {
               </div>
             </div>
           )}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };

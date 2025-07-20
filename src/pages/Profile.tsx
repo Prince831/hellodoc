@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
-import SideNav from "@/components/SideNav";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import PersonalInformation from "@/components/profile/PersonalInformation";
 import MedicalInformation from "@/components/profile/MedicalInformation";
@@ -75,9 +74,8 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
       <Navbar />
-      <SideNav />
       
-      <main className="pt-16 pl-0 md:pl-64">
+      <main className="pt-16">
         <div className="container mx-auto py-6 px-4 md:px-6 max-w-7xl">
           {/* Hero Profile Section */}
           <motion.div 

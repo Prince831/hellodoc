@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
-import SideNav from "@/components/SideNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,42 +18,97 @@ const healthMetrics = {
 };
 
 const Dashboard = () => {
-  const [showSideNav, setShowSideNav] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
   
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Gradient Background Layers */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-background/95 to-primary/5" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/3 to-accent/5" />
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
+      <Navbar />
       
-      <div className="relative z-10">
-        <Navbar />
-        <div className="flex">
-          {showSideNav && <SideNav />}
-          <div className={`flex-1 p-6 ${showSideNav ? 'ml-64' : ''}`}>
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold">Patient Dashboard</h1>
-              <Button variant="outline" onClick={() => setShowSideNav(!showSideNav)}>
-                {showSideNav ? "Hide Sidebar" : "Show Sidebar"}
-              </Button>
-            </div>
+      <main className="pt-16">
+        <div className="container mx-auto py-6 px-4 md:px-6 max-w-7xl">
+          {/* Hero Dashboard Section */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative mb-8 bg-gradient-to-br from-primary via-primary/90 to-accent rounded-3xl p-8 text-primary-foreground overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl" />
             
-            {/* Floating Tabs Container */}
-            <div className="relative backdrop-blur-sm bg-card/80 rounded-2xl shadow-2xl border border-border/20 p-6">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl blur-lg opacity-50" />
-              
-              <div className="relative">
-                <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted/50 backdrop-blur-sm">
-                    <TabsTrigger value="overview" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Overview</TabsTrigger>
-                    <TabsTrigger value="metrics" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Health Metrics</TabsTrigger>
-                    <TabsTrigger value="goals" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">Health Goals</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="overview" className="space-y-6">
-                    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className="relative z-10">
+              <h1 className="text-4xl font-bold mb-2">Welcome back!</h1>
+              <p className="text-primary-foreground/80 text-lg">Here's your health overview for today</p>
+            </div>
+          </motion.div>
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Navigation Sidebar */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-1"
+            >
+              <div className="sticky top-24 space-y-3">
+                <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-lg">
+                  <h3 className="font-semibold text-lg mb-4 text-foreground">Dashboard Sections</h3>
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" orientation="vertical">
+                    <TabsList className="grid w-full grid-rows-4 h-auto p-1 bg-muted/50 rounded-xl">
+                      <TabsTrigger 
+                        value="overview" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <Activity className="w-4 h-4 mr-3" />
+                        Overview
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="health" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <HeartPulse className="w-4 h-4 mr-3" />
+                        Health Metrics
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="appointments" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <Calendar className="w-4 h-4 mr-3" />
+                        Appointments
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="medications" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <Pill className="w-4 h-4 mr-3" />
+                        Medications
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Content Area */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-3"
+            >
+              <Tabs value={activeTab} className="w-full">
+                <div className="space-y-6">
+                  <TabsContent value="overview" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <Activity className="w-5 h-5 mr-3 text-primary" />
+                          Dashboard Overview
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Your health summary at a glance</p>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                       <Card className="bg-background/50 backdrop-blur-sm border-border/20">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                           <CardTitle className="text-sm font-medium">Heart Rate</CardTitle>
@@ -132,88 +186,156 @@ const Dashboard = () => {
                           <Button variant="link" className="p-0 mt-2 h-auto">View details</Button>
                         </CardContent>
                       </Card>
+                        </div>
+                      </div>
                     </div>
                   </TabsContent>
-                  
-                  <TabsContent value="metrics" className="space-y-4">
-                    <Card className="bg-background/50 backdrop-blur-sm border-border/20">
-                      <CardHeader>
-                        <CardTitle>Detailed Health Metrics</CardTitle>
-                        <CardDescription>
-                          View your health data over time
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="h-80 flex items-center justify-center">
-                        <p className="text-muted-foreground">Detailed health metrics charts will be displayed here</p>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="goals" className="space-y-4">
-                    <Card className="bg-background/50 backdrop-blur-sm border-border/20">
-                      <CardHeader className="flex justify-between items-start">
-                        <div>
-                          <CardTitle>Health Goals</CardTitle>
-                          <CardDescription>
-                            Track your progress towards your health goals
-                          </CardDescription>
+
+                  <TabsContent value="health" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <HeartPulse className="w-5 h-5 mr-3 text-red-500" />
+                          Health Metrics
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Monitor your vital signs and wellness data</p>
+                      </div>
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <HeartPulse className="h-5 w-5 text-red-500" />
+                                Vitals Trend
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-muted-foreground">Your health metrics are trending positively this week.</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Activity className="h-5 w-5 text-green-500" />
+                                Activity Goals
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Daily Steps</span>
+                                  <span>{healthMetrics.steps.current}/{healthMetrics.steps.goal}</span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2">
+                                  <div 
+                                    className="bg-green-500 h-2 rounded-full" 
+                                    style={{width: `${(healthMetrics.steps.current / healthMetrics.steps.goal) * 100}%`}}
+                                  />
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
                         </div>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm"><Plus className="h-4 w-4 mr-2" /> Add Goal</Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Add New Health Goal</DialogTitle>
-                              <DialogDescription>
-                                Set a new health goal to track your progress.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="py-4">
-                              <p className="text-muted-foreground">Goal creation form will be displayed here</p>
-                            </div>
-                            <DialogFooter>
-                              <Button variant="outline">Cancel</Button>
-                              <Button>Save Goal</Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                      </CardHeader>
-                      <CardContent>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="appointments" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <Calendar className="w-5 h-5 mr-3 text-blue-500" />
+                          Upcoming Appointments
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Your scheduled healthcare visits</p>
+                      </div>
+                      <div className="p-6">
                         <div className="space-y-4">
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <p className="font-medium">Daily Steps</p>
-                              <p className="text-sm">{healthMetrics.steps.current} / {healthMetrics.steps.goal}</p>
-                            </div>
-                            <Progress value={(healthMetrics.steps.current / healthMetrics.steps.goal) * 100} className="h-2" />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <p className="font-medium">Weight Loss</p>
-                              <p className="text-sm">-3 lbs / -10 lbs</p>
-                            </div>
-                            <Progress value={30} className="h-2" />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <p className="font-medium">Water Intake</p>
-                              <p className="text-sm">5 / 8 glasses</p>
-                            </div>
-                            <Progress value={62.5} className="h-2" />
-                          </div>
+                          <Card>
+                            <CardHeader className="pb-3">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-base">Dr. Smith - General Checkup</CardTitle>
+                                  <p className="text-sm text-muted-foreground">Tomorrow, 2:00 PM</p>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Reschedule
+                                </Button>
+                              </div>
+                            </CardHeader>
+                          </Card>
+
+                          <Card>
+                            <CardHeader>
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <CardTitle className="text-base">Dr. Johnson - Cardiology</CardTitle>
+                                  <p className="text-sm text-muted-foreground">Next week, Monday 10:00 AM</p>
+                                </div>
+                                <Button size="sm">
+                                  <Plus className="w-4 h-4 mr-2" />
+                                  Add to Calendar
+                                </Button>
+                              </div>
+                            </CardHeader>
+                          </Card>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   </TabsContent>
-                </Tabs>
-              </div>
-            </div>
+
+                  <TabsContent value="medications" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <Pill className="w-5 h-5 mr-3 text-green-500" />
+                          Current Medications
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Track your medications and dosages</p>
+                      </div>
+                      <div className="p-6">
+                        <div className="space-y-4">
+                          <Card>
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-base">Lisinopril 10mg</CardTitle>
+                                  <p className="text-sm text-muted-foreground">Once daily, morning</p>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Set Reminder
+                                </Button>
+                              </div>
+                            </CardHeader>
+                          </Card>
+
+                          <Card>
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-base">Metformin 500mg</CardTitle>
+                                  <p className="text-sm text-muted-foreground">Twice daily, with meals</p>
+                                </div>
+                                <Button size="sm" variant="outline">
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Set Reminder
+                                </Button>
+                              </div>
+                            </CardHeader>
+                          </Card>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
