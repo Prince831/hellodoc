@@ -73,114 +73,153 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
       <Navbar />
       <SideNav />
       
       <main className="pt-16 pl-0 md:pl-64">
-        <div className="container mx-auto py-8 px-4 md:px-6 max-w-5xl">
-          {/* Clean Profile Header */}
+        <div className="container mx-auto py-6 px-4 md:px-6 max-w-7xl">
+          {/* Hero Profile Section */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative mb-8 bg-gradient-to-br from-primary via-primary/90 to-accent rounded-3xl p-8 text-primary-foreground overflow-hidden"
           >
-            <ProfileHeader 
-              onSave={handleSaveProfile} 
-              isLoading={isLoading} 
-              userData={userData}
-            />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl" />
+            
+            <div className="relative z-10">
+              <ProfileHeader 
+                onSave={handleSaveProfile} 
+                isLoading={isLoading} 
+                userData={userData}
+              />
+            </div>
           </motion.div>
 
-          {/* Modern Tabs Container */}
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card/95 backdrop-blur-xl rounded-3xl shadow-xl border border-border/50 overflow-hidden"
-          >
-            <Tabs defaultValue="personal" className="w-full">
-              {/* Enhanced Tab Navigation */}
-              <div className="bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 px-6 pt-6">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-14 p-1 bg-background/80 backdrop-blur-sm rounded-2xl shadow-inner">
-                  <TabsTrigger 
-                    value="personal" 
-                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
-                  >
-                    <User className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Personal</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="medical" 
-                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
-                  >
-                    <Heart className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Medical</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="appointments" 
-                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Appointments</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="summary" 
-                    className="text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg"
-                  >
-                    <Activity className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Health</span>
-                  </TabsTrigger>
-                </TabsList>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Navigation Sidebar */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-1"
+            >
+              <div className="sticky top-24 space-y-3">
+                <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-lg">
+                  <h3 className="font-semibold text-lg mb-4 text-foreground">Profile Sections</h3>
+                  <Tabs defaultValue="personal" className="w-full" orientation="vertical">
+                    <TabsList className="grid w-full grid-rows-4 h-auto p-1 bg-muted/50 rounded-xl">
+                      <TabsTrigger 
+                        value="personal" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <User className="w-4 h-4 mr-3" />
+                        Personal Details
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="medical" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <Heart className="w-4 h-4 mr-3" />
+                        Medical History
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="appointments" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <Calendar className="w-4 h-4 mr-3" />
+                        Appointments
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="summary" 
+                        className="w-full justify-start px-4 py-3 text-sm font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg"
+                      >
+                        <Activity className="w-4 h-4 mr-3" />
+                        Health Overview
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
               </div>
+            </motion.div>
 
-              {/* Tab Content */}
-              <div className="p-6">
-                <TabsContent value="personal" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <PersonalInformation 
-                      userData={userData}
-                      onUpdateUserData={handleUpdateUserData}
-                    />
-                  </motion.div>
-                </TabsContent>
+            {/* Content Area */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-3"
+            >
+              <Tabs defaultValue="personal" className="w-full">
+                <div className="space-y-6">
+                  <TabsContent value="personal" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <User className="w-5 h-5 mr-3 text-primary" />
+                          Personal Information
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Manage your personal details and contact information</p>
+                      </div>
+                      <div className="p-6">
+                        <PersonalInformation 
+                          userData={userData}
+                          onUpdateUserData={handleUpdateUserData}
+                        />
+                      </div>
+                    </div>
+                  </TabsContent>
 
-                <TabsContent value="medical" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <MedicalInformation />
-                  </motion.div>
-                </TabsContent>
+                  <TabsContent value="medical" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <Heart className="w-5 h-5 mr-3 text-red-500" />
+                          Medical Information
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Your medical history and health records</p>
+                      </div>
+                      <div className="p-6">
+                        <MedicalInformation />
+                      </div>
+                    </div>
+                  </TabsContent>
 
-                <TabsContent value="appointments" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <AppointmentHistory />
-                  </motion.div>
-                </TabsContent>
+                  <TabsContent value="appointments" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <Calendar className="w-5 h-5 mr-3 text-blue-500" />
+                          Appointment History
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">View and manage your past and upcoming appointments</p>
+                      </div>
+                      <div className="p-6">
+                        <AppointmentHistory />
+                      </div>
+                    </div>
+                  </TabsContent>
 
-                <TabsContent value="summary" className="mt-0">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <HealthSummary />
-                  </motion.div>
-                </TabsContent>
-              </div>
-            </Tabs>
-          </motion.div>
+                  <TabsContent value="summary" className="mt-0">
+                    <div className="bg-card rounded-2xl border border-border/50 shadow-lg overflow-hidden">
+                      <div className="bg-gradient-to-r from-muted/50 to-muted/30 px-6 py-4 border-b border-border/30">
+                        <h2 className="text-xl font-bold text-foreground flex items-center">
+                          <Activity className="w-5 h-5 mr-3 text-green-500" />
+                          Health Summary
+                        </h2>
+                        <p className="text-muted-foreground text-sm mt-1">Overview of your health metrics and wellness data</p>
+                      </div>
+                      <div className="p-6">
+                        <HealthSummary />
+                      </div>
+                    </div>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </motion.div>
+          </div>
         </div>
       </main>
     </div>
