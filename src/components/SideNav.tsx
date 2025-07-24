@@ -3,9 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   CalendarDays, FileText, MessageSquare, Home, 
-  Settings, UserCircle, Stethoscope
+  Settings, UserCircle, Stethoscope, Users, Video,
+  PillIcon, Monitor, BarChart3, Shield, Bell
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -16,18 +18,62 @@ interface SideNavProps {
 const SideNav = ({ collapsed = false }: SideNavProps) => {
   const location = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
 
-  const navigationItems = [
-    { path: "/", icon: Home, label: "Home" },
-    { path: "/profile", icon: UserCircle, label: "Profile" },
-    { path: "/health-records", icon: FileText, label: "Health Records" },
-    { path: "/appointments", icon: CalendarDays, label: "Appointments" },
-    { path: "/symptom-checker", icon: Stethoscope, label: "Symptom Checker" },
-    { path: "/messages", icon: MessageSquare, label: "Messages" },
-    { path: "/settings", icon: Settings, label: "Settings" },
-  ];
+  const getNavigationItems = () => {
+    if (!user) {
+      return [
+        { path: "/", icon: Home, label: "Home" },
+        { path: "/symptom-checker", icon: Stethoscope, label: "Symptom Checker" },
+      ];
+    }
+
+    switch (user.role) {
+      case 'doctor':
+        return [
+          { path: "/doctor/dashboard", icon: Home, label: "Dashboard" },
+          { path: "/doctor/appointments", icon: CalendarDays, label: "Appointments" },
+          { path: "/doctor/patients", icon: Users, label: "Patients" },
+          { path: "/doctor/messages", icon: MessageSquare, label: "Messages" },
+          { path: "/doctor/consultations", icon: Video, label: "Consultations" },
+          { path: "/doctor/records", icon: FileText, label: "Records" },
+          { path: "/doctor/prescriptions", icon: PillIcon, label: "Prescriptions" },
+          { path: "/profile", icon: UserCircle, label: "Profile" },
+          { path: "/doctor/settings", icon: Settings, label: "Settings" },
+        ];
+      case 'admin':
+        return [
+          { path: "/admin/dashboard", icon: Home, label: "Dashboard" },
+          { path: "/admin/users", icon: Users, label: "Users" },
+          { path: "/admin/doctors", icon: Stethoscope, label: "Doctors" },
+          { path: "/admin/appointments", icon: CalendarDays, label: "Appointments" },
+          { path: "/admin/health-records", icon: FileText, label: "Health Records" },
+          { path: "/admin/messages", icon: MessageSquare, label: "Messages" },
+          { path: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+          { path: "/admin/security", icon: Shield, label: "Security" },
+          { path: "/admin/notifications", icon: Bell, label: "Notifications" },
+          { path: "/profile", icon: UserCircle, label: "Profile" },
+          { path: "/admin/settings", icon: Settings, label: "Settings" },
+        ];
+      default: // patient
+        return [
+          { path: "/", icon: Home, label: "Home" },
+          { path: "/dashboard", icon: Monitor, label: "Dashboard" },
+          { path: "/appointments", icon: CalendarDays, label: "Appointments" },
+          { path: "/health-records", icon: FileText, label: "Health Records" },
+          { path: "/medications", icon: PillIcon, label: "Medications" },
+          { path: "/messages", icon: MessageSquare, label: "Messages" },
+          { path: "/video-consultation", icon: Video, label: "Video Call" },
+          { path: "/symptom-checker", icon: Stethoscope, label: "Symptom Checker" },
+          { path: "/profile", icon: UserCircle, label: "Profile" },
+          { path: "/settings", icon: Settings, label: "Settings" },
+        ];
+    }
+  };
+
+  const navigationItems = getNavigationItems();
   
   return (
     <div className="h-full overflow-y-auto">

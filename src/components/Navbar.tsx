@@ -18,6 +18,50 @@ const Navbar = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
+  const getNavigationLinks = () => {
+    if (!user) {
+      return [
+        { to: "/", label: "Home" },
+        { to: "/doctors", label: "Find Doctors" },
+        { to: "/symptom-checker", label: "Symptom Checker" },
+      ];
+    }
+
+    switch (user.role) {
+      case 'doctor':
+        return [
+          { to: "/doctor/dashboard", label: "Dashboard" },
+          { to: "/doctor/appointments", label: "Appointments" },
+          { to: "/doctor/patients", label: "Patients" },
+          { to: "/doctor/messages", label: "Messages" },
+          { to: "/doctor/consultations", label: "Consultations" },
+          { to: "/doctor/records", label: "Records" },
+          { to: "/doctor/prescriptions", label: "Prescriptions" },
+        ];
+      case 'admin':
+        return [
+          { to: "/admin/dashboard", label: "Dashboard" },
+          { to: "/admin/users", label: "Users" },
+          { to: "/admin/doctors", label: "Doctors" },
+          { to: "/admin/appointments", label: "Appointments" },
+          { to: "/admin/health-records", label: "Health Records" },
+          { to: "/admin/messages", label: "Messages" },
+          { to: "/admin/analytics", label: "Analytics" },
+          { to: "/admin/security", label: "Security" },
+          { to: "/admin/notifications", label: "Notifications" },
+        ];
+      default: // patient
+        return [
+          { to: "/dashboard", label: "Dashboard" },
+          { to: "/appointments", label: "Appointments" },
+          { to: "/health-records", label: "Health Records" },
+          { to: "/medications", label: "Medications" },
+          { to: "/messages", label: "Messages" },
+          { to: "/video-consultation", label: "Video Call", icon: Video },
+        ];
+    }
+  };
+
   const MobileNavContent = () => (
     <motion.div 
       initial={{ opacity: 0, y: -20 }}
@@ -33,42 +77,32 @@ const Navbar = () => {
         
         {/* Navigation Links */}
         <div className="flex flex-col space-y-3">
-          {user ? (
+          {getNavigationLinks().map((link) => (
+            <Button key={link.to} variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+              <Link to={link.to}>
+                {link.icon && <link.icon className="mr-2 h-4 w-4" />}
+                {link.label}
+              </Link>
+            </Button>
+          ))}
+          
+          {user && (
             <>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/dashboard">Dashboard</Link>
-              </Button>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/appointments">Appointments</Link>
-              </Button>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/video-consultation">
-                  <Video className="mr-2 h-4 w-4" />
-                  Video Consultation
-                </Link>
-              </Button>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/health-records">Health Records</Link>
-              </Button>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/messages">Messages</Link>
-              </Button>
               <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
                 <Link to="/profile">Profile</Link>
               </Button>
               <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/settings">Settings</Link>
+                <Link to={user.role === 'doctor' ? "/doctor/settings" : user.role === 'admin' ? "/admin/settings" : "/settings"}>
+                  Settings
+                </Link>
               </Button>
             </>
-          ) : (
-            <>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/symptom-checker">Symptom Checker</Link>
-              </Button>
-              <Button size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/auth">Sign In</Link>
-              </Button>
-            </>
+          )}
+          
+          {!user && (
+            <Button size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+              <Link to="/auth">Sign In</Link>
+            </Button>
           )}
         </div>
         
@@ -95,15 +129,11 @@ const Navbar = () => {
             {/* Desktop Quick Navigation */}
             {user && (
               <nav className="hidden lg:flex items-center gap-1">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/dashboard">Dashboard</Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/appointments">Appointments</Link>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/health-records">Records</Link>
-                </Button>
+                {getNavigationLinks().slice(0, 4).map((link) => (
+                  <Button key={link.to} variant="ghost" size="sm" asChild>
+                    <Link to={link.to}>{link.label}</Link>
+                  </Button>
+                ))}
               </nav>
             )}
           </div>
@@ -117,9 +147,9 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             {/* Desktop navigation */}
             <div className="hidden md:flex items-center gap-2">
-              {user && (
+              {user && user.role !== 'admin' && (
                 <Button variant="ghost" size="icon" asChild>
-                  <Link to="/video-consultation">
+                  <Link to={user.role === 'doctor' ? "/doctor/consultations" : "/video-consultation"}>
                     <Video className="h-4 w-4" />
                     <span className="sr-only">Video Call</span>
                   </Link>
