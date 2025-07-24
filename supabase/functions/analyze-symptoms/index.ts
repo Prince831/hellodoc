@@ -15,14 +15,32 @@ serve(async (req) => {
   }
 
   try {
-    const { symptoms, userId } = await req.json();
+    const body = await req.json();
+    const { symptoms, userId } = body;
+    
+    // Input validation
+    if (!symptoms || typeof symptoms !== 'string' || symptoms.trim().length === 0) {
+      throw new Error('Symptoms are required and must be a non-empty string');
+    }
+    
+    if (symptoms.length > 2000) {
+      throw new Error('Symptoms description is too long (max 2000 characters)');
+    }
+    
+    if (userId && typeof userId !== 'string') {
+      throw new Error('User ID must be a valid string');
+    }
+    
+    // Sanitize input
+    const sanitizedSymptoms = symptoms.trim().replace(/[<>]/g, '');
+    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log("Processing symptoms:", symptoms);
+    console.log("Processing symptoms:", sanitizedSymptoms);
 
     // Create Supabase client for database operations
     const supabaseClient = createClient(
@@ -32,7 +50,7 @@ serve(async (req) => {
 
     // First, let's directly query for doctors based on the symptoms text
     // This is a fallback in case the AI analysis fails
-    const lowercaseSymptoms = symptoms.toLowerCase();
+    const lowercaseSymptoms = sanitizedSymptoms.toLowerCase();
     const symptomWords = lowercaseSymptoms
       .split(/\s+|,/)
       .map(word => word.trim())
@@ -78,7 +96,7 @@ serve(async (req) => {
                 "keywords": ["keyword1", "keyword2", "..."]
               }`
             },
-            { role: 'user', content: symptoms }
+            { role: 'user', content: sanitizedSymptoms }
           ],
         }),
       });
@@ -138,7 +156,7 @@ serve(async (req) => {
           .from('symptom_checks')
           .insert({
             user_id: userId,
-            symptoms,
+            symptoms: sanitizedSymptoms,
             ai_recommendation: aiOutput.recommendations,
             recommended_action: aiOutput.recommendedAction,
           });

@@ -13,14 +13,62 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, doctorId, date, reason, notes } = await req.json();
+    const body = await req.json();
+    const { userId, doctorId, date, reason, notes } = body;
 
-    if (!userId || !doctorId || !date || !reason) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+    // Input validation
+    if (!userId || typeof userId !== 'string') {
+      return new Response(JSON.stringify({ error: 'Valid user ID is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    if (!doctorId || typeof doctorId !== 'string') {
+      return new Response(JSON.stringify({ error: 'Valid doctor ID is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!date || typeof date !== 'string' || isNaN(Date.parse(date))) {
+      return new Response(JSON.stringify({ error: 'Valid appointment date is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
+      return new Response(JSON.stringify({ error: 'Appointment reason is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (reason.length > 500) {
+      return new Response(JSON.stringify({ error: 'Appointment reason is too long (max 500 characters)' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (notes && typeof notes !== 'string') {
+      return new Response(JSON.stringify({ error: 'Notes must be a string if provided' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (notes && notes.length > 1000) {
+      return new Response(JSON.stringify({ error: 'Notes are too long (max 1000 characters)' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Sanitize inputs
+    const sanitizedReason = reason.trim().replace(/[<>]/g, '');
+    const sanitizedNotes = notes ? notes.trim().replace(/[<>]/g, '') : null;
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -34,8 +82,8 @@ serve(async (req) => {
         user_id: userId,
         doctor_id: doctorId,
         date,
-        reason,
-        notes,
+        reason: sanitizedReason,
+        notes: sanitizedNotes,
         status: 'pending'
       })
       .select()
@@ -54,7 +102,7 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         title: 'Appointment Scheduled',
-        message: `Your appointment for ${reason} has been scheduled and is pending confirmation.`,
+        message: `Your appointment for ${sanitizedReason} has been scheduled and is pending confirmation.`,
         type: 'success',
         action_url: '/appointments',
       });
