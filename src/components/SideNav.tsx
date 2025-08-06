@@ -30,47 +30,19 @@ const SideNav = ({ collapsed = false }: SideNavProps) => {
       ];
     }
 
-    switch (user.role) {
-      case 'doctor':
-        return [
-          { path: "/doctor/dashboard", icon: Home, label: "Dashboard" },
-          { path: "/doctor/appointments", icon: CalendarDays, label: "Appointments" },
-          { path: "/doctor/patients", icon: Users, label: "Patients" },
-          { path: "/doctor/messages", icon: MessageSquare, label: "Messages" },
-          { path: "/doctor/consultations", icon: Video, label: "Consultations" },
-          { path: "/doctor/records", icon: FileText, label: "Records" },
-          { path: "/doctor/prescriptions", icon: PillIcon, label: "Prescriptions" },
-          { path: "/profile", icon: UserCircle, label: "Profile" },
-          { path: "/doctor/settings", icon: Settings, label: "Settings" },
-        ];
-      case 'admin':
-        return [
-          { path: "/admin/dashboard", icon: Home, label: "Dashboard" },
-          { path: "/admin/users", icon: Users, label: "Users" },
-          { path: "/admin/doctors", icon: Stethoscope, label: "Doctors" },
-          { path: "/admin/appointments", icon: CalendarDays, label: "Appointments" },
-          { path: "/admin/health-records", icon: FileText, label: "Health Records" },
-          { path: "/admin/messages", icon: MessageSquare, label: "Messages" },
-          { path: "/admin/analytics", icon: BarChart3, label: "Analytics" },
-          { path: "/admin/security", icon: Shield, label: "Security" },
-          { path: "/admin/notifications", icon: Bell, label: "Notifications" },
-          { path: "/profile", icon: UserCircle, label: "Profile" },
-          { path: "/admin/settings", icon: Settings, label: "Settings" },
-        ];
-      default: // patient
-        return [
-          { path: "/", icon: Home, label: "Home" },
-          { path: "/dashboard", icon: Monitor, label: "Dashboard" },
-          { path: "/appointments", icon: CalendarDays, label: "Appointments" },
-          { path: "/health-records", icon: FileText, label: "Health Records" },
-          { path: "/medications", icon: PillIcon, label: "Medications" },
-          { path: "/messages", icon: MessageSquare, label: "Messages" },
-          { path: "/video-consultation", icon: Video, label: "Video Call" },
-          { path: "/symptom-checker", icon: Stethoscope, label: "Symptom Checker" },
-          { path: "/profile", icon: UserCircle, label: "Profile" },
-          { path: "/settings", icon: Settings, label: "Settings" },
-        ];
-    }
+    // Only patient navigation
+    return [
+      { path: "/", icon: Home, label: "Home" },
+      { path: "/dashboard", icon: Monitor, label: "Dashboard" },
+      { path: "/appointments", icon: CalendarDays, label: "Appointments" },
+      { path: "/health-records", icon: FileText, label: "Health Records" },
+      { path: "/medications", icon: PillIcon, label: "Medications" },
+      { path: "/messages", icon: MessageSquare, label: "Messages" },
+      { path: "/video-consultation", icon: Video, label: "Video Call" },
+      { path: "/symptom-checker", icon: Stethoscope, label: "Symptom Checker" },
+      { path: "/profile", icon: UserCircle, label: "Profile" },
+      { path: "/settings", icon: Settings, label: "Settings" },
+    ];
   };
 
   const navigationItems = getNavigationItems();
