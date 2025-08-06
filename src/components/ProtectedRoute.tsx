@@ -26,14 +26,8 @@ const ProtectedRoute = ({
       }
 
       if (requiredRole && user.role !== requiredRole) {
-        // Redirect based on user role
-        if (user.role === 'doctor') {
-          navigate('/doctor/dashboard');
-        } else if (user.role === 'admin') {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+        // Redirect to dashboard for all users
+        navigate('/dashboard');
         return;
       }
     }

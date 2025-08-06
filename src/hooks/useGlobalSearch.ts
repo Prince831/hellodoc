@@ -67,7 +67,7 @@ export function useGlobalSearch() {
           description: `${doctor.specialization}`,
           icon: "user-md",
           type: 'doctor' as const,
-          url: `/doctor/${doctor.id}`
+          url: `/doctors?id=${doctor.id}`
         })),
         ...(appointments || []).map((appointment) => ({
           id: appointment.id,

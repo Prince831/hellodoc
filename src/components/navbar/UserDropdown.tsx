@@ -95,23 +95,6 @@ const UserDropdown = () => {
           </>
         )}
 
-        {user.role === "doctor" && (
-          <DropdownMenuItem asChild>
-            <Link to="/doctor/dashboard" className="cursor-pointer w-full">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Doctor Dashboard</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
-
-        {user.role === "admin" && (
-          <DropdownMenuItem asChild>
-            <Link to="/admin/dashboard" className="cursor-pointer w-full">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Admin Panel</span>
-            </Link>
-          </DropdownMenuItem>
-        )}
 
         <DropdownMenuItem asChild>
           <Link to="/settings" className="cursor-pointer w-full">

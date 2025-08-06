@@ -27,39 +27,15 @@ const Navbar = () => {
       ];
     }
 
-    switch (user.role) {
-      case 'doctor':
-        return [
-          { to: "/doctor/dashboard", label: "Dashboard" },
-          { to: "/doctor/appointments", label: "Appointments" },
-          { to: "/doctor/patients", label: "Patients" },
-          { to: "/doctor/messages", label: "Messages" },
-          { to: "/doctor/consultations", label: "Consultations" },
-          { to: "/doctor/records", label: "Records" },
-          { to: "/doctor/prescriptions", label: "Prescriptions" },
-        ];
-      case 'admin':
-        return [
-          { to: "/admin/dashboard", label: "Dashboard" },
-          { to: "/admin/users", label: "Users" },
-          { to: "/admin/doctors", label: "Doctors" },
-          { to: "/admin/appointments", label: "Appointments" },
-          { to: "/admin/health-records", label: "Health Records" },
-          { to: "/admin/messages", label: "Messages" },
-          { to: "/admin/analytics", label: "Analytics" },
-          { to: "/admin/security", label: "Security" },
-          { to: "/admin/notifications", label: "Notifications" },
-        ];
-      default: // patient
-        return [
-          { to: "/dashboard", label: "Dashboard" },
-          { to: "/appointments", label: "Appointments" },
-          { to: "/health-records", label: "Health Records" },
-          { to: "/medications", label: "Medications" },
-          { to: "/messages", label: "Messages" },
-          { to: "/video-consultation", label: "Video Call", icon: Video },
-        ];
-    }
+    // Only patient navigation
+    return [
+      { to: "/dashboard", label: "Dashboard" },
+      { to: "/appointments", label: "Appointments" },
+      { to: "/health-records", label: "Health Records" },
+      { to: "/medications", label: "Medications" },
+      { to: "/messages", label: "Messages" },
+      { to: "/video-consultation", label: "Video Call", icon: Video },
+    ];
   };
 
   const MobileNavContent = () => (
@@ -92,9 +68,7 @@ const Navbar = () => {
                 <Link to="/profile">Profile</Link>
               </Button>
               <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to={user.role === 'doctor' ? "/doctor/settings" : user.role === 'admin' ? "/admin/settings" : "/settings"}>
-                  Settings
-                </Link>
+                <Link to="/settings">Settings</Link>
               </Button>
             </>
           )}
@@ -147,9 +121,9 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             {/* Desktop navigation */}
             <div className="hidden md:flex items-center gap-2">
-              {user && user.role !== 'admin' && (
+              {user && (
                 <Button variant="ghost" size="icon" asChild>
-                  <Link to={user.role === 'doctor' ? "/doctor/consultations" : "/video-consultation"}>
+                  <Link to="/video-consultation">
                     <Video className="h-4 w-4" />
                     <span className="sr-only">Video Call</span>
                   </Link>
