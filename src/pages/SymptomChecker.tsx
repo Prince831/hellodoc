@@ -19,8 +19,10 @@ import {
   Clipboard
 } from "lucide-react";
 import DoctorList from "@/components/symptom-checker/DoctorList";
+import LocationEmergencySection from "@/components/symptom-checker/LocationEmergencySection";
 import { useDoctors } from "@/hooks/useDoctors";
 import Navbar from "@/components/Navbar";
+import { useNavigate } from "react-router-dom";
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
@@ -28,7 +30,8 @@ const SymptomChecker = () => {
   const [selectedSpecialization, setSelectedSpecialization] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [activeTab, setActiveTab] = useState("symptoms");
-
+  
+  const navigate = useNavigate();
   const { data: doctors = [], isLoading } = useDoctors(selectedSpecialization || undefined);
 
   const specializations = [
@@ -52,12 +55,23 @@ const SymptomChecker = () => {
       }
     }
 
-    setShowResults(true);
+    // Navigate to doctors page with symptom data
+    navigate('/doctors', { 
+      state: { 
+        symptoms: symptoms.trim(), 
+        bodyPart: bodyPart.trim(), 
+        specialization: selectedSpecialization 
+      } 
+    });
   };
 
   const handleSpecializationSelect = (specialization: string) => {
-    setSelectedSpecialization(specialization);
-    setShowResults(true);
+    navigate('/doctors', { 
+      state: { 
+        specialization,
+        symptoms: `Looking for ${specialization} specialist` 
+      } 
+    });
   };
 
   const handleReset = () => {
@@ -84,11 +98,21 @@ const SymptomChecker = () => {
           className="text-center mb-8"
         >
           <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 dark:text-white mb-4">
-            Find Doctors by Symptoms
+            What Symptoms Are You Experiencing?
           </h1>
           <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Describe your symptoms and we'll help you find the right specialists to address your health concerns.
+            Tell us your symptoms and we'll connect you with the right doctors who can help.
           </p>
+        </motion.div>
+
+        {/* Emergency Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <LocationEmergencySection />
         </motion.div>
 
         <div className="max-w-4xl mx-auto space-y-8">

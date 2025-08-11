@@ -4,7 +4,8 @@ import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ConversationList from "@/components/messages/ConversationList";
 import MessageBubble from "@/components/messages/MessageBubble";
-import MessageInput from "@/components/messages/MessageInput";
+import EnhancedMessageInput from "@/components/messages/EnhancedMessageInput";
+import CallInterface from "@/components/messages/CallInterface";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,13 @@ const Messages = () => {
   
   const [selectedConversation, setSelectedConversation] = useState<any>(null);
   const [conversations, setConversations] = useState<any[]>([]);
+  
+  // Call state management
+  const [activeCall, setActiveCall] = useState<{
+    type: 'voice' | 'video';
+    doctorName: string;
+    doctorAvatar?: string;
+  } | null>(null);
 
   const doctorId = location.state?.doctorId;
   const initiateChat = location.state?.initiateChat;
@@ -100,12 +108,60 @@ const Messages = () => {
     }
   };
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = (content: string, attachments?: File[]) => {
     if (!selectedConversation || !user) return;
+    
+    // Handle file attachments (mock implementation)
+    if (attachments && attachments.length > 0) {
+      attachments.forEach(file => {
+        toast({
+          title: "File Attached",
+          description: `${file.name} will be sent with your message`,
+        });
+      });
+    }
     
     sendMessage({
       receiverId: selectedConversation.id,
       content,
+    });
+  };
+
+  const handleStartVoiceCall = () => {
+    if (!selectedConversation) return;
+    
+    setActiveCall({
+      type: 'voice',
+      doctorName: selectedConversation.participant.name,
+      doctorAvatar: selectedConversation.participant.avatar
+    });
+    
+    toast({
+      title: "Voice Call Started",
+      description: `Connecting voice call with ${selectedConversation.participant.name}...`,
+    });
+  };
+
+  const handleStartVideoCall = () => {
+    if (!selectedConversation) return;
+    
+    setActiveCall({
+      type: 'video',
+      doctorName: selectedConversation.participant.name,
+      doctorAvatar: selectedConversation.participant.avatar
+    });
+    
+    toast({
+      title: "Video Call Started",
+      description: `Connecting video call with ${selectedConversation.participant.name}...`,
+    });
+  };
+
+  const handleEndCall = () => {
+    setActiveCall(null);
+    toast({
+      title: "Call Ended",
+      description: "The call has been disconnected.",
     });
   };
 
@@ -143,10 +199,20 @@ const Messages = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Button size="icon" variant="ghost">
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    onClick={handleStartVoiceCall}
+                    title="Start voice call"
+                  >
                     <Phone className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost">
+                  <Button 
+                    size="icon" 
+                    variant="ghost"
+                    onClick={handleStartVideoCall}
+                    title="Start video call"
+                  >
                     <Video className="h-4 w-4" />
                   </Button>
                   <Button size="icon" variant="ghost">
@@ -169,8 +235,12 @@ const Messages = () => {
                 </div>
               </ScrollArea>
               
-              {/* Message Input */}
-              <MessageInput onSendMessage={handleSendMessage} />
+              {/* Enhanced Message Input */}
+              <EnhancedMessageInput 
+                onSendMessage={handleSendMessage}
+                onStartVoiceCall={handleStartVoiceCall}
+                onStartVideoCall={handleStartVideoCall}
+              />
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
@@ -185,6 +255,18 @@ const Messages = () => {
           )}
         </div>
       </div>
+
+      {/* Call Interface Overlay */}
+      <CallInterface
+        isActive={!!activeCall}
+        callType={activeCall?.type || 'voice'}
+        doctorName={activeCall?.doctorName || ''}
+        doctorAvatar={activeCall?.doctorAvatar}
+        onEndCall={handleEndCall}
+        onToggleMute={(muted) => console.log('Mute toggled:', muted)}
+        onToggleVideo={(enabled) => console.log('Video toggled:', enabled)}
+        onToggleSpeaker={(enabled) => console.log('Speaker toggled:', enabled)}
+      />
     </div>
   );
 };

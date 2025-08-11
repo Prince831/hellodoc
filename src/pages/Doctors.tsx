@@ -3,19 +3,59 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Shield, Clock, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Shield, Clock, Users, MessageSquare } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import DoctorSection from "@/components/home/DoctorSection";
 import { useDoctors } from "@/hooks/useDoctors";
 
 const Doctors = () => {
-  const { data: doctors = [], isLoading } = useDoctors();
+  const location = useLocation();
+  const symptomData = location.state as {
+    symptoms?: string;
+    bodyPart?: string;
+    specialization?: string;
+  } | null;
+
+  const { data: doctors = [], isLoading } = useDoctors(symptomData?.specialization);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
       <Navbar />
       <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
+        {/* Symptom Summary */}
+        {symptomData && (
+          <motion.section
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+              <CardHeader>
+                <CardTitle className="text-primary">Based on Your Symptoms</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {symptomData.symptoms && (
+                  <p className="mb-2">
+                    <strong>Symptoms:</strong> {symptomData.symptoms}
+                  </p>
+                )}
+                {symptomData.bodyPart && (
+                  <p className="mb-2">
+                    <strong>Affected Area:</strong> {symptomData.bodyPart}
+                  </p>
+                )}
+                {symptomData.specialization && (
+                  <Badge variant="secondary" className="mt-2">
+                    {symptomData.specialization} Specialists
+                  </Badge>
+                )}
+              </CardContent>
+            </Card>
+          </motion.section>
+        )}
+
         {/* Hero Section */}
         <motion.section 
           className="text-center mb-8 sm:mb-12 lg:mb-16"
@@ -25,23 +65,27 @@ const Doctors = () => {
         >
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-3 sm:mb-4 lg:mb-6 text-xs sm:text-sm px-2 py-1" variant="secondary">
-              Find Your Perfect Healthcare Provider
+              Connect with Healthcare Professionals
             </Badge>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 lg:mb-6 leading-tight px-2">
-              Meet Our{" "}
-              <span className="text-primary">Expert Doctors</span>
+              {symptomData?.specialization ? `${symptomData.specialization}` : "Expert"}{" "}
+              <span className="text-primary">Doctors Ready to Help</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-2 max-w-3xl mx-auto leading-relaxed">
-              Browse our network of qualified healthcare professionals and book appointments with specialists in various medical fields.
+              {symptomData 
+                ? "Here are the doctors who can help with your symptoms. Start a conversation to discuss your condition."
+                : "Browse our network of qualified healthcare professionals and connect with specialists in various medical fields."
+              }
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-2">
               <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 lg:px-8 h-10 sm:h-11 lg:h-12" asChild>
-                <Link to="/symptom-checker">
-                  Find Doctors by Symptoms <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                <Link to="/messages">
+                  <MessageSquare className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  View Conversations
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 lg:px-8 h-10 sm:h-11 lg:h-12" asChild>
-                <Link to="/auth">Book Appointment</Link>
+                <Link to="/symptom-checker">Back to Symptoms</Link>
               </Button>
             </div>
           </div>

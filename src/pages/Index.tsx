@@ -109,12 +109,12 @@ const Index = () => {
               ) : (
                 <>
                   <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 lg:px-8 h-10 sm:h-11 lg:h-12" asChild>
-                    <Link to="/doctors">
-                      Browse Doctors <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <Link to="/symptom-checker">
+                      Start with Symptoms <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                     </Link>
                   </Button>
                   <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm sm:text-base px-4 sm:px-6 lg:px-8 h-10 sm:h-11 lg:h-12" asChild>
-                    <Link to="/symptom-checker">Find by Symptoms</Link>
+                    <Link to="/doctors">Browse All Doctors</Link>
                   </Button>
                 </>
               )}
@@ -174,17 +174,17 @@ const Index = () => {
               variants={staggerChildren}
             >
               <motion.div variants={scaleIn}>
-                <Link to="/doctors" className="block">
-                  <Card className="text-center hover:shadow-lg transition-all duration-300 h-full cursor-pointer hover:scale-105 border-0 shadow-md">
+                <Link to="/symptom-checker" className="block">
+                  <Card className="text-center hover:shadow-lg transition-all duration-300 h-full cursor-pointer hover:scale-105 border-0 shadow-md bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
                     <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
                       <div className="flex justify-center mb-2 sm:mb-3 lg:mb-4">
-                        <Heart className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
+                        <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
                       </div>
-                      <CardTitle className="text-base sm:text-lg lg:text-xl mb-2">Browse Doctors</CardTitle>
+                      <CardTitle className="text-base sm:text-lg lg:text-xl mb-2">Start with Symptoms</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 px-4 sm:px-6">
                       <CardDescription className="text-xs sm:text-sm lg:text-base leading-relaxed">
-                        Explore our network of qualified healthcare professionals and find the right specialist for you.
+                        Tell us what you're experiencing and we'll connect you with the right doctors for your condition.
                       </CardDescription>
                     </CardContent>
                   </Card>
@@ -192,17 +192,17 @@ const Index = () => {
               </motion.div>
 
               <motion.div variants={scaleIn}>
-                <Link to="/symptom-checker" className="block">
+                <Link to="/doctors" className="block">
                   <Card className="text-center hover:shadow-lg transition-all duration-300 h-full cursor-pointer hover:scale-105 border-0 shadow-md">
                     <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
                       <div className="flex justify-center mb-2 sm:mb-3 lg:mb-4">
-                        <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
+                        <Heart className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-primary" />
                       </div>
-                      <CardTitle className="text-base sm:text-lg lg:text-xl mb-2">Find by Symptoms</CardTitle>
+                      <CardTitle className="text-base sm:text-lg lg:text-xl mb-2">Browse All Doctors</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 px-4 sm:px-6">
                       <CardDescription className="text-xs sm:text-sm lg:text-base leading-relaxed">
-                        Describe your symptoms and we'll help you find doctors who specialize in treating your condition.
+                        Explore our network of qualified healthcare professionals and find specialists by category.
                       </CardDescription>
                     </CardContent>
                   </Card>
