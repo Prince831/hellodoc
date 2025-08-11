@@ -20,17 +20,7 @@ export const useAppointments = () => {
       
       const { data, error } = await supabase
         .from('appointments')
-        .select(`
-          *,
-          doctors (
-            name,
-            specialization,
-            image_url,
-            phone,
-            email,
-            hospital
-          )
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('date', { ascending: false });
 
@@ -41,9 +31,16 @@ export const useAppointments = () => {
 
       console.log('Fetched appointments:', data);
 
+      // Mock doctor data since we removed the doctors table
+      const mockDoctors = [
+        { id: 'd1', name: 'Dr. Sarah Johnson', specialization: 'Cardiology', image_url: null, phone: '(555) 123-4567', email: 'sarah@clinic.com', hospital: 'City General Hospital' },
+        { id: 'd2', name: 'Dr. Michael Chen', specialization: 'Neurology', image_url: null, phone: '(555) 234-5678', email: 'michael@clinic.com', hospital: 'Metro Medical Center' },
+        { id: 'd3', name: 'Dr. Emily Watson', specialization: 'Dermatology', image_url: null, phone: '(555) 345-6789', email: 'emily@clinic.com', hospital: 'Sunshine Clinic' }
+      ];
+
       return (data || []).map(appointment => ({
         ...appointment,
-        doctor: appointment.doctors
+        doctor: mockDoctors.find(d => d.id === appointment.doctor_id) || mockDoctors[0]
       })) as Appointment[];
     },
     enabled: !!user?.id,

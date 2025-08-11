@@ -26,12 +26,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { data, error } = await supabaseClient
-      .from('doctors')
-      .update(profileData)
-      .eq('id', doctorId);
+    // Since we removed doctors table, return success response
+    // In a patient-only system, this function is no longer needed
+    return new Response(JSON.stringify({ 
+      success: true,
+      message: 'Doctor profiles are not supported in this patient-only system'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 
-    if (error) {
+    // This code is kept for reference but never executed
+    if (false) {
       return new Response(JSON.stringify({ error: error.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

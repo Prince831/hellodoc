@@ -58,17 +58,22 @@ serve(async (req) => {
     
     console.log("Extracted keyword candidates:", symptomWords);
     
-    // Direct database query using symptom words
-    const { data: directMatchDoctors, error: directQueryError } = await supabaseClient
-      .from('doctors')
-      .select('*')
-      .filter('keywords', 'cs', `{${symptomWords.join(',')}}`);
-      
-    if (directQueryError) {
-      console.error("Error in direct doctor query:", directQueryError);
-    } else {
-      console.log(`Found ${directMatchDoctors?.length || 0} doctors through direct matching`);
-    }
+    // Use mock doctors data since we removed the doctors table
+    const mockDoctors = [
+      { id: 'd1', name: 'Dr. Sarah Johnson', specialization: 'Cardiology', keywords: ['heart', 'chest', 'cardiac', 'blood pressure'], rating: 4.8 },
+      { id: 'd2', name: 'Dr. Michael Chen', specialization: 'Neurology', keywords: ['headache', 'migraine', 'neurological', 'brain'], rating: 4.9 },
+      { id: 'd3', name: 'Dr. Emily Watson', specialization: 'Dermatology', keywords: ['skin', 'rash', 'dermal', 'acne'], rating: 4.7 },
+      { id: 'd4', name: 'Dr. James Wilson', specialization: 'General Medicine', keywords: ['fever', 'cold', 'flu', 'general'], rating: 4.6 }
+    ];
+    
+    // Find doctors that match symptoms
+    const directMatchDoctors = mockDoctors.filter(doctor => 
+      doctor.keywords.some(keyword => 
+        symptomWords.some(symptom => symptom.toLowerCase().includes(keyword.toLowerCase()))
+      )
+    );
+    
+    console.log(`Found ${directMatchDoctors.length} doctors through direct matching`);
 
     // Call OpenAI API to analyze symptoms
     try {
@@ -131,17 +136,17 @@ serve(async (req) => {
       
       console.log("Extracted keywords for doctor matching:", keywords);
 
-      // Find doctors that match the keywords
-      const { data: matchedDoctors, error: doctorsError } = await supabaseClient
-        .from('doctors')
-        .select('*')
-        .filter('keywords', 'cs', `{${keywords.join(',')}}`);
-        
-      if (doctorsError) {
-        console.error("Error fetching matching doctors:", doctorsError);
-      } else {
-        console.log(`Found ${matchedDoctors?.length || 0} matching doctors`);
-      }
+      // Find doctors that match the AI keywords using mock data
+      const matchedDoctors = mockDoctors.filter(doctor => 
+        keywords.some(keyword => 
+          doctor.keywords.some(docKeyword => 
+            docKeyword.toLowerCase().includes(keyword.toLowerCase()) ||
+            keyword.toLowerCase().includes(docKeyword.toLowerCase())
+          )
+        )
+      );
+      
+      console.log(`Found ${matchedDoctors.length} matching doctors`);
 
       // If AI matching found no doctors, use the direct match results
       const finalDoctors = (matchedDoctors && matchedDoctors.length > 0) 
