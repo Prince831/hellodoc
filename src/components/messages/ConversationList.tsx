@@ -11,8 +11,8 @@ interface Conversation {
   id: string;
   participant: {
     id: string;
-    name: string;
-    avatar?: string;
+    full_name: string;
+    avatar_url?: string;
     role?: string;
   };
   lastMessage?: {
@@ -39,7 +39,7 @@ const ConversationList = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredConversations = conversations.filter(conv =>
-    conv.participant.name.toLowerCase().includes(searchTerm.toLowerCase())
+    conv.participant.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -102,14 +102,14 @@ const ConversationList = ({
               >
                 <div className="flex items-start gap-3">
                   <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={conversation.participant.avatar} alt={conversation.participant.name} />
-                    <AvatarFallback>{conversation.participant.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={conversation.participant.avatar_url} alt={conversation.participant.full_name} />
+                    <AvatarFallback>{conversation.participant.full_name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-medium text-sm truncate">
-                        {conversation.participant.name}
+                        {conversation.participant.full_name}
                       </h3>
                       {conversation.participant.role && (
                         <Badge variant="secondary" className="text-xs">

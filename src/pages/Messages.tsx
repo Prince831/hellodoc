@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -19,10 +18,16 @@ const Messages = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { messages, loading, handleAppointmentResponse, markAsRead, sendMessage } = useMessages();
-  
-  const [selectedConversation, setSelectedConversation] = useState<any>(null);
-  const [conversations, setConversations] = useState<any[]>([]);
+  const { 
+    conversations, 
+    loading, 
+    selectedConversation,
+    setSelectedConversation,
+    handleAppointmentResponse, 
+    markAsRead, 
+    handleSendMessage,
+    startConversation
+  } = useMessages();
   
   // Call state management
   const [activeCall, setActiveCall] = useState<{
@@ -36,64 +41,14 @@ const Messages = () => {
 
   useEffect(() => {
     if (doctorId && initiateChat) {
+      // Start conversation with the doctor
+      startConversation(doctorId, "Hello, I would like to schedule a consultation.");
       toast({
         title: "Chat Ready",
         description: "You can now start chatting with the doctor.",
       });
     }
-  }, [doctorId, initiateChat, toast]);
-
-  // Group messages into conversations
-  useEffect(() => {
-    if (messages.length > 0 && user) {
-      const conversationMap = new Map();
-      
-      messages.forEach(message => {
-        const isFromCurrentUser = message.sender_id === user.id;
-        const otherUserId = isFromCurrentUser ? message.receiver_id : message.sender_id;
-        const otherUser = isFromCurrentUser 
-          ? { id: message.receiver_id, name: 'Doctor', avatar: undefined }
-          : message.sender;
-        
-        if (conversationMap.has(otherUserId)) {
-          const existing = conversationMap.get(otherUserId);
-          existing.messages.push(message);
-          if (new Date(message.timestamp) > new Date(existing.lastMessage.timestamp)) {
-            existing.lastMessage = {
-              content: message.content,
-              timestamp: message.timestamp,
-              fromCurrentUser: isFromCurrentUser
-            };
-          }
-          if (!message.read && !isFromCurrentUser) {
-            existing.unreadCount++;
-          }
-        } else {
-          conversationMap.set(otherUserId, {
-            id: otherUserId,
-            participant: otherUser,
-            messages: [message],
-            lastMessage: {
-              content: message.content,
-              timestamp: message.timestamp,
-              fromCurrentUser: isFromCurrentUser
-            },
-            unreadCount: (!message.read && !isFromCurrentUser) ? 1 : 0
-          });
-        }
-      });
-      
-      const conversationList = Array.from(conversationMap.values())
-        .sort((a, b) => new Date(b.lastMessage.timestamp).getTime() - new Date(a.lastMessage.timestamp).getTime());
-      
-      setConversations(conversationList);
-      
-      // Auto-select first conversation if none selected
-      if (!selectedConversation && conversationList.length > 0) {
-        setSelectedConversation(conversationList[0]);
-      }
-    }
-  }, [messages, user, selectedConversation]);
+  }, [doctorId, initiateChat, startConversation, toast]);
 
   const handleSelectConversation = (conversation: any) => {
     setSelectedConversation(conversation);
@@ -108,9 +63,7 @@ const Messages = () => {
     }
   };
 
-  const handleSendMessage = (content: string, attachments?: File[]) => {
-    if (!selectedConversation || !user) return;
-    
+  const handleSendMessageWithAttachments = (content: string, attachments?: File[]) => {
     // Handle file attachments (mock implementation)
     if (attachments && attachments.length > 0) {
       attachments.forEach(file => {
@@ -121,10 +74,7 @@ const Messages = () => {
       });
     }
     
-    sendMessage({
-      receiverId: selectedConversation.id,
-      content,
-    });
+    handleSendMessage(content);
   };
 
   const handleStartVoiceCall = () => {
@@ -132,13 +82,13 @@ const Messages = () => {
     
     setActiveCall({
       type: 'voice',
-      doctorName: selectedConversation.participant.name,
-      doctorAvatar: selectedConversation.participant.avatar
+      doctorName: selectedConversation.participant.full_name,
+      doctorAvatar: selectedConversation.participant.avatar_url
     });
     
     toast({
       title: "Voice Call Started",
-      description: `Connecting voice call with ${selectedConversation.participant.name}...`,
+      description: `Connecting voice call with ${selectedConversation.participant.full_name}...`,
     });
   };
 
@@ -147,13 +97,13 @@ const Messages = () => {
     
     setActiveCall({
       type: 'video',
-      doctorName: selectedConversation.participant.name,
-      doctorAvatar: selectedConversation.participant.avatar
+      doctorName: selectedConversation.participant.full_name,
+      doctorAvatar: selectedConversation.participant.avatar_url
     });
     
     toast({
       title: "Video Call Started",
-      description: `Connecting video call with ${selectedConversation.participant.name}...`,
+      description: `Connecting video call with ${selectedConversation.participant.full_name}...`,
     });
   };
 
@@ -185,11 +135,11 @@ const Messages = () => {
               <div className="border-b bg-background p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={selectedConversation.participant.avatar} alt={selectedConversation.participant.name} />
-                    <AvatarFallback>{selectedConversation.participant.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={selectedConversation.participant.avatar_url} alt={selectedConversation.participant.full_name} />
+                    <AvatarFallback>{selectedConversation.participant.full_name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="font-semibold">{selectedConversation.participant.name}</h2>
+                    <h2 className="font-semibold">{selectedConversation.participant.full_name}</h2>
                     {selectedConversation.participant.role && (
                       <Badge variant="secondary" className="text-xs">
                         {selectedConversation.participant.role}
@@ -237,7 +187,7 @@ const Messages = () => {
               
               {/* Enhanced Message Input */}
               <EnhancedMessageInput 
-                onSendMessage={handleSendMessage}
+                onSendMessage={handleSendMessageWithAttachments}
                 onStartVoiceCall={handleStartVoiceCall}
                 onStartVideoCall={handleStartVideoCall}
               />
