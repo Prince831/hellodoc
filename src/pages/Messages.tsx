@@ -9,15 +9,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Phone, Video, MoreVertical } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { MessageSquare, Phone, Video, MoreVertical, ArrowLeft, Menu } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Messages = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const { 
     conversations, 
     loading, 
@@ -28,6 +31,9 @@ const Messages = () => {
     handleSendMessage,
     startConversation
   } = useMessages();
+  
+  // Mobile state management
+  const [isMobileConversationListOpen, setIsMobileConversationListOpen] = useState(false);
   
   // Call state management
   const [activeCall, setActiveCall] = useState<{
@@ -53,6 +59,11 @@ const Messages = () => {
   const handleSelectConversation = (conversation: any) => {
     setSelectedConversation(conversation);
     
+    // Close mobile conversation list when selecting a conversation
+    if (isMobile) {
+      setIsMobileConversationListOpen(false);
+    }
+    
     // Mark unread messages as read
     if (conversation.unreadCount > 0) {
       conversation.messages.forEach((message: any) => {
@@ -60,6 +71,12 @@ const Messages = () => {
           markAsRead(message.id);
         }
       });
+    }
+  };
+
+  const handleBackToConversations = () => {
+    if (isMobile) {
+      setSelectedConversation(null);
     }
   };
 
@@ -115,17 +132,34 @@ const Messages = () => {
     });
   };
 
+  const ConversationListComponent = () => (
+    <ConversationList
+      conversations={conversations}
+      selectedConversationId={selectedConversation?.id}
+      onSelectConversation={handleSelectConversation}
+      loading={loading}
+    />
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="h-[calc(100vh-4rem)] flex">
-        {/* Conversation List */}
-        <ConversationList
-          conversations={conversations}
-          selectedConversationId={selectedConversation?.id}
-          onSelectConversation={handleSelectConversation}
-          loading={loading}
-        />
+        {/* Desktop Conversation List */}
+        {!isMobile && (
+          <div className="w-80 border-r">
+            <ConversationListComponent />
+          </div>
+        )}
+        
+        {/* Mobile Conversation List Sheet */}
+        {isMobile && (
+          <Sheet open={isMobileConversationListOpen} onOpenChange={setIsMobileConversationListOpen}>
+            <SheetContent side="left" className="w-80 p-0">
+              <ConversationListComponent />
+            </SheetContent>
+          </Sheet>
+        )}
         
         {/* Chat Area */}
         <div className="flex-1 flex flex-col">
@@ -134,12 +168,23 @@ const Messages = () => {
               {/* Chat Header */}
               <div className="border-b bg-background p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  {/* Mobile back button */}
+                  {isMobile && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleBackToConversations}
+                      className="mr-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Avatar className="h-10 w-10">
                     <AvatarImage src={selectedConversation.participant.avatar_url} alt={selectedConversation.participant.full_name} />
                     <AvatarFallback>{selectedConversation.participant.full_name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="font-semibold">{selectedConversation.participant.full_name}</h2>
+                    <h2 className="font-semibold text-sm sm:text-base">{selectedConversation.participant.full_name}</h2>
                     {selectedConversation.participant.role && (
                       <Badge variant="secondary" className="text-xs">
                         {selectedConversation.participant.role}
@@ -148,26 +193,30 @@ const Messages = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <Button 
                     size="icon" 
                     variant="ghost"
                     onClick={handleStartVoiceCall}
                     title="Start voice call"
+                    className="h-8 w-8 sm:h-10 sm:w-10"
                   >
-                    <Phone className="h-4 w-4" />
+                    <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                   <Button 
                     size="icon" 
                     variant="ghost"
                     onClick={handleStartVideoCall}
                     title="Start video call"
+                    className="h-8 w-8 sm:h-10 sm:w-10"
                   >
-                    <Video className="h-4 w-4" />
+                    <Video className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
+                  {!isMobile && (
+                    <Button size="icon" variant="ghost">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
               
@@ -193,12 +242,26 @@ const Messages = () => {
               />
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center p-4">
               <div className="text-center">
+                {isMobile && (
+                  <div className="absolute top-4 left-4">
+                    <Sheet open={isMobileConversationListOpen} onOpenChange={setIsMobileConversationListOpen}>
+                      <SheetTrigger asChild>
+                        <Button size="icon" variant="ghost">
+                          <Menu className="h-5 w-5" />
+                        </Button>
+                      </SheetTrigger>
+                    </Sheet>
+                  </div>
+                )}
                 <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
-                <p className="text-muted-foreground">
-                  Choose a conversation from the sidebar to start messaging
+                <p className="text-muted-foreground text-sm sm:text-base px-4">
+                  {isMobile 
+                    ? "Tap the menu button to view conversations" 
+                    : "Choose a conversation from the sidebar to start messaging"
+                  }
                 </p>
               </div>
             </div>

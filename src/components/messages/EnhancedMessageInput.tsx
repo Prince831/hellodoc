@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface EnhancedMessageInputProps {
   onSendMessage: (message: string, attachments?: File[]) => void;
@@ -42,6 +43,7 @@ const EnhancedMessageInput = ({
   const [attachments, setAttachments] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSend = () => {
     if ((message.trim() || attachments.length > 0) && !disabled) {
@@ -116,29 +118,31 @@ const EnhancedMessageInput = ({
       )}
       
       <div className="p-4">
-        {/* Call Actions */}
-        <div className="flex justify-center gap-2 mb-4">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onStartVoiceCall}
-            disabled={disabled}
-            className="flex items-center gap-2"
-          >
-            <Phone className="h-4 w-4" />
-            Voice Call
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onStartVideoCall}
-            disabled={disabled}
-            className="flex items-center gap-2"
-          >
-            <Video className="h-4 w-4" />
-            Video Call
-          </Button>
-        </div>
+        {/* Call Actions - Hidden on mobile since they're in the header */}
+        {!isMobile && (
+          <div className="flex justify-center gap-2 mb-4">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onStartVoiceCall}
+              disabled={disabled}
+              className="flex items-center gap-2"
+            >
+              <Phone className="h-4 w-4" />
+              Voice Call
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onStartVideoCall}
+              disabled={disabled}
+              className="flex items-center gap-2"
+            >
+              <Video className="h-4 w-4" />
+              Video Call
+            </Button>
+          </div>
+        )}
 
         <div className="flex items-end gap-2">
           <div className="flex-1">
@@ -147,20 +151,21 @@ const EnhancedMessageInput = ({
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
-              className="min-h-[60px] max-h-32 resize-none"
+              className={`min-h-[60px] max-h-32 resize-none ${isMobile ? 'text-base' : ''}`}
               disabled={disabled}
             />
           </div>
           
-          <div className="flex flex-col gap-2">
+          <div className={`flex ${isMobile ? 'flex-row gap-1' : 'flex-col gap-2'}`}>
             {/* File Attachment */}
             <Button
               size="icon"
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
+              className={isMobile ? 'h-8 w-8' : ''}
             >
-              <Paperclip className="h-4 w-4" />
+              <Paperclip className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
             </Button>
             
             {/* Emoji Picker */}
@@ -170,8 +175,9 @@ const EnhancedMessageInput = ({
                   size="icon"
                   variant="outline"
                   disabled={disabled}
+                  className={isMobile ? 'h-8 w-8' : ''}
                 >
-                  <Smile className="h-4 w-4" />
+                  <Smile className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-2">
@@ -196,8 +202,9 @@ const EnhancedMessageInput = ({
               size="icon" 
               onClick={handleSend}
               disabled={(!message.trim() && attachments.length === 0) || disabled}
+              className={isMobile ? 'h-8 w-8' : ''}
             >
-              <Send className="h-4 w-4" />
+              <Send className={`${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
             </Button>
           </div>
         </div>

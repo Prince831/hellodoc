@@ -44,7 +44,7 @@ const ConversationList = ({
 
   if (loading) {
     return (
-      <div className="w-80 border-r bg-background">
+      <div className="w-full h-full bg-background flex flex-col">
         <div className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -62,7 +62,7 @@ const ConversationList = ({
   }
 
   return (
-    <div className="w-80 border-r bg-background flex flex-col">
+    <div className="w-full h-full bg-background flex flex-col">
       <div className="p-4 border-b">
         <div className="relative">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
