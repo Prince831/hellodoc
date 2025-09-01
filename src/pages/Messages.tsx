@@ -5,6 +5,8 @@ import ConversationList from "@/components/messages/ConversationList";
 import MessageBubble from "@/components/messages/MessageBubble";
 import EnhancedMessageInput from "@/components/messages/EnhancedMessageInput";
 import CallInterface from "@/components/messages/CallInterface";
+import EmptyState from "@/components/messages/EmptyState";
+import LoadingState from "@/components/messages/LoadingState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +31,8 @@ const Messages = () => {
     handleAppointmentResponse, 
     markAsRead, 
     handleSendMessage,
-    startConversation
+    startConversation,
+    isLoading
   } = useMessages();
   
   // Mobile state management
@@ -222,16 +225,20 @@ const Messages = () => {
               
               {/* Messages */}
               <ScrollArea className="flex-1 p-4">
-                <div className="space-y-2">
-                  {selectedConversation.messages.map((message: any) => (
-                    <MessageBubble
-                      key={message.id}
-                      message={message}
-                      isCurrentUser={message.sender_id === user?.id}
-                      onAppointmentResponse={handleAppointmentResponse}
-                    />
-                  ))}
-                </div>
+                {selectedConversation.messages.length === 0 ? (
+                  <EmptyState type="no-messages" />
+                ) : (
+                  <div className="space-y-2">
+                    {selectedConversation.messages.map((message: any) => (
+                      <MessageBubble
+                        key={message.id}
+                        message={message}
+                        isCurrentUser={message.sender_id === user?.id}
+                        onAppointmentResponse={handleAppointmentResponse}
+                      />
+                    ))}
+                  </div>
+                )}
               </ScrollArea>
               
               {/* Enhanced Message Input */}
@@ -239,31 +246,32 @@ const Messages = () => {
                 onSendMessage={handleSendMessageWithAttachments}
                 onStartVoiceCall={handleStartVoiceCall}
                 onStartVideoCall={handleStartVideoCall}
+                disabled={isLoading}
               />
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center p-4">
-              <div className="text-center">
-                {isMobile && (
-                  <div className="absolute top-4 left-4">
-                    <Sheet open={isMobileConversationListOpen} onOpenChange={setIsMobileConversationListOpen}>
-                      <SheetTrigger asChild>
-                        <Button size="icon" variant="ghost">
-                          <Menu className="h-5 w-5" />
-                        </Button>
-                      </SheetTrigger>
-                    </Sheet>
-                  </div>
-                )}
-                <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
-                <p className="text-muted-foreground text-sm sm:text-base px-4">
-                  {isMobile 
-                    ? "Tap the menu button to view conversations" 
-                    : "Choose a conversation from the sidebar to start messaging"
-                  }
-                </p>
-              </div>
+            <div className="flex-1 flex flex-col relative">
+              {isMobile && (
+                <div className="absolute top-4 left-4 z-10">
+                  <Sheet open={isMobileConversationListOpen} onOpenChange={setIsMobileConversationListOpen}>
+                    <SheetTrigger asChild>
+                      <Button size="icon" variant="ghost" className="bg-background/95 backdrop-blur">
+                        <Menu className="h-5 w-5" />
+                      </Button>
+                    </SheetTrigger>
+                  </Sheet>
+                </div>
+              )}
+              <EmptyState 
+                type="select-conversation" 
+                onStartConversation={() => {
+                  // Could navigate to doctors page or show doctor selector
+                  toast({
+                    title: "Find a Doctor",
+                    description: "Visit the Doctors page to find and chat with healthcare providers.",
+                  });
+                }}
+              />
             </div>
           )}
         </div>

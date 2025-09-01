@@ -12,8 +12,8 @@ interface MessageBubbleProps {
     content: string;
     sender: {
       id: string;
-      name: string;
-      avatar?: string;
+      full_name: string;
+      avatar_url?: string;
     };
     timestamp: string;
     read: boolean;
@@ -38,15 +38,15 @@ const MessageBubble = ({ message, isCurrentUser, onAppointmentResponse }: Messag
     <div className={`flex gap-3 ${isCurrentUser ? 'flex-row-reverse' : ''} mb-4`}>
       {!isCurrentUser && (
         <Avatar className="h-8 w-8 flex-shrink-0">
-          <AvatarImage src={message.sender.avatar} alt={message.sender.name} />
-          <AvatarFallback>{message.sender.name.charAt(0)}</AvatarFallback>
+          <AvatarImage src={message.sender.avatar_url} alt={message.sender.full_name} />
+          <AvatarFallback>{message.sender.full_name.charAt(0)}</AvatarFallback>
         </Avatar>
       )}
       
       <div className={`flex flex-col max-w-[70%] ${isCurrentUser ? 'items-end' : 'items-start'}`}>
         {!isCurrentUser && (
           <span className="text-sm font-medium text-muted-foreground mb-1">
-            {message.sender.name}
+            {message.sender.full_name}
           </span>
         )}
         

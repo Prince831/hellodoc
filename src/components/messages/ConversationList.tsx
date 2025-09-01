@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import LoadingState from "@/components/messages/LoadingState";
+import EmptyState from "@/components/messages/EmptyState";
 
 interface Conversation {
   id: string;
@@ -51,12 +53,7 @@ const ConversationList = ({
             <Input placeholder="Search conversations..." className="pl-8" disabled />
           </div>
         </div>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2 animate-pulse" />
-            <p className="text-sm text-muted-foreground">Loading conversations...</p>
-          </div>
-        </div>
+        <LoadingState type="conversations" />
       </div>
     );
   }
@@ -77,19 +74,9 @@ const ConversationList = ({
       
       <ScrollArea className="flex-1">
         {filteredConversations.length === 0 ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">
-                {searchTerm ? 'No conversations found' : 'No messages yet'}
-              </p>
-              {!searchTerm && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Start a conversation with a doctor
-                </p>
-              )}
-            </div>
-          </div>
+          <EmptyState 
+            type={searchTerm ? 'no-conversations' : 'no-conversations'} 
+          />
         ) : (
           <div className="divide-y">
             {filteredConversations.map((conversation) => (
