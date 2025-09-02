@@ -896,6 +896,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_doctor_contact_info: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       has_role: {
         Args: { role_name: string; user_id: string }
         Returns: boolean
