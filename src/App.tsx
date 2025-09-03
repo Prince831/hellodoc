@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import { AuthProvider } from "./hooks/useAuth";
+import NotificationProvider from "./components/NotificationProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -50,7 +51,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <AuthProvider>
-            <SidebarProvider>
+            <NotificationProvider>
+              <SidebarProvider>
               <BrowserRouter>
                 <Routes>
                   {/* Public routes */}
@@ -108,7 +110,8 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
-            </SidebarProvider>
+              </SidebarProvider>
+            </NotificationProvider>
           </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>

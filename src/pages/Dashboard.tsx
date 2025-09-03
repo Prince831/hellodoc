@@ -7,6 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowUpRight, Activity, HeartPulse, Pill, Calendar, Clock, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { useIsMobile } from "@/hooks/use-mobile";
+import ResponsiveGrid from "@/components/ui/responsive-grid";
+import MobileCard from "@/components/ui/mobile-card";
 
 // Mock health metrics data
 const healthMetrics = {
@@ -19,30 +22,34 @@ const healthMetrics = {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const isMobile = useIsMobile();
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
       <Navbar />
       
-      <main className="pt-16">
-        <div className="container mx-auto py-6 px-4 md:px-6 max-w-7xl">
+      <main className={isMobile ? "pt-4" : "pt-16"}>
+        <div className={`container mx-auto py-6 ${isMobile ? "px-2" : "px-4 md:px-6"} max-w-7xl`}>
           {/* Hero Dashboard Section */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative mb-8 bg-gradient-to-br from-primary via-primary/90 to-accent rounded-3xl p-8 text-primary-foreground overflow-hidden"
+            className={`relative mb-8 bg-gradient-to-br from-primary via-primary/90 to-accent rounded-3xl ${isMobile ? "p-6" : "p-8"} text-primary-foreground overflow-hidden`}
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl" />
             
             <div className="relative z-10">
-              <h1 className="text-4xl font-bold mb-2">Welcome back!</h1>
-              <p className="text-primary-foreground/80 text-lg">Here's your health overview for today</p>
+              <h1 className={`font-bold mb-2 ${isMobile ? "text-2xl" : "text-4xl"}`}>Welcome back!</h1>
+              <p className={`text-primary-foreground/80 ${isMobile ? "text-base" : "text-lg"}`}>Here's your health overview for today</p>
             </div>
           </motion.div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <ResponsiveGrid 
+            cols={{ mobile: 1, tablet: 1, desktop: 4 }}
+            gap={{ mobile: 4, tablet: 6, desktop: 6 }}
+          >
             {/* Navigation Sidebar */}
             <motion.div 
               initial={{ opacity: 0, x: -30 }}
@@ -333,7 +340,7 @@ const Dashboard = () => {
                 </div>
               </Tabs>
             </motion.div>
-          </div>
+          </ResponsiveGrid>
         </div>
       </main>
     </div>

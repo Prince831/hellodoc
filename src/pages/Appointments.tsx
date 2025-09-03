@@ -10,11 +10,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BookingForm from "@/components/appointments/BookingForm";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileCard from "@/components/ui/mobile-card";
 
 const Appointments = () => {
   const location = useLocation();
   const { data: appointments, isLoading } = useAppointments();
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const isMobile = useIsMobile();
 
   // Check if we came here with a pre-selected doctor
   const selectedDoctorId = location.state?.selectedDoctorId;
@@ -39,14 +42,14 @@ const Appointments = () => {
       
       <div className="relative z-10">
         <Navbar />
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Appointments</h1>
-            <p className="text-muted-foreground">
-              Manage your healthcare appointments and consultations
-            </p>
-          </div>
+        <div className={`container mx-auto ${isMobile ? "px-3 py-4" : "px-3 sm:px-4 py-4 sm:py-6"}`}>
+          <div className={`flex ${isMobile ? "flex-col" : "flex-col sm:flex-row"} justify-between items-start ${isMobile ? "" : "sm:items-center"} gap-4 mb-6`}>
+            <div>
+              <h1 className={`font-bold tracking-tight ${isMobile ? "text-xl" : "text-2xl sm:text-3xl"}`}>My Appointments</h1>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Manage your healthcare appointments and consultations
+              </p>
+            </div>
           <Button 
             onClick={() => setShowBookingForm(true)}
             className="flex items-center gap-2"

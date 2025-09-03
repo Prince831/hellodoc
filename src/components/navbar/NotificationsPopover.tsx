@@ -1,57 +1,45 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useToast } from "@/hooks/use-toast";
-import NotificationItem, { Notification } from "./NotificationItem";
-
-// Mock notifications data with types and paths
-const mockNotifications: Notification[] = [
-  { 
-    id: 1, 
-    title: "New Message", 
-    description: "Dr. Smith sent you a message", 
-    time: "Just now",
-    type: "message",
-    path: "/messages"
-  },
-  { 
-    id: 2, 
-    title: "Appointment Reminder", 
-    description: "Your appointment is tomorrow at 10 AM", 
-    time: "2 hours ago",
-    type: "appointment",
-    path: "/appointments"
-  },
-  { 
-    id: 3, 
-    title: "Test Results", 
-    description: "Your test results are ready", 
-    time: "Yesterday",
-    type: "test_results",
-    path: "/health-records"
-  }
-];
+import { Badge } from "@/components/ui/badge";
+import { formatDistance } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const NotificationsPopover = () => {
-  const [unreadNotifications, setUnreadNotifications] = useState(3);
-  const [notifications] = useState<Notification[]>(mockNotifications);
+  const { notifications, isLoading, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleNotificationClick = () => {
-    setUnreadNotifications(0);
-  };
+  const handleNotificationClick = (notification: any) => {
+    // Mark as read
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
 
-  const handleNotificationItemClick = (notification: Notification) => {
-    if (notification.path) {
-      navigate(notification.path);
+    // Navigate if there's an action URL
+    if (notification.action_url) {
+      navigate(notification.action_url);
       toast({
         title: "Navigating",
-        description: `Going to ${notification.title}`
+        description: `Opening ${notification.title}`
       });
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'success':
+        return '✅';
+      case 'warning':
+        return '⚠️';
+      case 'error':
+        return '❌';
+      default:
+        return '📢';
     }
   };
 
@@ -62,41 +50,84 @@ const NotificationsPopover = () => {
           variant="ghost" 
           size="icon" 
           className="relative"
-          onClick={handleNotificationClick}
         >
           <Bell className="h-5 w-5" />
-          {unreadNotifications > 0 && (
-            <span className="absolute top-1 right-1 h-5 w-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-medium">
-              {unreadNotifications}
-            </span>
+          {unreadCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-[10px] font-medium min-w-[20px]"
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b">
-          <div className="font-medium">Notifications</div>
+        <div className="p-4 border-b flex items-center justify-between">
+          <div className="font-semibold">Notifications</div>
+          {unreadCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => markAllAsRead()}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Mark all read
+            </Button>
+          )}
         </div>
         <div className="max-h-80 overflow-y-auto">
-          {notifications.length > 0 ? (
+          {isLoading ? (
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              Loading notifications...
+            </div>
+          ) : notifications.length > 0 ? (
             <div className="divide-y">
               {notifications.map((notification) => (
-                <NotificationItem 
+                <div 
                   key={notification.id}
-                  notification={notification}
-                  onClick={handleNotificationItemClick}
-                />
+                  className={cn(
+                    "p-4 hover:bg-muted/50 cursor-pointer transition-colors border-l-2",
+                    !notification.read 
+                      ? "bg-primary/5 border-l-primary" 
+                      : "border-l-transparent"
+                  )}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-lg flex-shrink-0 mt-0.5">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className={cn(
+                        "font-medium text-sm",
+                        !notification.read && "text-foreground"
+                      )}>
+                        {notification.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {notification.message}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-2">
+                        {formatDistance(new Date(notification.created_at), new Date(), { 
+                          addSuffix: true 
+                        })}
+                      </div>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2" />
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No notifications
+            <div className="p-8 text-center text-sm text-muted-foreground">
+              <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div>No notifications yet</div>
+              <div className="text-xs mt-1">You'll see updates here</div>
             </div>
           )}
-        </div>
-        <div className="p-2 border-t">
-          <Button variant="ghost" size="sm" className="w-full justify-center">
-            Mark all as read
-          </Button>
         </div>
       </PopoverContent>
     </Popover>
