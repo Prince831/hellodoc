@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { mockMessages, mockDoctors } from "@/types/messages";
 
 export interface MessageUser {
   id: string;
@@ -48,85 +48,45 @@ export function useMessages() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newMessage, setNewMessage] = useState("");
 
-  // Fetch conversations with messages
+  // Create mock conversations from mock data
   const { data: conversations = [], isLoading: loading } = useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Fetch conversations for the current user
-      const { data: conversationData, error: convError } = await supabase
-        .from('conversations')
-        .select('*')
-        .or(`patient_id.eq.${user.id},doctor_id.eq.${user.id}`)
-        .order('last_message_at', { ascending: false });
+      // Create mock conversations based on mock doctors and messages
+      const conversationsWithMessages: Conversation[] = mockDoctors.map(doctor => {
+        // Filter messages for this doctor
+        const doctorMessages = mockMessages
+          .filter(msg => 
+            msg.sender_id === doctor.id || msg.receiver_id === doctor.id
+          )
+          .map(msg => ({
+            ...msg,
+            sender: {
+              id: msg.sender_id,
+              full_name: msg.sender_id === doctor.id ? doctor.name : 'John Patient',
+              avatar_url: msg.sender_id === doctor.id ? doctor.imageUrl : undefined,
+              role: msg.sender_id === doctor.id ? 'doctor' : 'patient'
+            },
+            receiver: {
+              id: msg.receiver_id,
+              full_name: msg.receiver_id === doctor.id ? doctor.name : 'John Patient',
+              avatar_url: msg.receiver_id === doctor.id ? doctor.imageUrl : undefined,
+              role: msg.receiver_id === doctor.id ? 'doctor' : 'patient'
+            }
+          }));
 
-      if (convError) {
-        console.error('Error fetching conversations:', convError);
-        throw convError;
-      }
+        const lastMessage = doctorMessages[doctorMessages.length - 1];
+        const unreadCount = doctorMessages.filter(m => !m.read && m.sender_id !== user.id).length;
 
-      // Fetch messages for each conversation
-      const conversationsWithMessages: Conversation[] = [];
-      
-      for (const conv of conversationData || []) {
-        // Determine the other participant
-        const otherUserId = conv.patient_id === user.id ? conv.doctor_id : conv.patient_id;
-        
-        // Fetch the other participant's profile
-        const { data: participantData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', otherUserId)
-          .single();
-
-        // Fetch messages for this conversation
-        const { data: messagesData } = await supabase
-          .from('messages')
-          .select(`
-            *,
-            sender:profiles!messages_sender_id_fkey(*),
-            receiver:profiles!messages_receiver_id_fkey(*)
-          `)
-          .eq('conversation_id', conv.id)
-          .order('created_at', { ascending: true });
-
-        const messages: Message[] = (messagesData || []).map(msg => ({
-          id: msg.id,
-          content: msg.content,
-          created_at: msg.created_at,
-          sender: {
-            id: msg.sender.id,
-            full_name: msg.sender.full_name || 'Unknown User',
-            avatar_url: msg.sender.avatar_url,
-            role: msg.sender.role
-          },
-          receiver: {
-            id: msg.receiver.id,
-            full_name: msg.receiver.full_name || 'Unknown User',
-            avatar_url: msg.receiver.avatar_url,
-            role: msg.receiver.role
-          },
-          sender_id: msg.sender_id,
-          receiver_id: msg.receiver_id,
-          timestamp: msg.created_at,
-          read: msg.read,
-          appointment_request: msg.appointment_request,
-          appointment_status: msg.appointment_status,
-          notification_type: msg.notification_type,
-          conversation_id: msg.conversation_id
-        }));
-
-        const lastMessage = messages[messages.length - 1];
-        const unreadCount = messages.filter(m => !m.read && m.sender_id !== user.id).length;
-
-        conversationsWithMessages.push({
-          id: conv.id,
+        return {
+          id: `conv-${doctor.id}`,
           participant: {
-            id: otherUserId,
-            full_name: participantData?.full_name || 'Unknown User',
-            avatar_url: participantData?.avatar_url,
-            role: participantData?.role
+            id: doctor.id,
+            full_name: doctor.name,
+            avatar_url: doctor.imageUrl,
+            role: 'doctor'
           },
           lastMessage: lastMessage ? {
             content: lastMessage.content,
@@ -134,58 +94,27 @@ export function useMessages() {
             fromCurrentUser: lastMessage.sender_id === user.id
           } : undefined,
           unreadCount,
-          messages,
-          subject: conv.subject,
-          status: conv.status
-        });
-      }
+          messages: doctorMessages,
+          subject: `Conversation with ${doctor.name}`,
+          status: 'active'
+        };
+      }).filter(conv => conv.messages.length > 0);
 
       return conversationsWithMessages;
     },
     enabled: !!user?.id,
   });
 
-  // Set up realtime subscription
+  // Mock realtime subscription (no-op for mock data)
   useEffect(() => {
     if (!user?.id) return;
-
-    console.log('Setting up realtime subscription for messages');
-    
-    const channel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          console.log('Message change detected:', payload);
-          queryClient.invalidateQueries({ queryKey: ['conversations'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'conversations'
-        },
-        (payload) => {
-          console.log('Conversation change detected:', payload);
-          queryClient.invalidateQueries({ queryKey: ['conversations'] });
-        }
-      )
-      .subscribe();
-
+    console.log('Mock realtime subscription setup');
     return () => {
-      console.log('Cleaning up realtime subscription');
-      supabase.removeChannel(channel);
+      console.log('Mock realtime subscription cleanup');
     };
   }, [user?.id, queryClient]);
 
-  // Send message mutation
+  // Mock send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async ({ 
       receiverId, 
@@ -198,23 +127,13 @@ export function useMessages() {
     }) => {
       if (!user?.id) throw new Error('User not authenticated');
 
-      const response = await supabase.functions.invoke('send-message', {
-        body: {
-          senderId: user.id,
-          receiverId,
-          content,
-          conversationId,
-        },
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to send message');
-      }
-
-      return response.data;
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('Mock sending message:', { receiverId, content, conversationId });
+      return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
       setNewMessage("");
       toast({
         title: "Message sent",
@@ -224,7 +143,7 @@ export function useMessages() {
     onError: (error: any) => {
       console.error('Error sending message:', error);
       toast({
-        title: "Error",
+        title: "Error", 
         description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
@@ -233,17 +152,9 @@ export function useMessages() {
 
   const handleAppointmentResponse = async (messageId: string, status: 'accepted' | 'rejected') => {
     try {
-      const { error } = await supabase
-        .from('messages')
-        .update({ 
-          appointment_status: status,
-          notification_type: status === 'accepted' ? 'appointment_confirmed' : 'appointment_rejected'
-        })
-        .eq('id', messageId);
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      // Mock appointment response
+      console.log('Mock appointment response:', { messageId, status });
+      
       toast({
         title: "Appointment Response Sent",
         description: `Appointment ${status === 'accepted' ? 'accepted' : 'rejected'} successfully.`,
@@ -260,13 +171,8 @@ export function useMessages() {
 
   const markAsRead = async (messageId: string) => {
     try {
-      const { error } = await supabase
-        .from('messages')
-        .update({ read: true })
-        .eq('id', messageId);
-
-      if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      // Mock mark as read
+      console.log('Mock marking message as read:', messageId);
     } catch (error) {
       console.error('Error marking message as read:', error);
     }
@@ -289,7 +195,7 @@ export function useMessages() {
     });
   };
 
-  // Create or get conversation with a user
+  // Mock start conversation
   const startConversation = async (otherUserId: string, initialMessage?: string) => {
     try {
       // Check if conversation already exists
@@ -302,22 +208,30 @@ export function useMessages() {
         return existingConv;
       }
 
-      // Create new conversation
-      const { data: newConv, error } = await supabase
-        .from('conversations')
-        .insert({
-          patient_id: user?.role === 'patient' ? user.id : otherUserId,
-          doctor_id: user?.role === 'doctor' ? user.id : otherUserId,
-          subject: 'New conversation',
-        })
-        .select()
-        .single();
+      // Find the doctor to create a new conversation
+      const doctor = mockDoctors.find(d => d.id === otherUserId);
+      if (!doctor) {
+        throw new Error('Doctor not found');
+      }
 
-      if (error) throw error;
+      // Create mock new conversation
+      const newConv: Conversation = {
+        id: `conv-new-${otherUserId}`,
+        participant: {
+          id: doctor.id,
+          full_name: doctor.name,
+          avatar_url: doctor.imageUrl,
+          role: 'doctor'
+        },
+        messages: [],
+        unreadCount: 0,
+        subject: `New conversation with ${doctor.name}`,
+        status: 'active'
+      };
 
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      setSelectedConversation(newConv);
       
-      if (initialMessage && newConv) {
+      if (initialMessage) {
         sendMessageMutation.mutate({
           receiverId: otherUserId,
           content: initialMessage,
