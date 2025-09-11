@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Eye, EyeOff, ArrowLeft, Heart } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowLeft, Heart, Github, Mail, Chrome } from "lucide-react";
 import { motion } from "framer-motion";
 
 const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -152,6 +153,64 @@ const AuthPage = () => {
     }
   };
 
+  const handleSocialAuth = async (provider: 'google' | 'github' | 'discord') => {
+    setSocialLoading(provider);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Authentication Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      // Note: Success is handled by the redirect
+    } catch (error) {
+      console.error(`${provider} auth error:`, error);
+      toast({
+        title: "Authentication Failed", 
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSocialLoading(null);
+    }
+  };
+
+  const SocialButton = ({ 
+    provider, 
+    icon: Icon, 
+    label, 
+    className = "" 
+  }: { 
+    provider: 'google' | 'github' | 'discord';
+    icon: any;
+    label: string;
+    className?: string;
+  }) => (
+    <Button
+      type="button"
+      variant="outline"
+      className={`w-full h-11 text-base font-medium ${className}`}
+      onClick={() => handleSocialAuth(provider)}
+      disabled={socialLoading !== null}
+    >
+      {socialLoading === provider ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Icon className="mr-2 h-4 w-4" />
+      )}
+      {label}
+    </Button>
+  );
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 px-4 py-8 relative overflow-hidden">
       {/* Background Animation */}
@@ -228,6 +287,52 @@ const AuthPage = () => {
                 </TabsList>
 
                 <TabsContent value="login" className="space-y-4">
+                  {/* Social Authentication Buttons */}
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Sign in with
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <SocialButton
+                        provider="google"
+                        icon={Chrome}
+                        label="Continue with Google"
+                        className="hover:bg-red-50 dark:hover:bg-red-950/20"
+                      />
+                      <SocialButton
+                        provider="github"
+                        icon={Github}
+                        label="Continue with GitHub"
+                        className="hover:bg-gray-50 dark:hover:bg-gray-950/20"
+                      />
+                      <SocialButton
+                        provider="discord"
+                        icon={Mail}
+                        label="Continue with Discord"
+                        className="hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or continue with email
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
@@ -278,6 +383,52 @@ const AuthPage = () => {
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4">
+                  {/* Social Authentication Buttons */}
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Sign up with
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid gap-2">
+                      <SocialButton
+                        provider="google"
+                        icon={Chrome}
+                        label="Continue with Google"
+                        className="hover:bg-red-50 dark:hover:bg-red-950/20"
+                      />
+                      <SocialButton
+                        provider="github"
+                        icon={Github}
+                        label="Continue with GitHub"
+                        className="hover:bg-gray-50 dark:hover:bg-gray-950/20"
+                      />
+                      <SocialButton
+                        provider="discord"
+                        icon={Mail}
+                        label="Continue with Discord"
+                        className="hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or create account with email
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
                   <form onSubmit={handleSignup} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
