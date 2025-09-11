@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,14 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useDoctors } from "@/hooks/useDoctors";
-import { useCreateAppointment } from "@/hooks/useAppointments";
+import { useCreateAppointment, useAppointments } from "@/hooks/useAppointments";
+import AvailableTimeSlots from "./AvailableTimeSlots";
 
 interface BookingFormProps {
   isOpen: boolean;
   onClose: () => void;
   preSelectedDoctorId?: string;
+  preSelectedDate?: Date;
 }
 
 interface FormData {
@@ -32,11 +34,15 @@ interface FormData {
 const BookingForm: React.FC<BookingFormProps> = ({ 
   isOpen, 
   onClose, 
-  preSelectedDoctorId 
+  preSelectedDoctorId,
+  preSelectedDate
 }) => {
   const { data: doctors = [] } = useDoctors();
+  const { data: appointments = [] } = useAppointments();
   const createAppointmentMutation = useCreateAppointment();
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(preSelectedDate);
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [showTimeSlots, setShowTimeSlots] = useState(false);
   
   const {
     register,
@@ -51,17 +57,37 @@ const BookingForm: React.FC<BookingFormProps> = ({
   });
 
   const watchedDoctorId = watch('doctorId');
+  const selectedDoctor = doctors.find(doc => doc.id === watchedDoctorId);
 
-  const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
-  ];
+  // Update form when preselected values change
+  useEffect(() => {
+    if (preSelectedDoctorId && preSelectedDoctorId !== watchedDoctorId) {
+      setValue('doctorId', preSelectedDoctorId);
+    }
+  }, [preSelectedDoctorId, setValue, watchedDoctorId]);
+
+  useEffect(() => {
+    if (preSelectedDate) {
+      setSelectedDate(preSelectedDate);
+    }
+  }, [preSelectedDate]);
+
+  // Show time slots when both doctor and date are selected
+  useEffect(() => {
+    setShowTimeSlots(!!(watchedDoctorId && selectedDate));
+  }, [watchedDoctorId, selectedDate]);
+
+  // Reset time selection when date or doctor changes
+  useEffect(() => {
+    setSelectedTime("");
+    setValue('time', "");
+  }, [watchedDoctorId, selectedDate, setValue]);
 
   const onSubmit = (data: FormData) => {
-    if (!selectedDate) return;
+    if (!selectedDate || !selectedTime) return;
 
     const appointmentDateTime = new Date(selectedDate);
-    const [hours, minutes] = data.time.split(':');
+    const [hours, minutes] = selectedTime.split(':');
     appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
 
     createAppointmentMutation.mutate({
@@ -71,14 +97,22 @@ const BookingForm: React.FC<BookingFormProps> = ({
       notes: data.notes,
     }, {
       onSuccess: () => {
+        setSelectedDate(undefined);
+        setSelectedTime("");
+        setShowTimeSlots(false);
         onClose();
       }
     });
   };
 
+  const handleTimeSelect = (time: string) => {
+    setSelectedTime(time);
+    setValue('time', time);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Book New Appointment</DialogTitle>
         </DialogHeader>
@@ -129,26 +163,22 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   onSelect={setSelectedDate}
                   disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
                   initialFocus
+                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="time">Select Time</Label>
-            <Select onValueChange={(value) => setValue('time', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a time slot" />
-              </SelectTrigger>
-              <SelectContent>
-                {timeSlots.map((time) => (
-                  <SelectItem key={time} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Time Slots Section */}
+          {showTimeSlots && selectedDoctor && selectedDate && (
+            <AvailableTimeSlots
+              doctor={selectedDoctor}
+              selectedDate={selectedDate}
+              existingAppointments={appointments}
+              onTimeSelect={handleTimeSelect}
+              selectedTime={selectedTime}
+            />
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="reason">Reason for Visit</Label>
@@ -182,7 +212,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             </Button>
             <Button
               type="submit"
-              disabled={createAppointmentMutation.isPending}
+              disabled={createAppointmentMutation.isPending || !selectedTime || !selectedDate}
               className="flex-1"
             >
               {createAppointmentMutation.isPending ? 'Booking...' : 'Book Appointment'}
