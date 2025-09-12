@@ -19,6 +19,7 @@ const AuthPage = () => {
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Login form state
   const [loginData, setLoginData] = useState({
@@ -34,6 +35,9 @@ const AuthPage = () => {
     confirmPassword: "",
     role: "patient" as "patient" | "doctor" | "admin"
   });
+
+  // Forgot password state
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +149,39 @@ const AuthPage = () => {
       console.error("Signup error:", error);
       toast({
         title: "Signup Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) {
+        toast({
+          title: "Reset Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Reset Email Sent",
+          description: "Please check your email for password reset instructions.",
+        });
+        setForgotPasswordEmail("");
+        setShowForgotPassword(false);
+      }
+    } catch (error) {
+      console.error("Password reset error:", error);
+      toast({
+        title: "Reset Failed",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
@@ -287,99 +324,156 @@ const AuthPage = () => {
                 </TabsList>
 
                 <TabsContent value="login" className="space-y-4">
-                  {/* Social Authentication Buttons */}
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
+                  {showForgotPassword ? (
+                    // Forgot Password Form
+                    <>
+                      <div className="text-center space-y-2">
+                        <h3 className="text-lg font-semibold">Reset Your Password</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Enter your email address and we'll send you a link to reset your password.
+                        </p>
                       </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                          Sign in with
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="grid gap-2">
-                      <SocialButton
-                        provider="google"
-                        icon={Chrome}
-                        label="Continue with Google"
-                        className="hover:bg-red-50 dark:hover:bg-red-950/20"
-                      />
-                      <SocialButton
-                        provider="github"
-                        icon={Github}
-                        label="Continue with GitHub"
-                        className="hover:bg-gray-50 dark:hover:bg-gray-950/20"
-                      />
-                      <SocialButton
-                        provider="discord"
-                        icon={Mail}
-                        label="Continue with Discord"
-                        className="hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
-                      />
-                    </div>
-
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                          Or continue with email
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
-                      <Input
-                        id="login-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={loginData.email}
-                        onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
-                        required
-                        className="h-11 text-base"
-                        autoComplete="email"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
-                      <div className="relative">
-                        <Input
-                          id="login-password"
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Enter your password"
-                          value={loginData.password}
-                          onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
-                          required
-                          className="h-11 pr-12 text-base"
-                          autoComplete="current-password"
-                        />
+                      
+                      <form onSubmit={handlePasswordReset} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="reset-email" className="text-sm font-medium">Email</Label>
+                          <Input
+                            id="reset-email"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={forgotPasswordEmail}
+                            onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                            required
+                            className="h-11 text-base"
+                            autoComplete="email"
+                          />
+                        </div>
+                        <Button type="submit" className="w-full h-11 text-base font-medium" disabled={loading}>
+                          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Send Reset Link
+                        </Button>
+                      </form>
+                      
+                      <div className="text-center">
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon"
-                          className="absolute right-0 top-0 h-11 w-12 hover:bg-transparent"
-                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-sm"
+                          onClick={() => setShowForgotPassword(false)}
                         >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
+                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          Back to Sign In
                         </Button>
                       </div>
-                    </div>
-                    <Button type="submit" className="w-full h-11 text-base font-medium" disabled={loading}>
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Sign In
-                    </Button>
-                  </form>
+                    </>
+                  ) : (
+                    // Login Form
+                    <>
+                      {/* Social Authentication Buttons */}
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                              Sign in with
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <SocialButton
+                            provider="google"
+                            icon={Chrome}
+                            label="Continue with Google"
+                            className="hover:bg-red-50 dark:hover:bg-red-950/20"
+                          />
+                          <SocialButton
+                            provider="github"
+                            icon={Github}
+                            label="Continue with GitHub"
+                            className="hover:bg-gray-50 dark:hover:bg-gray-950/20"
+                          />
+                          <SocialButton
+                            provider="discord"
+                            icon={Mail}
+                            label="Continue with Discord"
+                            className="hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                              Or continue with email
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
+                          <Input
+                            id="login-email"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={loginData.email}
+                            onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
+                            required
+                            className="h-11 text-base"
+                            autoComplete="email"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="text-xs text-primary hover:text-primary/80 p-0 h-auto"
+                              onClick={() => setShowForgotPassword(true)}
+                            >
+                              Forgot password?
+                            </Button>
+                          </div>
+                          <div className="relative">
+                            <Input
+                              id="login-password"
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Enter your password"
+                              value={loginData.password}
+                              onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                              required
+                              className="h-11 pr-12 text-base"
+                              autoComplete="current-password"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-11 w-12 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full h-11 text-base font-medium" disabled={loading}>
+                          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Sign In
+                        </Button>
+                      </form>
+                    </>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="signup" className="space-y-4">
