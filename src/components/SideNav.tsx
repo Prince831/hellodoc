@@ -7,7 +7,6 @@ import {
   PillIcon, Monitor, BarChart3, Shield, Bell
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -18,19 +17,11 @@ interface SideNavProps {
 const SideNav = ({ collapsed = false }: SideNavProps) => {
   const location = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const user = null; // No authentication
   
   const isActive = (path: string) => location.pathname === path;
 
   const getNavigationItems = () => {
-    if (!user) {
-      return [
-        { path: "/", icon: Home, label: "Home" },
-        { path: "/symptom-checker", icon: Stethoscope, label: "Symptom Checker" },
-      ];
-    }
-
-    // Only patient navigation
     return [
       { path: "/", icon: Home, label: "Home" },
       { path: "/dashboard", icon: Monitor, label: "Dashboard" },

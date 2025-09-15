@@ -2,7 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 interface Notification {
@@ -16,41 +15,32 @@ interface Notification {
 }
 
 export const useNotifications = () => {
-  const { user } = useAuth();
+  const user = null; // No authentication
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications', user?.id],
+    queryKey: ['notifications'],
     queryFn: async () => {
-      if (!user?.id) return [];
-
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (error) {
-        console.error('Error fetching notifications:', error);
-        return [];
-      }
-
-      return data as Notification[];
+      // Mock notifications data
+      const mockNotifications: Notification[] = [
+        {
+          id: "1",
+          title: "Welcome to HelloDoc",
+          message: "Your account has been set up successfully",
+          type: "info",
+          read: false,
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      return mockNotifications;
     },
-    enabled: !!user?.id,
   });
 
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
+      console.log('Mock marking notification as read:', notificationId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -59,13 +49,7 @@ export const useNotifications = () => {
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user?.id)
-        .eq('read', false);
-
-      if (error) throw error;
+      console.log('Mock marking all notifications as read');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -74,77 +58,18 @@ export const useNotifications = () => {
 
   // Set up real-time subscription for notifications
   useEffect(() => {
-    if (!user?.id) return;
-
-    console.log('Setting up notifications realtime subscription');
+    console.log('Mock notifications realtime subscription');
     
-    const channel = supabase
-      .channel('notifications-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('New notification received:', payload);
-          const newNotification = payload.new as Notification;
-          
-          // Show toast for new notification
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-            variant: newNotification.type === 'error' ? 'destructive' : 'default',
-          });
-          
-          // Refresh notifications
-          queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('Notification updated:', payload);
-          queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        }
-      )
-      .subscribe();
-
     return () => {
       console.log('Cleaning up notifications subscription');
-      supabase.removeChannel(channel);
     };
-  }, [user?.id, queryClient, toast]);
+  }, [queryClient, toast]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // Helper function to create notifications
   const createNotification = async (title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', actionUrl?: string) => {
-    if (!user?.id) return;
-
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: user.id,
-          title,
-          message,
-          type,
-          action_url: actionUrl,
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error creating notification:', error);
-    }
+    console.log('Mock creating notification:', { title, message, type, actionUrl });
   };
 
   return {

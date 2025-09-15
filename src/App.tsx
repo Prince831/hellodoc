@@ -5,13 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
-import { AuthProvider } from "./hooks/useAuth";
 import NotificationProvider from "./components/NotificationProvider";
-import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
-
-// Auth pages
-import AuthPage from "./pages/Auth";
 
 // Public pages
 
@@ -50,69 +45,33 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <AuthProvider>
-            <NotificationProvider>
-              <SidebarProvider>
-              <BrowserRouter>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/welcome" element={<SplashScreen />} />
-                  
-                  <Route path="/" element={<Index />} />
-                  <Route path="/doctors" element={<Doctors />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/symptom-checker" element={<SymptomChecker />} />
-                  
-                  {/* Protected Patient routes */}
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute requiredRole="patient">
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/health-records" element={
-                    <ProtectedRoute requiredRole="patient">
-                      <HealthRecords />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/appointments" element={
-                    <ProtectedRoute requiredRole="patient">
-                      <Appointments />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/messages" element={
-                    <ProtectedRoute requiredRole="patient">
-                      <Messages />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/medications" element={
-                    <ProtectedRoute requiredRole="patient">
-                      <Medications />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/video-consultation" element={
-                    <ProtectedRoute requiredRole="patient">
-                      <VideoConsultation />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/profile" element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  } />
-                  
-                  
-                  {/* 404 */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-              </SidebarProvider>
-            </NotificationProvider>
-          </AuthProvider>
+          <NotificationProvider>
+            <SidebarProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public routes */}
+                <Route path="/welcome" element={<SplashScreen />} />
+                
+                <Route path="/" element={<Index />} />
+                <Route path="/doctors" element={<Doctors />} />
+                <Route path="/symptom-checker" element={<SymptomChecker />} />
+                
+                {/* Application routes (no longer protected) */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/health-records" element={<HealthRecords />} />
+                <Route path="/appointments" element={<Appointments />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/medications" element={<Medications />} />
+                <Route path="/video-consultation" element={<VideoConsultation />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            </SidebarProvider>
+          </NotificationProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

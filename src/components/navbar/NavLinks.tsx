@@ -1,21 +1,13 @@
 
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-
 const NavLinks = () => {
-  const { user } = useAuth();
+  const user = null; // No authentication
 
   const getNavigationLinks = () => {
-    if (!user) {
-      return [
-        { to: "/doctors", label: "Find Doctors" },
-        { to: "/symptom-checker", label: "Symptom Checker" },
-      ];
-    }
-
-    // Only patient navigation
     return [
       { to: "/dashboard", label: "Dashboard" },
+      { to: "/doctors", label: "Find Doctors" },
+      { to: "/symptom-checker", label: "Symptom Checker" },
       { to: "/appointments", label: "Appointments" },
       { to: "/health-records", label: "Records" },
       { to: "/medications", label: "Medications" },

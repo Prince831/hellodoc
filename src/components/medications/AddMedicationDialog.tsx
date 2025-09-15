@@ -13,7 +13,6 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddMedicationDialogProps {
@@ -34,7 +33,7 @@ const AddMedicationDialog: React.FC<AddMedicationDialogProps> = ({
   open, 
   onOpenChange 
 }) => {
-  const { user } = useAuth();
+  const user = null; // No authentication
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -52,22 +51,10 @@ const AddMedicationDialog: React.FC<AddMedicationDialogProps> = ({
 
   const addMedicationMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      if (!user?.id) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('medications')
-        .insert({
-          user_id: user.id,
-          name: data.name,
-          dosage: data.dosage,
-          frequency: data.frequency,
-          start_date: data.start_date.toISOString().split('T')[0],
-          end_date: data.end_date ? data.end_date.toISOString().split('T')[0] : null,
-          instructions: data.instructions,
-          active: true,
-        });
-
-      if (error) throw error;
+      // Mock medication addition
+      console.log('Adding medication:', data);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['medications'] });

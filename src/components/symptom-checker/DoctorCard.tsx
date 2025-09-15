@@ -3,7 +3,6 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useCreateAppointment } from "@/hooks/useAppointments";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { DoctorCardProps } from "./types";
 import DoctorCardHeader from "./DoctorCardHeader";
@@ -20,23 +19,13 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
   compact = false
 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const user = null; // No authentication
   const { toast } = useToast();
   const createAppointmentMutation = useCreateAppointment();
 
   const handleBookAppointment = () => {
     if (onBookAppointment) {
       onBookAppointment(doctor.id);
-      return;
-    }
-
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to book an appointment.",
-        variant: "destructive",
-      });
-      navigate("/auth");
       return;
     }
 
@@ -55,16 +44,6 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
       return;
     }
 
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to message doctors.",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
     navigate("/messages", { 
       state: { 
         doctorId: doctor.id,
@@ -74,16 +53,6 @@ const DoctorCard: React.FC<DoctorCardProps> = ({
   };
 
   const handleQuickBook = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to book an appointment.",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
     // Quick booking for next available slot (demo purposes)
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);

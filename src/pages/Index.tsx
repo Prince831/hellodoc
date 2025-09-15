@@ -5,11 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Heart, Calendar, MessageCircle, Shield, Clock, Users, Star, Zap, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 
 const Index = () => {
-  const { user } = useAuth();
+  const user = null; // No authentication
 
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
@@ -210,7 +209,7 @@ const Index = () => {
               </motion.div>
 
               <motion.div variants={scaleIn}>
-                <Link to="/auth" className="block">
+                <Link to="/appointments" className="block">
                   <Card className="text-center hover:shadow-lg transition-all duration-300 h-full cursor-pointer hover:scale-105 border-0 shadow-md">
                     <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
                       <div className="flex justify-center mb-2 sm:mb-3 lg:mb-4">
@@ -304,13 +303,13 @@ const Index = () => {
                   variants={fadeInUp}
                   className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center"
                 >
-                  <Button 
+                    <Button 
                     size="lg" 
                     variant="secondary"
                     className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 h-auto shadow-lg hover:shadow-xl transition-all text-primary font-semibold"
                     asChild
                   >
-                    <Link to="/auth">
+                    <Link to="/dashboard">
                       Get Started Free <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                     </Link>
                   </Button>

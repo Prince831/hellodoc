@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import AddMedicationDialog from "@/components/medications/AddMedicationDialog";
 
@@ -28,34 +27,32 @@ interface Medication {
 }
 
 const Medications = () => {
-  const { user } = useAuth();
+  const user = null; // No authentication
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   const { data: medications = [], isLoading } = useQuery({
-    queryKey: ['medications', user?.id],
+    queryKey: ['medications'],
     queryFn: async () => {
-      if (!user?.id) return [];
-
-      const { data, error } = await supabase
-        .from('medications')
-        .select(`
-          *,
-          doctors (
-            name,
-            specialization
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('start_date', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching medications:', error);
-        return [];
-      }
-
-      return data as Medication[];
+      // Mock medications data
+      const mockMedications: Medication[] = [
+        {
+          id: "1",
+          name: "Aspirin",
+          dosage: "81mg",
+          frequency: "Once daily",
+          start_date: new Date().toISOString(),
+          active: true,
+          prescribed_by: "doctor1",
+          instructions: "Take with food",
+          doctors: {
+            name: "Dr. Smith",
+            specialization: "Cardiology"
+          }
+        }
+      ];
+      
+      return mockMedications;
     },
-    enabled: !!user?.id,
   });
 
   const activeMedications = medications.filter(med => med.active);

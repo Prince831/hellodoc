@@ -7,29 +7,22 @@ import UserDropdown from "@/components/navbar/UserDropdown";
 import { Link } from "react-router-dom";
 import { Video, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const user = null; // No authentication
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
   const getNavigationLinks = () => {
-    if (!user) {
-      return [
-        { to: "/", label: "Home" },
-        { to: "/doctors", label: "Find Doctors" },
-        { to: "/symptom-checker", label: "Symptom Checker" },
-      ];
-    }
-
-    // Only patient navigation
     return [
+      { to: "/", label: "Home" },
       { to: "/dashboard", label: "Dashboard" },
+      { to: "/doctors", label: "Find Doctors" },
+      { to: "/symptom-checker", label: "Symptom Checker" },
       { to: "/appointments", label: "Appointments" },
       { to: "/health-records", label: "Health Records" },
       { to: "/medications", label: "Medications" },
@@ -62,31 +55,21 @@ const Navbar = () => {
             </Button>
           ))}
           
-          {user && (
-            <>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/profile">Profile</Link>
-              </Button>
-              <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-                <Link to="/settings">Settings</Link>
-              </Button>
-            </>
-          )}
-          
-          {!user && (
-            <Button size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
-              <Link to="/auth">Sign In</Link>
-            </Button>
-          )}
+          <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+            <Link to="/profile">Profile</Link>
+          </Button>
+          <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+            <Link to="/settings">Settings</Link>
+          </Button>
         </div>
         
         {/* User Actions */}
         <div className="flex items-center justify-between pt-4 border-t">
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            {user && <NotificationsPopover />}
+            <NotificationsPopover />
           </div>
-          {user && <UserDropdown />}
+          <UserDropdown />
         </div>
       </div>
     </motion.div>
@@ -101,15 +84,13 @@ const Navbar = () => {
             <Logo />
             
             {/* Desktop Quick Navigation */}
-            {user && (
-              <nav className="hidden lg:flex items-center gap-1">
-                {getNavigationLinks().slice(0, 4).map((link) => (
-                  <Button key={link.to} variant="ghost" size="sm" asChild>
-                    <Link to={link.to}>{link.label}</Link>
-                  </Button>
-                ))}
-              </nav>
-            )}
+            <nav className="hidden lg:flex items-center gap-1">
+              {getNavigationLinks().slice(0, 4).map((link) => (
+                <Button key={link.to} variant="ghost" size="sm" asChild>
+                  <Link to={link.to}>{link.label}</Link>
+                </Button>
+              ))}
+            </nav>
           </div>
           
           {/* Center - Search (Desktop only) */}
@@ -121,15 +102,13 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             {/* Desktop navigation */}
             <div className="hidden md:flex items-center gap-2">
-              {user && (
-                <Button variant="ghost" size="icon" asChild>
-                  <Link to="/video-consultation">
-                    <Video className="h-4 w-4" />
-                    <span className="sr-only">Video Call</span>
-                  </Link>
-                </Button>
-              )}
-              {user && <NotificationsPopover />}
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/video-consultation">
+                  <Video className="h-4 w-4" />
+                  <span className="sr-only">Video Call</span>
+                </Link>
+              </Button>
+              <NotificationsPopover />
               <ThemeToggle />
               <UserDropdown />
             </div>

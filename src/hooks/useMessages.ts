@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { mockMessages, mockDoctors } from "@/types/messages";
 
@@ -42,7 +41,7 @@ export interface Conversation {
 }
 
 export function useMessages() {
-  const { user } = useAuth();
+  const user = null; // No authentication
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -50,10 +49,8 @@ export function useMessages() {
 
   // Create mock conversations from mock data
   const { data: conversations = [], isLoading: loading } = useQuery({
-    queryKey: ['conversations', user?.id],
+    queryKey: ['conversations'],
     queryFn: async () => {
-      if (!user?.id) return [];
-
       // Create mock conversations based on mock doctors and messages
       const conversationsWithMessages: Conversation[] = mockDoctors.map(doctor => {
         // Filter messages for this doctor
@@ -78,7 +75,7 @@ export function useMessages() {
           }));
 
         const lastMessage = doctorMessages[doctorMessages.length - 1];
-        const unreadCount = doctorMessages.filter(m => !m.read && m.sender_id !== user.id).length;
+        const unreadCount = doctorMessages.filter(m => !m.read && m.sender_id !== 'demo-user').length;
 
         return {
           id: `conv-${doctor.id}`,
@@ -91,7 +88,7 @@ export function useMessages() {
           lastMessage: lastMessage ? {
             content: lastMessage.content,
             timestamp: lastMessage.timestamp,
-            fromCurrentUser: lastMessage.sender_id === user.id
+            fromCurrentUser: lastMessage.sender_id === 'demo-user'
           } : undefined,
           unreadCount,
           messages: doctorMessages,
@@ -102,17 +99,15 @@ export function useMessages() {
 
       return conversationsWithMessages;
     },
-    enabled: !!user?.id,
   });
 
   // Mock realtime subscription (no-op for mock data)
   useEffect(() => {
-    if (!user?.id) return;
     console.log('Mock realtime subscription setup');
     return () => {
       console.log('Mock realtime subscription cleanup');
     };
-  }, [user?.id, queryClient]);
+  }, [queryClient]);
 
   // Mock send message mutation
   const sendMessageMutation = useMutation({
@@ -125,8 +120,6 @@ export function useMessages() {
       content: string; 
       conversationId?: string;
     }) => {
-      if (!user?.id) throw new Error('User not authenticated');
-
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
       

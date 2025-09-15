@@ -14,13 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MessageSquare, Phone, Video, MoreVertical, ArrowLeft, Menu } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Messages = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const user = null; // No authentication
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { 
@@ -70,7 +69,7 @@ const Messages = () => {
     // Mark unread messages as read
     if (conversation.unreadCount > 0) {
       conversation.messages.forEach((message: any) => {
-        if (!message.read && message.sender_id !== user?.id) {
+        if (!message.read && message.sender_id !== 'demo-user') {
           markAsRead(message.id);
         }
       });
@@ -233,7 +232,7 @@ const Messages = () => {
                       <MessageBubble
                         key={message.id}
                         message={message}
-                        isCurrentUser={message.sender_id === user?.id}
+                        isCurrentUser={message.sender_id === 'demo-user'}
                         onAppointmentResponse={handleAppointmentResponse}
                       />
                     ))}
