@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,9 +36,38 @@ const AuthPage = () => {
     role: "patient" as "patient" | "doctor" | "admin"
   });
 
-  // Forgot password state
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+// Forgot password state
+const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+// Password recovery (reset) state
+const [showResetPassword, setShowResetPassword] = useState(false);
+const [newPassword, setNewPassword] = useState("");
+const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
+useEffect(() => {
+  // SEO
+  document.title = "Login & Sign Up | HelloDoc";
+  const meta = document.querySelector('meta[name="description"]');
+  if (meta) meta.setAttribute('content', 'Login, sign up, or reset your password to access HelloDoc.');
+
+  // Detect password recovery state
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') setShowResetPassword(true);
+  });
+
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const type = params.get('type') || params.get('token_type');
+    if (type === 'recovery') setShowResetPassword(true);
+  }
+
+  // If already signed in, go to dashboard
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user) navigate('/dashboard');
+  });
+
+  return () => subscription.unsubscribe();
+}, [navigate]);
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -185,11 +214,65 @@ const AuthPage = () => {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-    } finally {
+  } finally {
       setLoading(false);
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: "Passwords do not match",
+        description: "Please confirm your new password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast({
+          title: "Update Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password Updated",
+          description: "Your password has been reset successfully.",
+        });
+        setShowResetPassword(false);
+        setNewPassword("");
+        setConfirmNewPassword("");
+        // Clean URL hash added by Supabase
+        if (window.location.hash) {
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error("Update password error:", error);
+      toast({
+        title: "Update Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleSocialAuth = async (provider: 'google' | 'github' | 'discord') => {
     setSocialLoading(provider);
     
@@ -197,7 +280,7 @@ const AuthPage = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}/auth`
         }
       });
 
@@ -490,26 +573,26 @@ const AuthPage = () => {
                       </div>
                     </div>
                     
-                    <div className="grid gap-2">
-                      <SocialButton
-                        provider="google"
-                        icon={Chrome}
-                        label="Continue with Google"
-                        className="hover:bg-red-50 dark:hover:bg-red-950/20"
-                      />
-                      <SocialButton
-                        provider="github"
-                        icon={Github}
-                        label="Continue with GitHub"
-                        className="hover:bg-gray-50 dark:hover:bg-gray-950/20"
-                      />
-                      <SocialButton
-                        provider="discord"
-                        icon={Mail}
-                        label="Continue with Discord"
-                        className="hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
-                      />
-                    </div>
+                      <div className="grid gap-2">
+                        <SocialButton
+                          provider="google"
+                          icon={Chrome}
+                          label="Continue with Google"
+                          className="hover:bg-red-50 dark:hover:bg-red-950/20"
+                        />
+                        <SocialButton
+                          provider="github"
+                          icon={Github}
+                          label="Continue with GitHub"
+                          className="hover:bg-gray-50 dark:hover:bg-gray-950/20"
+                        />
+                        <SocialButton
+                          provider="discord"
+                          icon={Mail}
+                          label="Continue with Discord"
+                          className="hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
+                        />
+                      </div>
 
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
