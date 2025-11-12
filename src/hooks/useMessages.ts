@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { mockMessages, mockDoctors } from "@/types/messages";
 
 export interface MessageUser {
   id: string;
@@ -40,76 +40,153 @@ export interface Conversation {
   status?: string;
 }
 
+const DEMO_USER_ID = 'demo-user';
+
 export function useMessages() {
-  const user = null; // No authentication
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [newMessage, setNewMessage] = useState("");
 
-  // Create mock conversations from mock data
+  // Fetch conversations with messages
   const { data: conversations = [], isLoading: loading } = useQuery({
-    queryKey: ['conversations'],
+    queryKey: ['conversations', DEMO_USER_ID],
     queryFn: async () => {
-      // Create mock conversations based on mock doctors and messages
-      const conversationsWithMessages: Conversation[] = mockDoctors.map(doctor => {
-        // Filter messages for this doctor
-        const doctorMessages = mockMessages
-          .filter(msg => 
-            msg.sender_id === doctor.id || msg.receiver_id === doctor.id
-          )
-          .map(msg => ({
-            ...msg,
+      console.log('Fetching conversations from Supabase');
+      
+      const { data: conversationsData, error: conversationsError } = await supabase
+        .from('conversations')
+        .select(`
+          id,
+          patient_id,
+          doctor_id,
+          subject,
+          status,
+          last_message_at,
+          created_at
+        `)
+        .or(`patient_id.eq.${DEMO_USER_ID},doctor_id.eq.${DEMO_USER_ID}`)
+        .order('last_message_at', { ascending: false });
+
+      if (conversationsError) {
+        console.error('Error fetching conversations:', conversationsError);
+        throw conversationsError;
+      }
+
+      if (!conversationsData || conversationsData.length === 0) {
+        console.log('No conversations found');
+        return [];
+      }
+
+      // Fetch messages for each conversation
+      const conversationsWithMessages = await Promise.all(
+        conversationsData.map(async (conv) => {
+          // Determine the other participant
+          const participantId = conv.patient_id === DEMO_USER_ID ? conv.doctor_id : conv.patient_id;
+          
+          // Fetch participant details from doctors table
+          const { data: doctorData } = await supabase
+            .from('doctors')
+            .select('id, name, image_url')
+            .eq('id', participantId)
+            .single();
+
+          const participant: MessageUser = {
+            id: participantId,
+            full_name: doctorData?.name || 'Unknown',
+            avatar_url: doctorData?.image_url,
+            role: 'doctor'
+          };
+
+          // Fetch messages for this conversation
+          const { data: messagesData, error: messagesError } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: true });
+
+          if (messagesError) {
+            console.error('Error fetching messages:', messagesError);
+            return null;
+          }
+
+          // Transform messages
+          const messages: Message[] = (messagesData || []).map((msg: any) => ({
+            id: msg.id,
+            content: msg.content,
+            created_at: msg.created_at,
+            sender_id: msg.sender_id,
+            receiver_id: msg.receiver_id,
+            timestamp: msg.created_at,
+            read: msg.read,
+            conversation_id: msg.conversation_id,
+            appointment_request: msg.appointment_request,
+            appointment_status: msg.appointment_status,
+            notification_type: msg.notification_type,
             sender: {
               id: msg.sender_id,
-              full_name: msg.sender_id === doctor.id ? doctor.name : 'John Patient',
-              avatar_url: msg.sender_id === doctor.id ? doctor.imageUrl : undefined,
-              role: msg.sender_id === doctor.id ? 'doctor' : 'patient'
+              full_name: msg.sender_id === participantId ? participant.full_name : 'You',
+              avatar_url: msg.sender_id === participantId ? participant.avatar_url : undefined,
+              role: msg.sender_id === participantId ? 'doctor' : 'patient'
             },
             receiver: {
               id: msg.receiver_id,
-              full_name: msg.receiver_id === doctor.id ? doctor.name : 'John Patient',
-              avatar_url: msg.receiver_id === doctor.id ? doctor.imageUrl : undefined,
-              role: msg.receiver_id === doctor.id ? 'doctor' : 'patient'
+              full_name: msg.receiver_id === participantId ? participant.full_name : 'You',
+              avatar_url: msg.receiver_id === participantId ? participant.avatar_url : undefined,
+              role: msg.receiver_id === participantId ? 'doctor' : 'patient'
             }
           }));
 
-        const lastMessage = doctorMessages[doctorMessages.length - 1];
-        const unreadCount = doctorMessages.filter(m => !m.read && m.sender_id !== 'demo-user').length;
+          const lastMessage = messages[messages.length - 1];
+          const unreadCount = messages.filter(m => !m.read && m.sender_id !== DEMO_USER_ID).length;
 
-        return {
-          id: `conv-${doctor.id}`,
-          participant: {
-            id: doctor.id,
-            full_name: doctor.name,
-            avatar_url: doctor.imageUrl,
-            role: 'doctor'
-          },
-          lastMessage: lastMessage ? {
-            content: lastMessage.content,
-            timestamp: lastMessage.timestamp,
-            fromCurrentUser: lastMessage.sender_id === 'demo-user'
-          } : undefined,
-          unreadCount,
-          messages: doctorMessages,
-          subject: `Conversation with ${doctor.name}`,
-          status: 'active'
-        };
-      }).filter(conv => conv.messages.length > 0);
+          return {
+            id: conv.id,
+            participant,
+            lastMessage: lastMessage ? {
+              content: lastMessage.content,
+              timestamp: lastMessage.timestamp,
+              fromCurrentUser: lastMessage.sender_id === DEMO_USER_ID
+            } : undefined,
+            unreadCount,
+            messages,
+            subject: conv.subject,
+            status: conv.status
+          };
+        })
+      );
 
-      return conversationsWithMessages;
+      return conversationsWithMessages.filter(Boolean) as Conversation[];
     },
   });
 
-  // Mock realtime subscription (no-op for mock data)
+  // Realtime subscription for new messages
   useEffect(() => {
-    console.log('Mock realtime subscription setup');
+    console.log('Setting up realtime subscription for messages');
+    
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${DEMO_USER_ID}`
+        },
+        (payload) => {
+          console.log('Message change detected:', payload);
+          queryClient.invalidateQueries({ queryKey: ['conversations', DEMO_USER_ID] });
+        }
+      )
+      .subscribe();
+
     return () => {
-      console.log('Mock realtime subscription cleanup');
+      console.log('Cleaning up realtime subscription');
+      supabase.removeChannel(channel);
     };
   }, [queryClient]);
 
-  // Mock send message mutation
+  // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async ({ 
       receiverId, 
@@ -120,14 +197,34 @@ export function useMessages() {
       content: string; 
       conversationId?: string;
     }) => {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Sending message:', { receiverId, content, conversationId });
       
-      console.log('Mock sending message:', { receiverId, content, conversationId });
-      return { success: true };
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          sender_id: DEMO_USER_ID,
+          receiver_id: receiverId,
+          conversation_id: conversationId,
+          content: content.trim(),
+          read: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update conversation last_message_at
+      if (conversationId) {
+        await supabase
+          .from('conversations')
+          .update({ last_message_at: new Date().toISOString() })
+          .eq('id', conversationId);
+      }
+
+      return data;
     },
     onSuccess: () => {
-      setNewMessage("");
+      queryClient.invalidateQueries({ queryKey: ['conversations', DEMO_USER_ID] });
       toast({
         title: "Message sent",
         description: "Your message has been sent successfully.",
@@ -145,14 +242,20 @@ export function useMessages() {
 
   const handleAppointmentResponse = async (messageId: string, status: 'accepted' | 'rejected') => {
     try {
-      // Mock appointment response
-      console.log('Mock appointment response:', { messageId, status });
+      const { error } = await supabase
+        .from('messages')
+        .update({ appointment_status: status })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['conversations', DEMO_USER_ID] });
       
       toast({
         title: "Appointment Response Sent",
         description: `Appointment ${status === 'accepted' ? 'accepted' : 'rejected'} successfully.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error handling appointment response:', error);
       toast({
         variant: "destructive",
@@ -164,8 +267,14 @@ export function useMessages() {
 
   const markAsRead = async (messageId: string) => {
     try {
-      // Mock mark as read
-      console.log('Mock marking message as read:', messageId);
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('id', messageId);
+
+      if (error) throw error;
+      
+      queryClient.invalidateQueries({ queryKey: ['conversations', DEMO_USER_ID] });
     } catch (error) {
       console.error('Error marking message as read:', error);
     }
@@ -188,7 +297,7 @@ export function useMessages() {
     });
   };
 
-  // Mock start conversation
+  // Start a new conversation
   const startConversation = async (otherUserId: string, initialMessage?: string) => {
     try {
       // Check if conversation already exists
@@ -201,28 +310,47 @@ export function useMessages() {
         return existingConv;
       }
 
-      // Find the doctor to create a new conversation
-      const doctor = mockDoctors.find(d => d.id === otherUserId);
-      if (!doctor) {
+      // Fetch doctor details
+      const { data: doctorData, error: doctorError } = await supabase
+        .from('doctors')
+        .select('id, name, image_url')
+        .eq('id', otherUserId)
+        .single();
+
+      if (doctorError || !doctorData) {
         throw new Error('Doctor not found');
       }
 
-      // Create mock new conversation
-      const newConv: Conversation = {
-        id: `conv-new-${otherUserId}`,
+      // Create new conversation
+      const { data: newConv, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          patient_id: DEMO_USER_ID,
+          doctor_id: otherUserId,
+          subject: `Conversation with ${doctorData.name}`,
+          status: 'active'
+        })
+        .select()
+        .single();
+
+      if (convError) throw convError;
+
+      const newConversation: Conversation = {
+        id: newConv.id,
         participant: {
-          id: doctor.id,
-          full_name: doctor.name,
-          avatar_url: doctor.imageUrl,
+          id: doctorData.id,
+          full_name: doctorData.name,
+          avatar_url: doctorData.image_url,
           role: 'doctor'
         },
         messages: [],
         unreadCount: 0,
-        subject: `New conversation with ${doctor.name}`,
-        status: 'active'
+        subject: newConv.subject,
+        status: newConv.status
       };
 
-      setSelectedConversation(newConv);
+      setSelectedConversation(newConversation);
+      queryClient.invalidateQueries({ queryKey: ['conversations', DEMO_USER_ID] });
       
       if (initialMessage) {
         sendMessageMutation.mutate({
@@ -232,13 +360,13 @@ export function useMessages() {
         });
       }
 
-      return newConv;
-    } catch (error) {
+      return newConversation;
+    } catch (error: any) {
       console.error('Error creating conversation:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to start conversation. Please try again.",
+        description: error.message || "Failed to start conversation. Please try again.",
       });
     }
   };
@@ -246,8 +374,6 @@ export function useMessages() {
   return {
     conversations,
     loading,
-    newMessage,
-    setNewMessage,
     selectedConversation,
     setSelectedConversation,
     handleAppointmentResponse,

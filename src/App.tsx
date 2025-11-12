@@ -7,6 +7,7 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import NotificationProvider from "./components/NotificationProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useInitializeApp } from "./hooks/useInitializeApp";
 
 // Public pages
 
@@ -38,6 +39,38 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppContent() {
+  const { isInitialized, isInitializing } = useInitializeApp();
+
+  if (isInitializing) {
+    return <SplashScreen />;
+  }
+
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/welcome" element={<SplashScreen />} />
+      
+      <Route path="/" element={<Index />} />
+      <Route path="/doctors" element={<Doctors />} />
+      <Route path="/symptom-checker" element={<SymptomChecker />} />
+      
+      {/* Application routes (no longer protected) */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/health-records" element={<HealthRecords />} />
+      <Route path="/appointments" element={<Appointments />} />
+      <Route path="/messages" element={<Messages />} />
+      <Route path="/medications" element={<Medications />} />
+      <Route path="/video-consultation" element={<VideoConsultation />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/settings" element={<Settings />} />
+      
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
@@ -47,29 +80,9 @@ const App = () => (
           <Sonner />
           <NotificationProvider>
             <SidebarProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/welcome" element={<SplashScreen />} />
-                
-                <Route path="/" element={<Index />} />
-                <Route path="/doctors" element={<Doctors />} />
-                <Route path="/symptom-checker" element={<SymptomChecker />} />
-                
-                {/* Application routes (no longer protected) */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/health-records" element={<HealthRecords />} />
-                <Route path="/appointments" element={<Appointments />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/medications" element={<Medications />} />
-                <Route path="/video-consultation" element={<VideoConsultation />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                {/* 404 */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
             </SidebarProvider>
           </NotificationProvider>
         </TooltipProvider>
