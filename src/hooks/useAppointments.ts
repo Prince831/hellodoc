@@ -18,7 +18,8 @@ export const useAppointments = () => {
           doctor_id: "d1",
           date: new Date().toISOString(),
           reason: "General consultation",
-          status: "confirmed",
+          status: "approved" as const,
+          created_at: new Date().toISOString(),
           doctor: {
             id: "d1",
             name: "Dr. Sarah Johnson",

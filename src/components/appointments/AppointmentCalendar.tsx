@@ -24,11 +24,11 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
   // Filter appointments
   const upcomingAppointments = appointments.filter(apt => 
-    new Date(apt.date) > new Date() && apt.status !== 'cancelled'
+    new Date(apt.date) > new Date() && apt.status !== 'cancelled' as any
   );
 
   const pastAppointments = appointments.filter(apt => 
-    new Date(apt.date) <= new Date() || apt.status === 'cancelled'
+    new Date(apt.date) <= new Date() || apt.status === 'cancelled' as any
   );
 
   const handleDateSelect = (date: Date) => {
