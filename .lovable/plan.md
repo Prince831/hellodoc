@@ -55,6 +55,7 @@
 - Zod validation on every form, both client and edge-function side.
 - Mobile responsiveness pass, keyboard/focus states, and semantic tokens instead of any hardcoded colors.
 - Page-level SEO metadata, single H1 per page, alt text, canonical tags.
+- Fix the three existing TypeScript build errors: an animation easing type in `DoctorList.tsx`, an appointment update type in `useAppointments.ts`, and a stale `allowedHosts` option in `src/vite.config.ts`.
 
 ## Technical notes
 
