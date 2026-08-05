@@ -1,99 +1,65 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
-const DEMO_USER_ID = 'demo-user';
-
+/**
+ * Keeps appointment and message caches fresh in real time for the signed-in user.
+ * Notification rows themselves are created by the mutation that caused the change,
+ * so this hook only invalidates caches (no duplicate notification writes).
+ */
 export const useNotificationTriggers = () => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const { user, doctorId } = useAuth();
+  const userId = user?.id;
 
   useEffect(() => {
-    console.log('Setting up notification triggers');
+    if (!userId) return;
 
-    // Subscribe to appointment changes
     const appointmentsChannel = supabase
-      .channel('appointment-notifications')
+      .channel(`appointment-updates-${userId}`)
       .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'appointments',
-          filter: `user_id=eq.${DEMO_USER_ID}`
-        },
-        async (payload) => {
-          console.log('Appointment change detected:', payload);
-          
-          if (payload.eventType === 'UPDATE') {
-            const appointment = payload.new;
-            if (appointment.status === 'approved') {
-              await supabase.from('notifications').insert({
-                user_id: DEMO_USER_ID,
-                title: 'Appointment Approved',
-                message: `Your appointment has been approved for ${new Date(appointment.date).toLocaleDateString()}.`,
-                type: 'success',
-                action_url: '/appointments'
-              });
-            } else if (appointment.status === 'cancelled') {
-              await supabase.from('notifications').insert({
-                user_id: DEMO_USER_ID,
-                title: 'Appointment Cancelled',
-                message: 'Your appointment has been cancelled.',
-                type: 'warning',
-                action_url: '/appointments'
-              });
-            }
-          }
-          
-          queryClient.invalidateQueries({ queryKey: ['appointments', DEMO_USER_ID] });
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments", filter: `user_id=eq.${userId}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["appointments"] });
         }
       )
       .subscribe();
 
-    // Subscribe to new messages
     const messagesChannel = supabase
-      .channel('message-notifications')
+      .channel(`message-updates-${userId}`)
       .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-          filter: `receiver_id=eq.${DEMO_USER_ID}`
-        },
-        async (payload) => {
-          console.log('New message received:', payload);
-          
-          const message = payload.new;
-          
-          // Get sender information
-          const { data: doctor } = await supabase
-            .from('doctors')
-            .select('name')
-            .eq('id', message.sender_id)
-            .single();
-
-          if (doctor) {
-            await supabase.from('notifications').insert({
-              user_id: DEMO_USER_ID,
-              title: 'New Message',
-              message: `You have a new message from ${doctor.name}.`,
-              type: 'info',
-              action_url: '/messages'
-            });
-          }
-          
-          queryClient.invalidateQueries({ queryKey: ['conversations', DEMO_USER_ID] });
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${userId}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["conversations"] });
         }
       )
       .subscribe();
 
     return () => {
-      console.log('Cleaning up notification triggers');
       supabase.removeChannel(appointmentsChannel);
       supabase.removeChannel(messagesChannel);
     };
-  }, [queryClient, toast]);
+  }, [userId, queryClient]);
+
+  useEffect(() => {
+    if (!doctorId) return;
+
+    const channel = supabase
+      .channel(`doctor-appointments-${doctorId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments", filter: `doctor_id=eq.${doctorId}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["doctor-appointments"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [doctorId, queryClient]);
 };
