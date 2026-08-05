@@ -2,153 +2,119 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
-interface Notification {
+export interface AppNotification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   read: boolean;
   action_url?: string;
   created_at: string;
 }
 
-const DEMO_USER_ID = 'demo-user';
-
 export const useNotifications = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const { data: notifications = [], isLoading } = useQuery({
-    queryKey: ['notifications', DEMO_USER_ID],
+    queryKey: ["notifications", userId],
+    enabled: !!userId,
     queryFn: async () => {
-      console.log('Fetching notifications from Supabase');
-      
       const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', DEMO_USER_ID)
-        .order('created_at', { ascending: false })
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId!)
+        .order("created_at", { ascending: false })
         .limit(50);
 
-      if (error) {
-        console.error('Error fetching notifications:', error);
-        throw error;
-      }
-
-      return data as Notification[];
+      if (error) throw error;
+      return (data ?? []) as AppNotification[];
     },
   });
 
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
       const { error } = await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ read: true })
-        .eq('id', notificationId);
-
+        .eq("id", notificationId);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', DEMO_USER_ID] });
-    },
-    onError: (error: any) => {
-      console.error('Error marking notification as read:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mark notification as read.",
-        variant: "destructive",
-      });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications", userId] }),
   });
 
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
+      if (!userId) return;
       const { error } = await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ read: true })
-        .eq('user_id', DEMO_USER_ID)
-        .eq('read', false);
-
+        .eq("user_id", userId)
+        .eq("read", false);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications', DEMO_USER_ID] });
-      toast({
-        title: "Success",
-        description: "All notifications marked as read.",
-      });
-    },
-    onError: (error: any) => {
-      console.error('Error marking all notifications as read:', error);
-      toast({
-        title: "Error",
-        description: "Failed to mark all notifications as read.",
-        variant: "destructive",
-      });
+      queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+      toast({ title: "All notifications marked as read" });
     },
   });
 
-  // Set up real-time subscription for notifications
   useEffect(() => {
-    console.log('Setting up realtime subscription for notifications');
-    
+    if (!userId) return;
+
     const channel = supabase
-      .channel('notifications-changes')
+      .channel(`notifications-${userId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${DEMO_USER_ID}`
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('New notification received:', payload);
-          queryClient.invalidateQueries({ queryKey: ['notifications', DEMO_USER_ID] });
-          
-          const newNotification = payload.new as Notification;
-          toast({
-            title: newNotification.title,
-            description: newNotification.message,
-          });
+          queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+          const newNotification = payload.new as AppNotification;
+          toast({ title: newNotification.title, description: newNotification.message });
         }
       )
       .subscribe();
 
     return () => {
-      console.log('Cleaning up notifications subscription');
       supabase.removeChannel(channel);
     };
-  }, [queryClient, toast]);
+  }, [userId, queryClient, toast]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Helper function to create notifications
   const createNotification = async (
-    title: string, 
-    message: string, 
-    type: 'info' | 'success' | 'warning' | 'error' = 'info', 
-    actionUrl?: string
+    title: string,
+    message: string,
+    type: AppNotification["type"] = "info",
+    actionUrl?: string,
+    targetUserId?: string
   ) => {
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: DEMO_USER_ID,
-          title,
-          message,
-          type,
-          action_url: actionUrl,
-          read: false
-        });
+    const recipient = targetUserId ?? userId;
+    if (!recipient) return;
 
-      if (error) throw error;
+    const { error } = await supabase.from("notifications").insert({
+      user_id: recipient,
+      title,
+      message,
+      type,
+      action_url: actionUrl,
+      read: false,
+    });
 
-      queryClient.invalidateQueries({ queryKey: ['notifications', DEMO_USER_ID] });
-    } catch (error) {
-      console.error('Error creating notification:', error);
+    if (error) {
+      console.error("Error creating notification:", error);
+      return;
     }
+    queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
   };
 
   return {

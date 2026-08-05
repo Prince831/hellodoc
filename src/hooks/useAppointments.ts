@@ -1,41 +1,67 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Appointment } from "@/types/appointments";
 
-const DEMO_USER_ID = 'demo-user';
+export type AppointmentUpdate = {
+  date?: string;
+  status?: string;
+  reason?: string;
+  notes?: string;
+};
 
+const APPOINTMENT_SELECT = `
+  *,
+  doctor:doctors(
+    id,
+    name,
+    specialization,
+    image_url,
+    phone,
+    email,
+    hospital
+  )
+`;
+
+/** Appointments for the signed-in patient. */
 export const useAppointments = () => {
+  const { user } = useAuth();
+
   return useQuery({
-    queryKey: ['appointments', DEMO_USER_ID],
+    queryKey: ["appointments", user?.id],
+    enabled: !!user,
     queryFn: async () => {
-      console.log('Fetching appointments from Supabase');
-      
       const { data, error } = await supabase
-        .from('appointments')
-        .select(`
-          *,
-          doctor:doctors(
-            id,
-            name,
-            specialization,
-            image_url,
-            phone,
-            email,
-            hospital
-          )
-        `)
-        .eq('user_id', DEMO_USER_ID)
-        .order('date', { ascending: true });
+        .from("appointments")
+        .select(APPOINTMENT_SELECT)
+        .eq("user_id", user!.id)
+        .order("date", { ascending: true });
 
-      if (error) {
-        console.error('Error fetching appointments:', error);
-        throw error;
-      }
+      if (error) throw error;
+      return (data ?? []) as unknown as Appointment[];
+    },
+  });
+};
 
-      console.log('Fetched appointments:', data);
-      return data as Appointment[];
+/** Appointments assigned to the signed-in doctor. */
+export const useDoctorAppointments = () => {
+  const { doctorId } = useAuth();
+
+  return useQuery({
+    queryKey: ["doctor-appointments", doctorId],
+    enabled: !!doctorId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select(`${APPOINTMENT_SELECT}, patient:profiles!appointments_user_id_fkey(id, full_name, avatar_url, phone)`)
+        .eq("doctor_id", doctorId!)
+        .order("date", { ascending: true });
+
+      if (error) throw error;
+      return (data ?? []) as unknown as (Appointment & {
+        patient?: { id: string; full_name: string; avatar_url?: string; phone?: string };
+      })[];
     },
   });
 };
@@ -43,6 +69,7 @@ export const useAppointments = () => {
 export const useCreateAppointment = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (appointmentData: {
@@ -51,46 +78,45 @@ export const useCreateAppointment = () => {
       reason: string;
       notes?: string;
     }) => {
-      console.log('Creating appointment:', appointmentData);
-      
+      if (!user) throw new Error("You must be signed in to book an appointment.");
+
       const { data, error } = await supabase
-        .from('appointments')
+        .from("appointments")
         .insert({
-          user_id: DEMO_USER_ID,
+          user_id: user.id,
           doctor_id: appointmentData.doctor_id,
           date: appointmentData.date,
           reason: appointmentData.reason,
           notes: appointmentData.notes,
-          status: 'pending'
+          status: "pending",
         })
         .select()
         .single();
 
       if (error) throw error;
-      
-      // Create notification for the user
-      await supabase.from('notifications').insert({
-        user_id: DEMO_USER_ID,
-        title: 'Appointment Scheduled',
-        message: `Your appointment has been scheduled for ${new Date(appointmentData.date).toLocaleString()}.`,
-        type: 'success'
+
+      await supabase.from("notifications").insert({
+        user_id: user.id,
+        title: "Appointment requested",
+        message: `Your appointment for ${appointmentData.reason} is pending confirmation.`,
+        type: "info",
+        action_url: "/appointments",
       });
 
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments', DEMO_USER_ID] });
-      queryClient.invalidateQueries({ queryKey: ['notifications', DEMO_USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor-appointments"] });
       toast({
-        title: "Appointment scheduled",
-        description: "Your appointment has been scheduled successfully.",
+        title: "Appointment requested",
+        description: "Your doctor will confirm shortly.",
       });
     },
-    onError: (error: any) => {
-      console.error('Error creating appointment:', error);
+    onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to schedule appointment. Please try again.",
+        title: "Could not book appointment",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -102,35 +128,37 @@ export const useUpdateAppointment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      updates 
-    }: { 
-      id: string; 
-      updates: Partial<Appointment> 
-    }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: AppointmentUpdate }) => {
       const { data, error } = await supabase
-        .from('appointments')
+        .from("appointments")
         .update(updates)
-        .eq('id', id)
-        .select()
+        .eq("id", id)
+        .select("*, patient_id:user_id, reason")
         .single();
 
       if (error) throw error;
+
+      if (updates.status && data) {
+        await supabase.from("notifications").insert({
+          user_id: (data as { user_id: string }).user_id,
+          title: `Appointment ${updates.status}`,
+          message: `Your appointment has been ${updates.status}.`,
+          type: updates.status === "cancelled" ? "warning" : "success",
+          action_url: "/appointments",
+        });
+      }
+
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments', DEMO_USER_ID] });
-      toast({
-        title: "Appointment updated",
-        description: "Your appointment has been updated successfully.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor-appointments"] });
+      toast({ title: "Appointment updated" });
     },
-    onError: (error) => {
-      console.error('Error updating appointment:', error);
+    onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: "Failed to update appointment. Please try again.",
+        title: "Could not update appointment",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -144,9 +172,9 @@ export const useCancelAppointment = () => {
   return useMutation({
     mutationFn: async (appointmentId: string) => {
       const { data, error } = await supabase
-        .from('appointments')
-        .update({ status: 'cancelled' })
-        .eq('id', appointmentId)
+        .from("appointments")
+        .update({ status: "cancelled" })
+        .eq("id", appointmentId)
         .select()
         .single();
 
@@ -154,17 +182,14 @@ export const useCancelAppointment = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments', DEMO_USER_ID] });
-      toast({
-        title: "Appointment cancelled",
-        description: "Your appointment has been cancelled successfully.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor-appointments"] });
+      toast({ title: "Appointment cancelled" });
     },
-    onError: (error) => {
-      console.error('Error cancelling appointment:', error);
+    onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: "Failed to cancel appointment. Please try again.",
+        title: "Could not cancel appointment",
+        description: error.message,
         variant: "destructive",
       });
     },

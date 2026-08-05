@@ -56,7 +56,7 @@ const CallInterface = ({
   }, [isActive]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     
     if (callStatus === 'connected') {
       interval = setInterval(() => {

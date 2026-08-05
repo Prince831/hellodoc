@@ -2,19 +2,21 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import NotificationProvider from "./components/NotificationProvider";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { useInitializeApp } from "./hooks/useInitializeApp";
+import { AuthProvider } from "./hooks/useAuth";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Public pages
-
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SymptomChecker from "./pages/SymptomChecker";
 import SplashScreen from "./pages/SplashScreen";
+import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 
 // Patient pages
 import HealthRecords from "./pages/HealthRecords";
@@ -26,45 +28,56 @@ import VideoConsultation from "./pages/VideoConsultation";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 
+// Doctor pages
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+import DoctorSchedule from "./pages/doctor/DoctorSchedule";
+import DoctorPatient from "./pages/doctor/DoctorPatient";
+
 // Additional pages
 import Doctors from "./pages/Doctors";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: 1,
       staleTime: 5 * 60 * 1000,
       gcTime: 10 * 60 * 1000,
     },
   },
 });
 
-function AppContent() {
-  const { isInitialized, isInitializing } = useInitializeApp();
+const protectedPatientRoutes: [string, JSX.Element][] = [
+  ["/dashboard", <Dashboard />],
+  ["/health-records", <HealthRecords />],
+  ["/appointments", <Appointments />],
+  ["/messages", <Messages />],
+  ["/medications", <Medications />],
+  ["/video-consultation", <VideoConsultation />],
+  ["/profile", <Profile />],
+  ["/settings", <Settings />],
+];
 
-  if (isInitializing) {
-    return <SplashScreen />;
-  }
-
+function AppRoutes() {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/welcome" element={<SplashScreen />} />
-      
       <Route path="/" element={<Index />} />
       <Route path="/doctors" element={<Doctors />} />
       <Route path="/symptom-checker" element={<SymptomChecker />} />
-      
-      {/* Application routes (no longer protected) */}
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/health-records" element={<HealthRecords />} />
-      <Route path="/appointments" element={<Appointments />} />
-      <Route path="/messages" element={<Messages />} />
-      <Route path="/medications" element={<Medications />} />
-      <Route path="/video-consultation" element={<VideoConsultation />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/settings" element={<Settings />} />
-      
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Patient routes */}
+      {protectedPatientRoutes.map(([path, element]) => (
+        <Route key={path} path={path} element={<ProtectedRoute>{element}</ProtectedRoute>} />
+      ))}
+
+      {/* Doctor routes */}
+      <Route path="/doctor" element={<ProtectedRoute requireDoctor><DoctorDashboard /></ProtectedRoute>} />
+      <Route path="/doctor/schedule" element={<ProtectedRoute requireDoctor><DoctorSchedule /></ProtectedRoute>} />
+      <Route path="/doctor/patients/:patientId" element={<ProtectedRoute requireDoctor><DoctorPatient /></ProtectedRoute>} />
+
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -78,13 +91,15 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <NotificationProvider>
-            <SidebarProvider>
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
-            </SidebarProvider>
-          </NotificationProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <NotificationProvider>
+                <SidebarProvider>
+                  <AppRoutes />
+                </SidebarProvider>
+              </NotificationProvider>
+            </AuthProvider>
+          </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

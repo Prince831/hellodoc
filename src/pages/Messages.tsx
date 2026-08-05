@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import ConversationList from "@/components/messages/ConversationList";
@@ -19,7 +19,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const Messages = () => {
   const location = useLocation();
-  const user = null; // No authentication
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const { 
@@ -27,6 +26,7 @@ const Messages = () => {
     loading, 
     selectedConversation,
     setSelectedConversation,
+    currentUserId,
     handleAppointmentResponse, 
     markAsRead, 
     handleSendMessage,
@@ -47,8 +47,11 @@ const Messages = () => {
   const doctorId = location.state?.doctorId;
   const initiateChat = location.state?.initiateChat;
 
+  const chatInitiatedRef = useRef(false);
+
   useEffect(() => {
-    if (doctorId && initiateChat) {
+    if (doctorId && initiateChat && !chatInitiatedRef.current) {
+      chatInitiatedRef.current = true;
       // Start conversation with the doctor
       startConversation(doctorId, "Hello, I would like to schedule a consultation.");
       toast({
@@ -56,7 +59,8 @@ const Messages = () => {
         description: "You can now start chatting with the doctor.",
       });
     }
-  }, [doctorId, initiateChat, startConversation, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doctorId, initiateChat]);
 
   const handleSelectConversation = (conversation: any) => {
     setSelectedConversation(conversation);
@@ -69,7 +73,7 @@ const Messages = () => {
     // Mark unread messages as read
     if (conversation.unreadCount > 0) {
       conversation.messages.forEach((message: any) => {
-        if (!message.read && message.sender_id !== 'demo-user') {
+        if (!message.read && message.sender_id !== currentUserId) {
           markAsRead(message.id);
         }
       });
@@ -232,7 +236,7 @@ const Messages = () => {
                       <MessageBubble
                         key={message.id}
                         message={message}
-                        isCurrentUser={message.sender_id === 'demo-user'}
+                        isCurrentUser={message.sender_id === currentUserId}
                         onAppointmentResponse={handleAppointmentResponse}
                       />
                     ))}

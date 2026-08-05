@@ -278,6 +278,8 @@ export type Database = {
           phone: string | null
           rating: number
           specialization: string
+          user_id: string | null
+          verified: boolean
           working_hours: Json | null
           years_of_experience: number
         }
@@ -300,6 +302,8 @@ export type Database = {
           phone?: string | null
           rating: number
           specialization: string
+          user_id?: string | null
+          verified?: boolean
           working_hours?: Json | null
           years_of_experience: number
         }
@@ -322,6 +326,8 @@ export type Database = {
           phone?: string | null
           rating?: number
           specialization?: string
+          user_id?: string | null
+          verified?: boolean
           working_hours?: Json | null
           years_of_experience?: number
         }
@@ -784,6 +790,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_consultations: {
         Row: {
           appointment_id: string
@@ -897,13 +924,20 @@ export type Database = {
     }
     Functions: {
       can_view_doctor_contact_info: { Args: never; Returns: boolean }
-      has_role: {
-        Args: { role_name: string; user_id: string }
-        Returns: boolean
-      }
+      current_doctor_id: { Args: never; Returns: string }
+      has_role:
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
+        | { Args: { role_name: string; user_id: string }; Returns: boolean }
+      is_treating_doctor: { Args: { _patient_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "patient" | "doctor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1030,6 +1064,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["patient", "doctor", "admin"],
+    },
   },
 } as const
