@@ -1,156 +1,150 @@
-
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { MessageSquare, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquare, FileText, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useWebRTC } from "@/hooks/useWebRTC";
 import VideoDisplay from "./VideoDisplay";
 import VideoControls from "./VideoControls";
 import VideoChat from "./VideoChat";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 
 interface VideoInterfaceProps {
-  doctorName: string;
+  roomId: string;
+  /** Auth user id of the local participant. */
+  peerId: string;
+  peerName: string;
+  /** Patients are the polite peer in perfect negotiation. */
+  polite: boolean;
+  appointmentId: string;
+  /** Doctors can write a clinical note straight into the patient chart. */
+  canWriteClinicalNote: boolean;
   onEndCall: () => void;
 }
 
-const VideoInterface = ({ doctorName, onEndCall }: VideoInterfaceProps) => {
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(true);
+const VideoInterface = ({
+  roomId,
+  peerId,
+  peerName,
+  polite,
+  appointmentId,
+  canWriteClinicalNote,
+  onEndCall,
+}: VideoInterfaceProps) => {
   const [notes, setNotes] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
   const { toast } = useToast();
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  
-  // Simulated remote video feed - in a real app, this would use WebRTC
-  const isConnected = useRef<boolean>(false);
-  
-  useEffect(() => {
-    // Simulate setting up a video call
-    if (!isConnected.current) {
-      isConnected.current = true;
-      
-      // Access the user's camera for local preview
-      const getMedia = async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream;
-          }
-          
-          toast({
-            title: "Video connected",
-            description: "Your camera and microphone are now active",
-          });
-          
-          // Clean up function to stop all tracks when component unmounts
-          return () => {
-            stream.getTracks().forEach(track => track.stop());
-          };
-        } catch (error) {
-          console.error("Error accessing media devices:", error);
-          toast({
-            title: "Camera access error",
-            description: "Could not access your camera or microphone",
-            variant: "destructive"
-          });
-        }
-      };
-      
-      const cleanup = getMedia();
-      
-      return () => {
-        cleanup.then(cleanupFn => cleanupFn && cleanupFn());
-        isConnected.current = false;
-      };
-    }
-  }, [toast]);
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-    
-    // In a real app, this would actually mute the audio track
-    if (localVideoRef.current && localVideoRef.current.srcObject) {
-      const audioTracks = (localVideoRef.current.srcObject as MediaStream).getAudioTracks();
-      audioTracks.forEach(track => {
-        track.enabled = isMuted;
+  const {
+    status,
+    error,
+    localStream,
+    remoteStream,
+    isMuted,
+    isCameraOff,
+    toggleMute,
+    toggleCamera,
+  } = useWebRTC({ roomId, peerId, polite });
+
+  const handleSaveNotes = async () => {
+    if (!notes.trim()) return;
+
+    if (!canWriteClinicalNote) {
+      toast({
+        title: "Notes saved locally",
+        description: "Personal notes are kept in this session only.",
       });
+      return;
     }
-    
-    toast({
-      title: isMuted ? "Microphone unmuted" : "Microphone muted",
-      description: isMuted ? "Others can now hear you" : "Others cannot hear you",
-    });
-  };
 
-  const toggleVideo = () => {
-    setIsVideoOn(!isVideoOn);
-    
-    // In a real app, this would actually disable the video track
-    if (localVideoRef.current && localVideoRef.current.srcObject) {
-      const videoTracks = (localVideoRef.current.srcObject as MediaStream).getVideoTracks();
-      videoTracks.forEach(track => {
-        track.enabled = !isVideoOn;
+    setSavingNote(true);
+    const { error: saveError } = await supabase.from("appointment_notes").insert({
+      appointment_id: appointmentId,
+      author_id: peerId,
+      note_type: "consultation",
+      content: notes.trim(),
+    });
+    setSavingNote(false);
+
+    if (saveError) {
+      toast({
+        title: "Could not save note",
+        description: saveError.message,
+        variant: "destructive",
       });
+      return;
     }
-    
-    toast({
-      title: isVideoOn ? "Camera turned off" : "Camera turned on",
-      description: isVideoOn ? "Others cannot see you" : "Others can now see you",
-    });
-  };
 
-  const handleSaveNotes = () => {
-    toast({
-      title: "Notes saved",
-      description: "Your consultation notes have been saved",
-    });
+    setNotes("");
+    toast({ title: "Note saved to the patient chart" });
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-8rem)]">
-      <div className="md:col-span-2 flex flex-col">
-        <VideoDisplay 
-          doctorName={doctorName}
-          localVideoRef={localVideoRef}
-          isVideoOn={isVideoOn}
+    <div className="grid h-[calc(100vh-10rem)] grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="flex flex-col md:col-span-2">
+        <div className="mb-2 flex items-center justify-between">
+          <h1 className="text-lg font-semibold">Consultation with {peerName}</h1>
+          <Badge variant={status === "connected" ? "default" : "secondary"}>
+            {status === "connected" ? "Live" : status.replace("-", " ")}
+          </Badge>
+        </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-2">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <VideoDisplay
+          peerName={peerName}
+          localStream={localStream}
+          remoteStream={remoteStream}
+          isCameraOff={isCameraOff}
+          isMuted={isMuted}
+          status={status}
         />
-        
+
         <VideoControls
           isMuted={isMuted}
-          isVideoOn={isVideoOn}
+          isCameraOff={isCameraOff}
           toggleMute={toggleMute}
-          toggleVideo={toggleVideo}
+          toggleCamera={toggleCamera}
           onEndCall={onEndCall}
         />
       </div>
-      
+
       <div className="md:col-span-1">
-        <Tabs defaultValue="chat" className="h-full flex flex-col">
+        <Tabs defaultValue="chat" className="flex h-full flex-col">
           <TabsList className="w-full">
             <TabsTrigger value="chat" className="flex-1">
-              <MessageSquare className="h-4 w-4 mr-2" />
+              <MessageSquare className="mr-2 h-4 w-4" />
               Chat
             </TabsTrigger>
             <TabsTrigger value="notes" className="flex-1">
-              <FileText className="h-4 w-4 mr-2" />
+              <FileText className="mr-2 h-4 w-4" />
               Notes
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="chat" className="flex-1 flex flex-col">
-            <VideoChat doctorName={doctorName} />
+          <TabsContent value="chat" className="flex flex-1 flex-col">
+            <VideoChat doctorName={peerName} />
           </TabsContent>
           <TabsContent value="notes" className="flex-1">
-            <Card className="h-full p-4 flex flex-col">
-              <h3 className="font-medium mb-2">Consultation Notes</h3>
-              <Textarea 
-                className="flex-1 p-2 mb-4 resize-none" 
-                placeholder="Take notes during your consultation..."
+            <Card className="flex h-full flex-col p-4">
+              <h2 className="mb-2 font-medium">Consultation notes</h2>
+              <Textarea
+                className="mb-4 flex-1 resize-none p-2"
+                placeholder="Take notes during the consultation…"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
-              <Button onClick={handleSaveNotes}>Save Notes</Button>
+              <Button onClick={handleSaveNotes} disabled={savingNote || !notes.trim()}>
+                {savingNote ? "Saving…" : "Save notes"}
+              </Button>
             </Card>
           </TabsContent>
         </Tabs>
