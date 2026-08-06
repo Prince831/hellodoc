@@ -74,6 +74,11 @@ function AppRoutes() {
         <Route key={path} path={path} element={<ProtectedRoute>{element}</ProtectedRoute>} />
       ))}
 
+      {/* Live video room — open to whichever participant (patient or doctor) the room belongs to */}
+      <Route path="/call/:roomId" element={<ProtectedRoute><VideoRoom /></ProtectedRoute>} />
+
+
+
       {/* Doctor routes */}
       <Route path="/doctor" element={<ProtectedRoute requireDoctor><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/schedule" element={<ProtectedRoute requireDoctor><DoctorSchedule /></ProtectedRoute>} />
