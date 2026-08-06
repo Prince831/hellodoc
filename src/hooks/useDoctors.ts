@@ -7,10 +7,10 @@ export const useDoctors = (specialization?: string, searchTerm?: string) => {
     queryKey: ["doctors", specialization, searchTerm],
     queryFn: async () => {
       let query = supabase
-        .from("doctors")
+        .from("doctors_public")
         .select("*")
-        .eq("availability", true)
-        .eq("verified", true);
+        .eq("availability", true);
+
 
       if (specialization) {
         query = query.ilike("specialization", `%${specialization}%`);
@@ -34,7 +34,7 @@ export const useDoctor = (doctorId: string) => {
     queryKey: ["doctor", doctorId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("doctors")
+        .from("doctors_public")
         .select("*")
         .eq("id", doctorId)
         .maybeSingle();
