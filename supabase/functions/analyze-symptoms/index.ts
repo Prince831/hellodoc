@@ -187,7 +187,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('General error:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: (error as Error).message,
       analysis: "An error occurred during analysis. Please try again later.",
       recommendedAction: "virtual_consultation",
       recommendations: "Please consult with a healthcare professional.",
