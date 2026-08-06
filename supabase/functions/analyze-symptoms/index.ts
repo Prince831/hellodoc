@@ -1,12 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, getAuthUserId, serviceClient } from "../_shared/auth.ts";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,37 +11,34 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { symptoms, userId } = body;
-    
+    const { symptoms } = body;
+
+    // Never trust a client-supplied user id — derive it from the JWT.
+    const userId = await getAuthUserId(req);
+
     // Input validation
     if (!symptoms || typeof symptoms !== 'string' || symptoms.trim().length === 0) {
       throw new Error('Symptoms are required and must be a non-empty string');
     }
-    
+
     if (symptoms.length > 2000) {
       throw new Error('Symptoms description is too long (max 2000 characters)');
     }
-    
-    if (userId && typeof userId !== 'string') {
-      throw new Error('User ID must be a valid string');
-    }
-    
+
     // Sanitize input
     const sanitizedSymptoms = symptoms.trim().replace(/[<>]/g, '');
-    
+
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
     }
 
-    console.log("Processing symptoms:", sanitizedSymptoms);
+    console.log("Processing symptoms for user:", userId ?? 'anonymous');
 
     // Create Supabase client for database operations
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseClient = serviceClient();
+
 
     // First, let's directly query for doctors based on the symptoms text
     // This is a fallback in case the AI analysis fails
