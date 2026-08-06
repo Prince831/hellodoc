@@ -94,7 +94,7 @@ serve(async (req) => {
     await supabaseClient
       .from('notifications')
       .insert({
-        user_id: userId,
+        user_id: callerId,
         title: 'Appointment Scheduled',
         message: `Your appointment for ${sanitizedReason} has been scheduled and is pending confirmation.`,
         type: 'success',
