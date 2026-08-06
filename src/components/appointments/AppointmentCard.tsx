@@ -134,17 +134,27 @@ export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps)
           </DialogContent>
         </Dialog>
 
-        {onCancel && !isPast && (
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            onClick={onCancel}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel Appointment
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {canJoinCall && (
+            <Button size="sm" onClick={joinCall} disabled={startCall.isPending}>
+              <Video className="h-4 w-4 mr-2" />
+              Join video call
+            </Button>
+          )}
+
+          {onCancel && !isPast && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={onCancel}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancel Appointment
+            </Button>
+          )}
+        </div>
       </div>
+
     </Card>
   );
 };
