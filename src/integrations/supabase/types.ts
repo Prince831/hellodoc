@@ -126,6 +126,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -168,6 +175,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
             referencedColumns: ["id"]
           },
           {
@@ -221,6 +235,13 @@ export type Database = {
             referencedRelation: "doctors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "doctor_schedules_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       doctor_unavailability: {
@@ -254,6 +275,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_unavailability_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -373,6 +401,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "health_records_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "health_records_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -427,6 +462,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lab_results_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
             referencedColumns: ["id"]
           },
           {
@@ -525,6 +567,13 @@ export type Database = {
             columns: ["prescribed_by"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medications_prescribed_by_fkey"
+            columns: ["prescribed_by"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
             referencedColumns: ["id"]
           },
           {
@@ -910,6 +959,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "vitals_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "doctors_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vitals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -920,20 +976,74 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      doctors_public: {
+        Row: {
+          availability: boolean | null
+          bio: string | null
+          consultation_fee: number | null
+          consultation_types: string[] | null
+          created_at: string | null
+          education: string | null
+          hospital: string | null
+          id: string | null
+          image_url: string | null
+          keywords: string[] | null
+          languages: string[] | null
+          name: string | null
+          rating: number | null
+          specialization: string | null
+          verified: boolean | null
+          years_of_experience: number | null
+        }
+        Insert: {
+          availability?: boolean | null
+          bio?: string | null
+          consultation_fee?: number | null
+          consultation_types?: string[] | null
+          created_at?: string | null
+          education?: string | null
+          hospital?: string | null
+          id?: string | null
+          image_url?: string | null
+          keywords?: string[] | null
+          languages?: string[] | null
+          name?: string | null
+          rating?: number | null
+          specialization?: string | null
+          verified?: boolean | null
+          years_of_experience?: number | null
+        }
+        Update: {
+          availability?: boolean | null
+          bio?: string | null
+          consultation_fee?: number | null
+          consultation_types?: string[] | null
+          created_at?: string | null
+          education?: string | null
+          hospital?: string | null
+          id?: string | null
+          image_url?: string | null
+          keywords?: string[] | null
+          languages?: string[] | null
+          name?: string | null
+          rating?: number | null
+          specialization?: string | null
+          verified?: boolean | null
+          years_of_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_view_doctor_contact_info: { Args: never; Returns: boolean }
       current_doctor_id: { Args: never; Returns: string }
-      has_role:
-        | {
-            Args: {
-              _role: Database["public"]["Enums"]["app_role"]
-              _user_id: string
-            }
-            Returns: boolean
-          }
-        | { Args: { role_name: string; user_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_treating_doctor: { Args: { _patient_id: string }; Returns: boolean }
     }
     Enums: {
