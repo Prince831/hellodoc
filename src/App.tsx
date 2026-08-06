@@ -25,6 +25,7 @@ import Messages from "./pages/Messages";
 import Dashboard from "./pages/Dashboard";
 import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
+import VideoRoom from "./pages/VideoRoom";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 
@@ -72,6 +73,11 @@ function AppRoutes() {
       {protectedPatientRoutes.map(([path, element]) => (
         <Route key={path} path={path} element={<ProtectedRoute>{element}</ProtectedRoute>} />
       ))}
+
+      {/* Live video room — open to whichever participant (patient or doctor) the room belongs to */}
+      <Route path="/call/:roomId" element={<ProtectedRoute><VideoRoom /></ProtectedRoute>} />
+
+
 
       {/* Doctor routes */}
       <Route path="/doctor" element={<ProtectedRoute requireDoctor><DoctorDashboard /></ProtectedRoute>} />

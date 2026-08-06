@@ -1,18 +1,26 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format, isToday, parseISO } from "date-fns";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarClock, CheckCircle2, Users, XCircle, CalendarCog } from "lucide-react";
+import { CalendarClock, CheckCircle2, Users, XCircle, CalendarCog, Video } from "lucide-react";
 import { useDoctorAppointments, useUpdateAppointment } from "@/hooks/useAppointments";
 import { useAuth } from "@/hooks/useAuth";
+import { useStartVideoConsultation } from "@/hooks/useVideoConsultations";
 
 const DoctorDashboard = () => {
   const { data: appointments = [], isLoading } = useDoctorAppointments();
   const updateAppointment = useUpdateAppointment();
   const { doctorId } = useAuth();
+  const navigate = useNavigate();
+  const startCall = useStartVideoConsultation();
+
+  const joinCall = (appointmentId: string) =>
+    startCall.mutate(appointmentId, {
+      onSuccess: (roomId) => navigate(`/call/${roomId}`),
+    });
 
   const pending = appointments.filter((a) => a.status === "pending");
   const today = appointments.filter((a) => isToday(parseISO(a.date)) && a.status === "approved");
@@ -131,6 +139,9 @@ const DoctorDashboard = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary">{a.status}</Badge>
+                        <Button size="sm" onClick={() => joinCall(a.id)} disabled={startCall.isPending}>
+                          <Video className="mr-1 h-4 w-4" /> Start video call
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => setStatus(a.id, "completed")}>
                           Mark complete
                         </Button>

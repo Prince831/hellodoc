@@ -1,8 +1,10 @@
 
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, X, FileText } from "lucide-react";
+import { Calendar, Clock, X, FileText, Video } from "lucide-react";
 import { Appointment } from "@/types/appointments";
+import { useStartVideoConsultation } from "@/hooks/useVideoConsultations";
 import { getStatusColor, getStatusBorderColor } from "@/utils/appointmentUtils";
 import {
   Dialog,
@@ -21,6 +23,15 @@ interface AppointmentCardProps {
 export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps) => {
   const appointmentDate = new Date(appointment.date);
   const isPast = appointmentDate < new Date();
+  const navigate = useNavigate();
+  const startCall = useStartVideoConsultation();
+  const canJoinCall = appointment.status === "approved" && !isPast;
+
+  const joinCall = () =>
+    startCall.mutate(appointment.id, {
+      onSuccess: (roomId) => navigate(`/call/${roomId}`),
+    });
+
 
   return (
     <Card 
@@ -123,17 +134,27 @@ export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps)
           </DialogContent>
         </Dialog>
 
-        {onCancel && !isPast && (
-          <Button 
-            variant="destructive" 
-            size="sm" 
-            onClick={onCancel}
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel Appointment
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {canJoinCall && (
+            <Button size="sm" onClick={joinCall} disabled={startCall.isPending}>
+              <Video className="h-4 w-4 mr-2" />
+              Join video call
+            </Button>
+          )}
+
+          {onCancel && !isPast && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={onCancel}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancel Appointment
+            </Button>
+          )}
+        </div>
       </div>
+
     </Card>
   );
 };
