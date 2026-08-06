@@ -1,11 +1,5 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, getAuthUserId, serviceClient, unauthorized, forbidden } from "../_shared/auth.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,25 +7,28 @@ serve(async (req) => {
   }
 
   try {
+    const callerId = await getAuthUserId(req);
+    if (!callerId) return unauthorized();
+
     const { senderId, receiverId, content, conversationId } = await req.json();
 
-    if (!senderId || !receiverId || !content) {
-      return new Response(JSON.stringify({ error: 'Missing senderId, receiverId, or content' }), {
+    if (!receiverId || !content) {
+      return new Response(JSON.stringify({ error: 'Missing receiverId or content' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    if (senderId && senderId !== callerId) {
+      return forbidden('You may only send messages as yourself');
+    }
 
-    // Insert the message
+    const supabaseClient = serviceClient();
+
     const { data: messageData, error: messageError } = await supabaseClient
       .from('messages')
       .insert({
-        sender_id: senderId,
+        sender_id: callerId,
         receiver_id: receiverId,
         content,
         conversation_id: conversationId,
@@ -47,7 +44,6 @@ serve(async (req) => {
       });
     }
 
-    // Create notification for the receiver
     await supabaseClient
       .from('notifications')
       .insert({
@@ -61,9 +57,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({ success: true, message: messageData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

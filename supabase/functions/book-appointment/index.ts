@@ -1,11 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, getAuthUserId, serviceClient, unauthorized, forbidden } from "../_shared/auth.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,16 +8,17 @@ serve(async (req) => {
   }
 
   try {
+    const callerId = await getAuthUserId(req);
+    if (!callerId) return unauthorized();
+
     const body = await req.json();
     const { userId, doctorId, date, reason, notes } = body;
 
-    // Input validation
-    if (!userId || typeof userId !== 'string') {
-      return new Response(JSON.stringify({ error: 'Valid user ID is required' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // The appointment always belongs to the authenticated caller
+    if (userId && userId !== callerId) {
+      return forbidden('You may only book appointments for yourself');
     }
+
 
     if (!doctorId || typeof doctorId !== 'string') {
       return new Response(JSON.stringify({ error: 'Valid doctor ID is required' }), {
@@ -70,16 +66,14 @@ serve(async (req) => {
     const sanitizedReason = reason.trim().replace(/[<>]/g, '');
     const sanitizedNotes = notes ? notes.trim().replace(/[<>]/g, '') : null;
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseClient = serviceClient();
 
     // Create appointment
     const { data: appointmentData, error: appointmentError } = await supabaseClient
       .from('appointments')
       .insert({
-        user_id: userId,
+        user_id: callerId,
+
         doctor_id: doctorId,
         date,
         reason: sanitizedReason,
@@ -100,7 +94,7 @@ serve(async (req) => {
     await supabaseClient
       .from('notifications')
       .insert({
-        user_id: userId,
+        user_id: callerId,
         title: 'Appointment Scheduled',
         message: `Your appointment for ${sanitizedReason} has been scheduled and is pending confirmation.`,
         type: 'success',

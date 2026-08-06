@@ -17,7 +17,7 @@ export function useGlobalSearch() {
     try {
       // Search doctors
       const { data: doctors, error: doctorsError } = await supabase
-        .from('doctors')
+        .from('doctors_public')
         .select('id, name, specialization')
         .ilike('name', `%${query}%`)
         .limit(5);
