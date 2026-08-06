@@ -1,10 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders, getAuthUserId, serviceClient, unauthorized, forbidden } from "../_shared/auth.ts";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,6 +7,9 @@ serve(async (req) => {
   }
 
   try {
+    const callerId = await getAuthUserId(req);
+    if (!callerId) return unauthorized();
+
     const { userId, title, message, type = 'info', actionUrl } = await req.json();
 
     if (!userId || !title || !message) {
@@ -21,10 +19,28 @@ serve(async (req) => {
       });
     }
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseClient = serviceClient();
+
+    if (userId !== callerId) {
+      // Only a doctor treating this patient may notify someone else.
+      const { data: doctor } = await supabaseClient
+        .from('doctors')
+        .select('id')
+        .eq('user_id', callerId)
+        .maybeSingle();
+
+      if (!doctor) return forbidden('You may only create notifications for yourself');
+
+      const { data: appointment } = await supabaseClient
+        .from('appointments')
+        .select('id')
+        .eq('doctor_id', doctor.id)
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+
+      if (!appointment) return forbidden('Not a treating doctor for this patient');
+    }
 
     const { data, error } = await supabaseClient
       .from('notifications')
@@ -46,16 +62,12 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      notification: data 
-    }), {
+    return new Response(JSON.stringify({ success: true, notification: data }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
     console.error('Unexpected error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
