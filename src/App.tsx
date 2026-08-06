@@ -25,6 +25,7 @@ import Messages from "./pages/Messages";
 import Dashboard from "./pages/Dashboard";
 import Medications from "./pages/Medications";
 import VideoConsultation from "./pages/VideoConsultation";
+import VideoRoom from "./pages/VideoRoom";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 
