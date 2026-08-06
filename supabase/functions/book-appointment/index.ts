@@ -66,16 +66,14 @@ serve(async (req) => {
     const sanitizedReason = reason.trim().replace(/[<>]/g, '');
     const sanitizedNotes = notes ? notes.trim().replace(/[<>]/g, '') : null;
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseClient = serviceClient();
 
     // Create appointment
     const { data: appointmentData, error: appointmentError } = await supabaseClient
       .from('appointments')
       .insert({
-        user_id: userId,
+        user_id: callerId,
+
         doctor_id: doctorId,
         date,
         reason: sanitizedReason,
