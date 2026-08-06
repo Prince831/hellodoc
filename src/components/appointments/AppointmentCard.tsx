@@ -1,8 +1,10 @@
 
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, X, FileText } from "lucide-react";
+import { Calendar, Clock, X, FileText, Video } from "lucide-react";
 import { Appointment } from "@/types/appointments";
+import { useStartVideoConsultation } from "@/hooks/useVideoConsultations";
 import { getStatusColor, getStatusBorderColor } from "@/utils/appointmentUtils";
 import {
   Dialog,
