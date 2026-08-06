@@ -23,6 +23,15 @@ interface AppointmentCardProps {
 export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps) => {
   const appointmentDate = new Date(appointment.date);
   const isPast = appointmentDate < new Date();
+  const navigate = useNavigate();
+  const startCall = useStartVideoConsultation();
+  const canJoinCall = appointment.status === "approved" && !isPast;
+
+  const joinCall = () =>
+    startCall.mutate(appointment.id, {
+      onSuccess: (roomId) => navigate(`/call/${roomId}`),
+    });
+
 
   return (
     <Card 
