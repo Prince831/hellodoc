@@ -105,17 +105,53 @@ const VideoInterface = ({
       <div className="flex flex-col md:col-span-2">
         <div className="mb-2 flex items-center justify-between">
           <h1 className="text-lg font-semibold">Consultation with {peerName}</h1>
-          <Badge variant={status === "connected" ? "default" : "secondary"}>
-            {status === "connected" ? "Live" : status.replace("-", " ")}
+          <Badge
+            variant={
+              status === "connected"
+                ? "default"
+                : status === "failed"
+                  ? "destructive"
+                  : "secondary"
+            }
+          >
+            {status === "connected"
+              ? "Live"
+              : status === "reconnecting"
+                ? `Reconnecting${reconnectAttempt ? ` (${reconnectAttempt}/${maxReconnectAttempts})` : ""}`
+                : status.replace("-", " ")}
           </Badge>
         </div>
 
-        {error && (
-          <Alert variant="destructive" className="mb-2">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+        {status === "reconnecting" && (
+          <Alert className="mb-2">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                {error ??
+                  "The connection dropped. We are restoring it automatically — stay on this page."}
+              </span>
+              <Button size="sm" variant="outline" onClick={reconnect}>
+                Reconnect now
+              </Button>
+            </AlertDescription>
           </Alert>
         )}
+
+        {error && status !== "reconnecting" && (
+          <Alert variant="destructive" className="mb-2">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+              <span>{error}</span>
+              {status === "failed" && (
+                <Button size="sm" variant="outline" onClick={reconnect}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Try again
+                </Button>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
 
         <VideoDisplay
           peerName={peerName}
