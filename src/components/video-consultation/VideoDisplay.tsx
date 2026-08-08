@@ -17,6 +17,7 @@ const STATUS_LABEL: Record<CallStatus, string> = {
   waiting: "Waiting for the other participant to join…",
   connecting: "Connecting…",
   connected: "Connected",
+  reconnecting: "Connection lost — reconnecting…",
   failed: "Connection problem",
 };
 
