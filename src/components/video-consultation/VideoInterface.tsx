@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, FileText, AlertTriangle } from "lucide-react";
+import { MessageSquare, FileText, AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -55,6 +55,9 @@ const VideoInterface = ({
     remoteStream,
     isMuted,
     isCameraOff,
+    reconnectAttempt,
+    maxReconnectAttempts,
+    reconnect,
     toggleMute,
     toggleCamera,
   } = useWebRTC({
