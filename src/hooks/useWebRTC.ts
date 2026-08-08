@@ -24,19 +24,33 @@ interface UseWebRTCOptions {
    * collision. Patients are polite, doctors are impolite.
    */
   polite: boolean;
+  /** Devices chosen in the pre-join check. */
+  audioDeviceId?: string;
+  videoDeviceId?: string;
+  /** Join preferences from the pre-join check. */
+  startMuted?: boolean;
+  startCameraOff?: boolean;
 }
 
 /**
  * Peer-to-peer WebRTC call using Supabase Realtime broadcast for signalling.
  * Implements the "perfect negotiation" pattern so either side can join first.
  */
-export function useWebRTC({ roomId, peerId, polite }: UseWebRTCOptions) {
+export function useWebRTC({
+  roomId,
+  peerId,
+  polite,
+  audioDeviceId,
+  videoDeviceId,
+  startMuted = false,
+  startCameraOff = false,
+}: UseWebRTCOptions) {
   const [status, setStatus] = useState<CallStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isMuted, setIsMuted] = useState(startMuted);
+  const [isCameraOff, setIsCameraOff] = useState(startCameraOff);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -45,6 +59,8 @@ export function useWebRTC({ roomId, peerId, polite }: UseWebRTCOptions) {
   const ignoreOfferRef = useRef(false);
   const politeRef = useRef(polite);
   politeRef.current = polite;
+  const prefsRef = useRef({ audioDeviceId, videoDeviceId, startMuted, startCameraOff });
+  prefsRef.current = { audioDeviceId, videoDeviceId, startMuted, startCameraOff };
 
   const send = useCallback((event: string, payload: SignalPayload) => {
     channelRef.current?.send({ type: "broadcast", event, payload });
