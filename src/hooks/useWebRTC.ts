@@ -164,15 +164,29 @@ export function useWebRTC({
 
     const start = async () => {
       setStatus("requesting-media");
+      const prefs = prefsRef.current;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: { echoCancellation: true, noiseSuppression: true },
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            ...(prefs.videoDeviceId ? { deviceId: { exact: prefs.videoDeviceId } } : {}),
+          },
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            ...(prefs.audioDeviceId ? { deviceId: { exact: prefs.audioDeviceId } } : {}),
+          },
         });
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
           return;
         }
+        // Apply the pre-join preferences before publishing the tracks.
+        if (prefs.startMuted) stream.getAudioTracks().forEach((t) => (t.enabled = false));
+        if (prefs.startCameraOff) stream.getVideoTracks().forEach((t) => (t.enabled = false));
+        setIsMuted(prefs.startMuted);
+        setIsCameraOff(prefs.startCameraOff);
         localStreamRef.current = stream;
         setLocalStream(stream);
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
