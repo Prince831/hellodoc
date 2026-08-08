@@ -23,6 +23,11 @@ interface VideoInterfaceProps {
   appointmentId: string;
   /** Doctors can write a clinical note straight into the patient chart. */
   canWriteClinicalNote: boolean;
+  /** Devices and preferences chosen in the pre-join check. */
+  audioDeviceId?: string;
+  videoDeviceId?: string;
+  startMuted?: boolean;
+  startCameraOff?: boolean;
   onEndCall: () => void;
 }
 
@@ -33,6 +38,10 @@ const VideoInterface = ({
   polite,
   appointmentId,
   canWriteClinicalNote,
+  audioDeviceId,
+  videoDeviceId,
+  startMuted,
+  startCameraOff,
   onEndCall,
 }: VideoInterfaceProps) => {
   const [notes, setNotes] = useState("");
@@ -48,7 +57,15 @@ const VideoInterface = ({
     isCameraOff,
     toggleMute,
     toggleCamera,
-  } = useWebRTC({ roomId, peerId, polite });
+  } = useWebRTC({
+    roomId,
+    peerId,
+    polite,
+    audioDeviceId,
+    videoDeviceId,
+    startMuted,
+    startCameraOff,
+  });
 
   const handleSaveNotes = async () => {
     if (!notes.trim()) return;
