@@ -24,19 +24,33 @@ interface UseWebRTCOptions {
    * collision. Patients are polite, doctors are impolite.
    */
   polite: boolean;
+  /** Devices chosen in the pre-join check. */
+  audioDeviceId?: string;
+  videoDeviceId?: string;
+  /** Join preferences from the pre-join check. */
+  startMuted?: boolean;
+  startCameraOff?: boolean;
 }
 
 /**
  * Peer-to-peer WebRTC call using Supabase Realtime broadcast for signalling.
  * Implements the "perfect negotiation" pattern so either side can join first.
  */
-export function useWebRTC({ roomId, peerId, polite }: UseWebRTCOptions) {
+export function useWebRTC({
+  roomId,
+  peerId,
+  polite,
+  audioDeviceId,
+  videoDeviceId,
+  startMuted = false,
+  startCameraOff = false,
+}: UseWebRTCOptions) {
   const [status, setStatus] = useState<CallStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
+  const [isMuted, setIsMuted] = useState(startMuted);
+  const [isCameraOff, setIsCameraOff] = useState(startCameraOff);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -45,6 +59,8 @@ export function useWebRTC({ roomId, peerId, polite }: UseWebRTCOptions) {
   const ignoreOfferRef = useRef(false);
   const politeRef = useRef(polite);
   politeRef.current = polite;
+  const prefsRef = useRef({ audioDeviceId, videoDeviceId, startMuted, startCameraOff });
+  prefsRef.current = { audioDeviceId, videoDeviceId, startMuted, startCameraOff };
 
   const send = useCallback((event: string, payload: SignalPayload) => {
     channelRef.current?.send({ type: "broadcast", event, payload });
@@ -148,15 +164,29 @@ export function useWebRTC({ roomId, peerId, polite }: UseWebRTCOptions) {
 
     const start = async () => {
       setStatus("requesting-media");
+      const prefs = prefsRef.current;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: { echoCancellation: true, noiseSuppression: true },
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            ...(prefs.videoDeviceId ? { deviceId: { exact: prefs.videoDeviceId } } : {}),
+          },
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            ...(prefs.audioDeviceId ? { deviceId: { exact: prefs.audioDeviceId } } : {}),
+          },
         });
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
           return;
         }
+        // Apply the pre-join preferences before publishing the tracks.
+        if (prefs.startMuted) stream.getAudioTracks().forEach((t) => (t.enabled = false));
+        if (prefs.startCameraOff) stream.getVideoTracks().forEach((t) => (t.enabled = false));
+        setIsMuted(prefs.startMuted);
+        setIsCameraOff(prefs.startCameraOff);
         localStreamRef.current = stream;
         setLocalStream(stream);
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
