@@ -53,6 +53,12 @@ const VideoRoom = () => {
               Back to consultations
             </Button>
           </div>
+        ) : !joinPrefs ? (
+          <PreJoinCheck
+            peerName={peerName}
+            onJoin={setJoinPrefs}
+            onCancel={() => navigate(isDoctorSide ? "/doctor" : "/video-consultation")}
+          />
         ) : (
           <VideoInterface
             roomId={consultation.room_id}
@@ -61,6 +67,10 @@ const VideoRoom = () => {
             polite={!isDoctorSide}
             appointmentId={appointment.id}
             canWriteClinicalNote={isDoctorSide}
+            audioDeviceId={joinPrefs.audioDeviceId}
+            videoDeviceId={joinPrefs.videoDeviceId}
+            startMuted={joinPrefs.startMuted}
+            startCameraOff={joinPrefs.startCameraOff}
             onEndCall={handleEnd}
           />
         )}
