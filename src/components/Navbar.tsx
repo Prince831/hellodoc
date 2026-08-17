@@ -1,70 +1,68 @@
-
 import Logo from "@/components/navbar/Logo";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationsPopover from "@/components/navbar/NotificationsPopover";
 import UserDropdown from "@/components/navbar/UserDropdown";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Video, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+const navigationLinks = [
+  { to: "/", label: "Home" },
+  { to: "/dashboard", label: "Dashboard" },
+  { to: "/doctors", label: "Find Doctors" },
+  { to: "/symptom-checker", label: "Symptom Checker" },
+  { to: "/appointments", label: "Appointments" },
+  { to: "/health-records", label: "Health Records" },
+  { to: "/medications", label: "Medications" },
+  { to: "/messages", label: "Messages" },
+  { to: "/video-consultation", label: "Video Call", icon: Video },
+];
 
 const Navbar = () => {
-  const user = null; // No authentication
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => setIsMenuOpen((o) => !o);
   const closeMenu = () => setIsMenuOpen(false);
 
-  const getNavigationLinks = () => {
-    return [
-      { to: "/", label: "Home" },
-      { to: "/dashboard", label: "Dashboard" },
-      { to: "/doctors", label: "Find Doctors" },
-      { to: "/symptom-checker", label: "Symptom Checker" },
-      { to: "/appointments", label: "Appointments" },
-      { to: "/health-records", label: "Health Records" },
-      { to: "/medications", label: "Medications" },
-      { to: "/messages", label: "Messages" },
-      { to: "/video-consultation", label: "Video Call", icon: Video },
-    ];
-  };
-
   const MobileNavContent = () => (
-    <motion.div 
-      initial={{ opacity: 0, y: -20 }}
+    <motion.div
+      initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="md:hidden absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-md border-b shadow-lg z-40"
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="glass absolute left-0 right-0 top-16 z-40 border-t md:hidden"
     >
-      <div className="container mx-auto px-4 py-6 space-y-4">
-        {/* Mobile Search */}
-        <div className="w-full">
-          <GlobalSearch />
-        </div>
-        
-        {/* Navigation Links */}
-        <div className="flex flex-col space-y-3">
-          {getNavigationLinks().map((link) => (
-            <Button key={link.to} variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+      <div className="container mx-auto space-y-4 px-4 py-6">
+        <GlobalSearch />
+        <div className="flex flex-col space-y-1.5">
+          {navigationLinks.map((link) => (
+            <Button
+              key={link.to}
+              variant="ghost"
+              size="lg"
+              asChild
+              className="h-12 justify-start text-base font-medium"
+              onClick={closeMenu}
+            >
               <Link to={link.to}>
                 {link.icon && <link.icon className="mr-2 h-4 w-4" />}
                 {link.label}
               </Link>
             </Button>
           ))}
-          
-          <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+          <Button variant="ghost" size="lg" asChild className="h-12 justify-start text-base" onClick={closeMenu}>
             <Link to="/profile">Profile</Link>
           </Button>
-          <Button variant="ghost" size="lg" asChild className="justify-start h-12 text-base font-medium" onClick={closeMenu}>
+          <Button variant="ghost" size="lg" asChild className="h-12 justify-start text-base" onClick={closeMenu}>
             <Link to="/settings">Settings</Link>
           </Button>
         </div>
-        
-        {/* User Actions */}
-        <div className="flex items-center justify-between pt-4 border-t">
+        <div className="flex items-center justify-between border-t pt-4">
           <div className="flex items-center gap-3">
             <ThemeToggle />
             <NotificationsPopover />
@@ -77,31 +75,42 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/70 backdrop-blur-xl">
         <div className="container flex h-16 items-center justify-between px-4">
-          {/* Left side - Logo */}
           <div className="flex items-center gap-6">
             <Logo />
-            
-            {/* Desktop Quick Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {getNavigationLinks().slice(0, 4).map((link) => (
-                <Button key={link.to} variant="ghost" size="sm" asChild>
-                  <Link to={link.to}>{link.label}</Link>
-                </Button>
-              ))}
+            <nav className="hidden items-center gap-1 lg:flex">
+              {navigationLinks.slice(0, 4).map((link) => {
+                const active = location.pathname === link.to;
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={cn(
+                      "relative rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-300",
+                      active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="navbar-active"
+                        className="absolute inset-0 rounded-lg bg-primary/10"
+                        transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                      />
+                    )}
+                    <span className="relative z-10">{link.label}</span>
+                  </Link>
+                );
+              })}
             </nav>
           </div>
-          
-          {/* Center - Search (Desktop only) */}
-          <div className="hidden lg:flex flex-1 justify-center max-w-md mx-8">
+
+          <div className="mx-8 hidden max-w-md flex-1 justify-center lg:flex">
             <GlobalSearch />
           </div>
 
-          {/* Right side actions */}
           <div className="flex items-center gap-2">
-            {/* Desktop navigation */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden items-center gap-2 md:flex">
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/video-consultation">
                   <Video className="h-4 w-4" />
@@ -112,36 +121,17 @@ const Navbar = () => {
               <ThemeToggle />
               <UserDropdown />
             </div>
-            
-            {/* Mobile menu toggle */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMenu} aria-label="Toggle menu">
+              {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Navigation Overlay */}
-      <AnimatePresence>
-        {isMenuOpen && <MobileNavContent />}
-      </AnimatePresence>
-      
-      {/* Mobile backdrop */}
+      <AnimatePresence>{isMenuOpen && <MobileNavContent />}</AnimatePresence>
+
       {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-30 md:hidden"
-          onClick={closeMenu}
-        />
+        <div className="fixed inset-0 z-30 bg-foreground/10 backdrop-blur-sm md:hidden" onClick={closeMenu} />
       )}
     </>
   );
