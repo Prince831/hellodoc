@@ -1,0 +1,110 @@
+import { Suspense, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, MeshDistortMaterial, Environment, Torus } from "@react-three/drei";
+import type { Mesh, Group } from "three";
+
+const PulseCore = () => {
+  const mesh = useRef<Mesh>(null);
+  useFrame(({ clock }) => {
+    if (!mesh.current) return;
+    const t = clock.getElapsedTime();
+    const beat = 1 + Math.sin(t * 2.2) * 0.035 + Math.sin(t * 4.4) * 0.015;
+    mesh.current.scale.setScalar(beat);
+    mesh.current.rotation.y = t * 0.25;
+  });
+
+  return (
+    <mesh ref={mesh}>
+      <icosahedronGeometry args={[1.25, 12]} />
+      <MeshDistortMaterial
+        color="#4C9BFF"
+        emissive="#3BD6A0"
+        emissiveIntensity={0.25}
+        roughness={0.12}
+        metalness={0.55}
+        distort={0.32}
+        speed={1.6}
+      />
+    </mesh>
+  );
+};
+
+const OrbitRings = () => {
+  const group = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    if (!group.current) return;
+    const t = clock.getElapsedTime();
+    group.current.rotation.z = t * 0.18;
+    group.current.rotation.x = Math.sin(t * 0.3) * 0.25;
+  });
+
+  return (
+    <group ref={group}>
+      <Torus args={[2.1, 0.025, 16, 128]} rotation={[Math.PI / 2.6, 0, 0]}>
+        <meshStandardMaterial color="#3BD6A0" emissive="#3BD6A0" emissiveIntensity={0.6} roughness={0.3} />
+      </Torus>
+      <Torus args={[2.6, 0.018, 16, 128]} rotation={[Math.PI / 1.9, 0.4, 0]}>
+        <meshStandardMaterial color="#4C9BFF" emissive="#4C9BFF" emissiveIntensity={0.5} roughness={0.3} />
+      </Torus>
+    </group>
+  );
+};
+
+const Capsules = () => {
+  const group = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    if (group.current) group.current.rotation.y = -clock.getElapsedTime() * 0.35;
+  });
+
+  const items = [0, 1, 2, 3];
+  return (
+    <group ref={group}>
+      {items.map((i) => {
+        const angle = (i / items.length) * Math.PI * 2;
+        return (
+          <Float key={i} speed={2} rotationIntensity={1.2} floatIntensity={1.1}>
+            <mesh position={[Math.cos(angle) * 2.4, Math.sin(angle) * 0.9, Math.sin(angle) * 1.4]}>
+              <capsuleGeometry args={[0.12, 0.32, 8, 16]} />
+              <meshStandardMaterial
+                color={i % 2 === 0 ? "#8ED9FF" : "#7DF3C6"}
+                roughness={0.15}
+                metalness={0.4}
+              />
+            </mesh>
+          </Float>
+        );
+      })}
+    </group>
+  );
+};
+
+interface HeroSceneProps {
+  className?: string;
+}
+
+const HeroScene = ({ className }: HeroSceneProps) => {
+  return (
+    <div className={className} aria-hidden="true">
+      <Canvas
+        camera={{ position: [0, 0, 6.4], fov: 45 }}
+        dpr={[1, 1.8]}
+        gl={{ antialias: true, alpha: true }}
+      >
+        <Suspense fallback={null}>
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[4, 5, 4]} intensity={1.4} color="#ffffff" />
+          <pointLight position={[-4, -2, 3]} intensity={2.2} color="#3BD6A0" />
+          <pointLight position={[3, 3, -4]} intensity={1.8} color="#4C9BFF" />
+          <Float speed={1.4} rotationIntensity={0.5} floatIntensity={1.2}>
+            <PulseCore />
+          </Float>
+          <OrbitRings />
+          <Capsules />
+          <Environment preset="city" />
+        </Suspense>
+      </Canvas>
+    </div>
+  );
+};
+
+export default HeroScene;
