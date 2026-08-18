@@ -9,8 +9,10 @@ import Navbar from "@/components/Navbar";
 import Aurora from "@/components/layout/Aurora";
 import PageTransition from "@/components/layout/PageTransition";
 import TiltCard from "@/components/ui/tilt-card";
+import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
 
 const HeroScene = lazy(() => import("@/components/three/HeroScene"));
+
 
 const fadeInUp = {
   initial: { opacity: 0, y: 32 },
