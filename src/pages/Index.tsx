@@ -127,15 +127,24 @@ const Index = () => {
               className="relative mx-auto h-[300px] w-full max-w-xl sm:h-[380px] lg:h-[460px]"
             >
               <div className="absolute inset-8 rounded-full bg-gradient-primary opacity-20 blur-3xl" />
-              <Suspense
-                fallback={
-                  <div className="grid h-full place-items-center">
-                    <div className="h-40 w-40 animate-pulse rounded-full bg-gradient-primary opacity-30 blur-2xl" />
-                  </div>
-                }
-              >
-                <HeroScene className="h-full w-full" />
-              </Suspense>
+              {isWebGLAvailable() ? (
+                <SceneBoundary>
+                  <Suspense
+                    fallback={
+                      <div className="grid h-full place-items-center">
+                        <div className="h-40 w-40 animate-pulse rounded-full bg-gradient-primary opacity-30 blur-2xl" />
+                      </div>
+                    }
+                  >
+                    <HeroScene className="h-full w-full" />
+                  </Suspense>
+                </SceneBoundary>
+              ) : (
+                <div className="grid h-full place-items-center">
+                  <div className="float-3d h-48 w-48 rounded-full bg-gradient-primary opacity-40 blur-2xl" />
+                </div>
+              )}
+
             </motion.div>
           </motion.section>
 
