@@ -31,7 +31,7 @@ const DoctorDashboard = () => {
 
   if (!doctorId) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <main className="container mx-auto px-4 py-10">
           <h1 className="text-2xl font-bold">Doctor profile not set up</h1>
@@ -44,7 +44,7 @@ const DoctorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">

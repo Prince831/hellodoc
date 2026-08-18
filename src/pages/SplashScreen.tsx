@@ -17,7 +17,7 @@ const SplashScreen = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary to-white flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-primary flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}

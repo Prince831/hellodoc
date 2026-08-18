@@ -38,7 +38,7 @@ const VideoRoom = () => {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <main className="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
         {isLoading || !user ? (

@@ -102,7 +102,7 @@ const HealthRecords = () => {
   }, [toast]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
+    <div className="min-h-screen ">
       <Navbar />
       
       <main className="pt-16">

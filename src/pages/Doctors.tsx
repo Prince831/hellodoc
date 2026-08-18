@@ -20,7 +20,7 @@ const Doctors = () => {
   const { data: doctors = [], isLoading } = useDoctors(symptomData?.specialization);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-primary-glow dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen ">
       <Navbar />
       <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
         {/* Symptom Summary */}
