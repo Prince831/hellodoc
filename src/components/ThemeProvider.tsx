@@ -110,14 +110,17 @@ export function ThemeProvider({
 
   useEffect(() => {
     const scheme = getColorScheme(colorScheme);
-    
-    // Apply the color scheme to CSS variables
-    document.documentElement.style.setProperty('--primary', scheme.primary);
-    document.documentElement.style.setProperty('--secondary', scheme.secondary);
-    document.documentElement.style.setProperty('--accent', scheme.accent);
-    
+    const root = document.documentElement;
+
+    // Apply the accent scheme to the design-system tokens (raw HSL triplets).
+    root.style.setProperty('--primary', scheme.primary);
+    root.style.setProperty('--primary-glow', scheme.glow);
+    root.style.setProperty('--accent', scheme.accent);
+    root.style.setProperty('--ring', scheme.primary);
+
     localStorage.setItem('hello-doc-color-scheme', colorScheme);
   }, [colorScheme]);
+
 
   useEffect(() => {
     // Apply font size

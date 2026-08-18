@@ -39,8 +39,8 @@ const AnalysisResults = ({ analysisResults }: AnalysisResultsProps) => {
       default:
         return {
           badge: <Badge variant="secondary">Assessment Complete</Badge>,
-          icon: <Phone className="h-5 w-5 text-gray-500" />,
-          color: "border-gray-200 bg-gray-50 dark:bg-gray-950 dark:border-gray-800"
+          icon: <Phone className="h-5 w-5 text-muted-foreground" />,
+          color: "border-gray-200 bg-muted/40  dark:border-gray-800"
         };
     }
   };

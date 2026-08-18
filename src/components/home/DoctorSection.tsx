@@ -44,7 +44,7 @@ const DoctorSection = ({ doctors, loading, symptoms, error }: DoctorSectionProps
       variants={itemVariants} 
       className="mb-8 sm:mb-12 lg:mb-16"
     >
-      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 text-gray-900 dark:text-white px-2">
+      <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 text-foreground px-2">
         {symptoms ? 'Recommended Doctors' : 'Our Specialists'}
       </h2>
       

@@ -149,7 +149,7 @@ const AvailableTimeSlots: React.FC<AvailableTimeSlotsProps> = ({
             Booked
           </Badge>
           <Badge variant="outline" className="text-xs">
-            <div className="w-2 h-2 bg-gray-400 rounded-full mr-1" />
+            <div className="w-2 h-2 bg-muted-foreground rounded-full mr-1" />
             Past
           </Badge>
         </div>
@@ -181,7 +181,7 @@ const AvailableTimeSlots: React.FC<AvailableTimeSlotsProps> = ({
                   <div
                     className={cn(
                       "absolute top-1 right-1 w-1.5 h-1.5 rounded-full",
-                      status === 'booked' ? 'bg-red-500' : 'bg-gray-400'
+                      status === 'booked' ? 'bg-red-500' : 'bg-muted-foreground'
                     )}
                   />
                 )}

@@ -57,7 +57,7 @@ const ChatArea = ({
                   {message.attachments.map((attachment, index) => (
                     <div 
                       key={index}
-                      className="text-xs px-2 py-1 bg-black/10 dark:bg-white/10 rounded-md"
+                      className="text-xs px-2 py-1 bg-black/10 dark:bg-card/10 rounded-md"
                     >
                       {attachment.name}
                     </div>

@@ -24,7 +24,7 @@ export const AppointmentList = ({
   appointments,
   emptyMessage = "No appointments found",
   showScheduleButton = false,
-  titleColor = "text-gray-900",
+  titleColor = "text-foreground",
   onCancelAppointment,
   onScheduleClick,
   loading = false
@@ -34,7 +34,7 @@ export const AppointmentList = ({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-2">
+        <div className="sticky top-0 z-10 bg-muted/40 pt-4 pb-2">
           <h2 className={`text-2xl font-bold ${titleColor} flex items-center gap-2 border-b pb-4`}>
             <Icon className="h-5 w-5" />
             {title}
@@ -49,11 +49,11 @@ export const AppointmentList = ({
   
   return (
     <div className="space-y-6">
-      <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-2">
+      <div className="sticky top-0 z-10 bg-muted/40 pt-4 pb-2">
         <h2 className={`text-2xl font-bold ${titleColor} flex items-center gap-2 border-b pb-4`}>
           <Icon className="h-5 w-5" />
           {title}
-          <span className="ml-2 text-sm font-normal text-gray-600">
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
             ({appointments.length})
           </span>
         </h2>
@@ -62,10 +62,10 @@ export const AppointmentList = ({
         <div className="pr-4 space-y-6">
           {appointments.length === 0 ? (
             <Card className={`p-8 text-center ${
-              icon === "calendar" ? "bg-blue-50 border-blue-100" : "bg-gray-50 border-gray-100"
+              icon === "calendar" ? "bg-blue-50 border-blue-100" : "bg-muted/40 border-gray-100"
             }`}>
               <p className={`font-medium ${
-                icon === "calendar" ? "text-blue-800" : "text-gray-600"
+                icon === "calendar" ? "text-blue-800" : "text-muted-foreground"
               }`}>{emptyMessage}</p>
               {showScheduleButton && (
                 <Button 

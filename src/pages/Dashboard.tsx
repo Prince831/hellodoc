@@ -25,7 +25,7 @@ const Dashboard = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 via-background to-muted/20">
+    <div className="min-h-screen ">
       <Navbar />
       
       <main className={isMobile ? "pt-4" : "pt-16"}>
@@ -36,7 +36,7 @@ const Dashboard = () => {
             animate={{ opacity: 1, scale: 1 }}
             className={`relative mb-8 bg-gradient-to-br from-primary via-primary/90 to-accent rounded-3xl ${isMobile ? "p-6" : "p-8"} text-primary-foreground overflow-hidden`}
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-64 h-64 bg-card/10 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl" />
             
             <div className="relative z-10">

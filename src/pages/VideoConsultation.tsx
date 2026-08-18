@@ -4,7 +4,7 @@ import VideoConsultationContainer from "@/components/video-consultation/VideoCon
 
 const VideoConsultation = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <VideoConsultationContainer />

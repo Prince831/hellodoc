@@ -148,7 +148,7 @@ const Messages = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <div className="h-[calc(100vh-4rem)] flex">
         {/* Desktop Conversation List */}

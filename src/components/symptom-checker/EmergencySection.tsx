@@ -20,7 +20,7 @@ const EmergencySection = () => {
     <div className="bg-destructive/10 dark:bg-destructive/20 rounded-lg p-6 flex flex-col md:flex-row items-center justify-between">
       <div className="mb-4 md:mb-0 md:mr-6">
         <h3 className="font-bold text-xl text-destructive mb-2">Emergency Situation?</h3>
-        <p className="text-gray-700 dark:text-gray-300">
+        <p className="text-muted-foreground ">
           If you're experiencing severe symptoms that require immediate attention, don't wait.
         </p>
       </div>

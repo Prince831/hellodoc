@@ -20,7 +20,7 @@ const SymptomAnalysis = ({ symptoms, analysis, recommendedAction }: SymptomAnaly
     >
       <Card className="p-6">
         <h2 className="text-2xl font-bold mb-4">Your Symptoms Analysis</h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">{analysis}</p>
+        <p className="text-muted-foreground  mb-4">{analysis}</p>
         <div className={`mt-4 p-4 rounded-lg ${
           recommendedAction === 'emergency' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
           recommendedAction === 'virtual_consultation' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
