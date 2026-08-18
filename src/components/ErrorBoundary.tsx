@@ -42,7 +42,7 @@ class ErrorBoundary extends Component<Props, State> {
             </CardHeader>
             <CardContent className="text-center space-y-4">
               {import.meta.env.DEV && this.state.error && (
-                <div className="bg-gray-100 p-3 rounded-md text-left text-sm">
+                <div className="bg-muted p-3 rounded-md text-left text-sm">
                   <p className="font-mono text-red-600">{this.state.error.message}</p>
                 </div>
               )}

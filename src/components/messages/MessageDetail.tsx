@@ -19,17 +19,17 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
             <div className="absolute -left-14 top-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white">
               {message.sender.name.charAt(0)}
             </div>
-            <p className="text-gray-100">{message.content}</p>
-            <span className="text-xs text-gray-400 mt-1 block">
+            <p className="text-muted-foreground">{message.content}</p>
+            <span className="text-xs text-muted-foreground mt-1 block">
               {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
-          <Card className="p-4 bg-[#2C3444] border-none text-gray-100 max-w-[80%] ml-14">
+          <Card className="p-4 bg-[#2C3444] border-none text-muted-foreground max-w-[80%] ml-14">
             <h4 className="font-semibold text-primary flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Appointment Request
             </h4>
-            <p className="text-gray-300 mt-2">
+            <p className="text-muted-foreground mt-2">
               {new Date(message.appointment_request.date).toLocaleString([], {
                 weekday: 'long',
                 year: 'numeric',
@@ -39,7 +39,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
                 minute: '2-digit'
               })}
             </p>
-            <p className="text-gray-300 mt-1">Reason: {message.appointment_request.reason}</p>
+            <p className="text-muted-foreground mt-1">Reason: {message.appointment_request.reason}</p>
             <div className="flex gap-2 mt-4">
               <Button
                 size="sm"
@@ -66,7 +66,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
         <div className={`rounded-lg p-3 relative max-w-[80%] ${
           message.sender.name === 'You' 
             ? 'ml-auto bg-primary text-white' 
-            : 'ml-14 bg-[#2C3444] text-gray-100'
+            : 'ml-14 bg-[#2C3444] text-muted-foreground'
         }`}>
           {message.sender.name !== 'You' && (
             <div className="absolute -left-14 top-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white">
@@ -74,7 +74,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
             </div>
           )}
           <p className="whitespace-pre-wrap">{message.content}</p>
-          <span className="text-xs text-gray-300/80 mt-1 block">
+          <span className="text-xs text-muted-foreground/80 mt-1 block">
             {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
@@ -90,7 +90,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
             <h3 className="text-lg font-semibold text-white">
               {message.sender.name}
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-muted-foreground">
               {new Date(message.created_at).toLocaleDateString([], {
                 weekday: 'long',
                 year: 'numeric',
@@ -104,7 +104,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
           </ScrollArea>
         </>
       ) : (
-        <div className="flex-1 flex items-center justify-center text-gray-400">
+        <div className="flex-1 flex items-center justify-center text-muted-foreground">
           Select a message to view details
         </div>
       )}

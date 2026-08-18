@@ -20,7 +20,7 @@ const Doctors = () => {
   const { data: doctors = [], isLoading } = useDoctors(symptomData?.specialization);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-primary-glow dark:from-slate-900 dark:to-slate-800">
       <Navbar />
       <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-12">
         {/* Symptom Summary */}
@@ -67,11 +67,11 @@ const Doctors = () => {
             <Badge className="mb-3 sm:mb-4 lg:mb-6 text-xs sm:text-sm px-2 py-1" variant="secondary">
               Connect with Healthcare Professionals
             </Badge>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 lg:mb-6 leading-tight px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground mb-3 sm:mb-4 lg:mb-6 leading-tight px-2">
               {symptomData?.specialization ? `${symptomData.specialization}` : "Expert"}{" "}
               <span className="text-primary">Doctors Ready to Help</span>
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-2 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground  mb-4 sm:mb-6 lg:mb-8 px-4 sm:px-2 max-w-3xl mx-auto leading-relaxed">
               {symptomData 
                 ? "Here are the doctors who can help with your symptoms. Start a conversation to discuss your condition."
                 : "Browse our network of qualified healthcare professionals and connect with specialists in various medical fields."
@@ -99,7 +99,7 @@ const Doctors = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 text-gray-900 dark:text-white px-2">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 text-foreground px-2">
               Why Choose Our Doctors?
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-2 sm:px-0">
