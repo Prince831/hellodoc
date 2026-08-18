@@ -87,7 +87,7 @@ const LocationEmergencySection = () => {
           </div>
           <Button 
             onClick={handleEmergencyCall}
-            className="bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg h-12 px-6 font-semibold"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0 shadow-lg h-12 px-6 font-semibold"
             size="lg"
           >
             <Phone className="mr-2 h-5 w-5" />

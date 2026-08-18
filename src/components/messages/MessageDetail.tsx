@@ -16,7 +16,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
       return (
         <div className="space-y-4 animate-fade-in px-4">
           <div className="bg-[#2C3444] rounded-lg p-3 relative max-w-[80%] ml-14">
-            <div className="absolute -left-14 top-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white">
+            <div className="absolute -left-14 top-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground">
               {message.sender.name.charAt(0)}
             </div>
             <p className="text-muted-foreground">{message.content}</p>
@@ -65,11 +65,11 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
       <div className="animate-fade-in px-4">
         <div className={`rounded-lg p-3 relative max-w-[80%] ${
           message.sender.name === 'You' 
-            ? 'ml-auto bg-primary text-white' 
+            ? 'ml-auto bg-primary text-primary-foreground' 
             : 'ml-14 bg-[#2C3444] text-muted-foreground'
         }`}>
           {message.sender.name !== 'You' && (
-            <div className="absolute -left-14 top-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white">
+            <div className="absolute -left-14 top-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground">
               {message.sender.name.charAt(0)}
             </div>
           )}
@@ -87,7 +87,7 @@ const MessageDetail = ({ message, onAppointmentResponse }: MessageDetailProps) =
       {message ? (
         <>
           <div className="p-4 border-b border-gray-800">
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-primary-foreground">
               {message.sender.name}
             </h3>
             <p className="text-sm text-muted-foreground">

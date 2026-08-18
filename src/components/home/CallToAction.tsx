@@ -10,7 +10,7 @@ const CallToAction = () => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
       viewport={{ once: true }}
-      className="py-12 md:py-16 px-4 bg-gradient-to-br from-primary/90 to-primary/70 text-white mt-8 rounded-lg shadow-lg"
+      className="py-12 md:py-16 px-4 bg-gradient-to-br from-primary/90 to-primary/70 text-primary-foreground mt-8 rounded-lg shadow-lg"
     >
       <div className="max-w-7xl mx-auto text-center">
         <motion.h2 

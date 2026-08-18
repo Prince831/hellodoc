@@ -24,10 +24,10 @@ const SplashScreen = () => {
         transition={{ duration: 0.5 }}
         className="text-center"
       >
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+        <h1 className="text-4xl md:text-6xl font-bold text-primary-foreground mb-4">
           Hello Doc
         </h1>
-        <p className="text-xl text-white/90">
+        <p className="text-xl text-primary-foreground/90">
           Your Health, Our Priority
         </p>
         {isLoading && (
