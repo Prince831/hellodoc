@@ -59,8 +59,11 @@ const protectedPatientRoutes: [string, JSX.Element][] = [
 ];
 
 function AppRoutes() {
+  const location = useLocation();
   return (
-    <Routes>
+    <AnimatePresence mode="wait">
+    <Routes location={location} key={location.pathname}>
+
       {/* Public routes */}
       <Route path="/welcome" element={<SplashScreen />} />
       <Route path="/" element={<Index />} />
