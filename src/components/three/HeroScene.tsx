@@ -145,7 +145,13 @@ const HeroScene = ({ className }: HeroSceneProps) => {
           </Float>
           <OrbitRings />
           <Capsules />
-          <Environment preset="city" />
+          <VitalsMotes />
+          <Environment>
+            <Lightformer intensity={2} position={[0, 5, 2]} scale={[10, 10, 1]} />
+            <Lightformer intensity={1.2} color="#3BD6A0" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 1, 1]} />
+            <Lightformer intensity={1} color="#4C9BFF" position={[5, -1, 1]} rotation-y={-Math.PI / 2} scale={[20, 1, 1]} />
+          </Environment>
+
         </Suspense>
       </Canvas>
     </div>
