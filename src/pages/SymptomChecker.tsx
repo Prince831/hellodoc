@@ -150,10 +150,14 @@ const SymptomChecker = () => {
                 
                 <div className="relative">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 backdrop-blur-sm">
+                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto mb-8 bg-muted/50 backdrop-blur-sm">
                       <TabsTrigger value="symptoms" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">
                         <Activity className="w-4 h-4 mr-2" />
                         Symptoms
+                      </TabsTrigger>
+                      <TabsTrigger value="body-map" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">
+                        <PersonStanding className="w-4 h-4 mr-2" />
+                        Body Map
                       </TabsTrigger>
                       <TabsTrigger value="specialties" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">
                         <Stethoscope className="w-4 h-4 mr-2" />
@@ -164,6 +168,60 @@ const SymptomChecker = () => {
                         Quick Check
                       </TabsTrigger>
                     </TabsList>
+
+                    <TabsContent value="body-map" className="space-y-6">
+                      <div className="text-center mb-2">
+                        <CardTitle className="text-2xl text-foreground">Point To Where It Hurts</CardTitle>
+                        <p className="text-muted-foreground mt-2">
+                          Rotate the model and tap a region — we'll pre-fill your symptoms and match a specialty.
+                        </p>
+                      </div>
+
+                      <div className="relative h-[380px] rounded-2xl border border-border/20 bg-background/30 backdrop-blur-sm overflow-hidden">
+                        {isWebGLAvailable() ? (
+                          <SceneBoundary>
+                            <Suspense fallback={<div className="grid h-full place-items-center text-sm text-muted-foreground">Loading 3D model…</div>}>
+                              <BodyMap3D
+                                className="h-full w-full"
+                                selectedId={selectedRegion?.id}
+                                onPick={handleRegionPick}
+                              />
+                            </Suspense>
+                          </SceneBoundary>
+                        ) : (
+                          <div className="grid h-full place-items-center p-6 text-center text-sm text-muted-foreground">
+                            3D isn't supported on this device — use the Symptoms tab instead.
+                          </div>
+                        )}
+                      </div>
+
+                      {selectedRegion && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge className="bg-primary/15 text-primary border-primary/20">{selectedRegion.label}</Badge>
+                            <Badge variant="secondary">{selectedRegion.specialization}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Common concerns here: {selectedRegion.symptoms.join(", ")}.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button className="flex-1" onClick={handleSearch}>
+                              <Search className="mr-2 h-4 w-4" />
+                              Find {selectedRegion.specialization} doctors
+                            </Button>
+                            <Button variant="outline" onClick={() => setActiveTab("symptoms")}>
+                              Refine symptoms
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </TabsContent>
+
+
 
                     <TabsContent value="symptoms" className="space-y-6">
                       <div className="text-center mb-6">
