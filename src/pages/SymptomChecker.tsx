@@ -96,8 +96,10 @@ const SymptomChecker = () => {
     setSymptoms("");
     setBodyPart("");
     setSelectedSpecialization("");
+    setSelectedRegion(undefined);
     setShowResults(false);
   };
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
