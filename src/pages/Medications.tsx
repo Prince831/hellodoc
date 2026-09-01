@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Plus, Pill, Calendar, Clock, User } from "lucide-react";
+import { lazy, Suspense, useMemo, useState } from "react";
+import { Plus, Pill, Calendar, Clock, User, Network, AlertTriangle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import AddMedicationDialog from "@/components/medications/AddMedicationDialog";
+import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
+import { buildInteractionGraph } from "@/data/medicationInteractions";
+
+const MedicationNetwork3D = lazy(() => import("@/components/three/MedicationNetwork3D"));
 
 interface Medication {
   id: string;
@@ -29,6 +33,7 @@ interface Medication {
 const Medications = () => {
   const user = null; // No authentication
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<string | undefined>();
 
   const { data: medications = [], isLoading } = useQuery({
     queryKey: ['medications'],
@@ -48,7 +53,32 @@ const Medications = () => {
             name: "Dr. Smith",
             specialization: "Cardiology"
           }
-        }
+        },
+        {
+          id: "2",
+          name: "Warfarin",
+          dosage: "5mg",
+          frequency: "Once daily",
+          start_date: new Date().toISOString(),
+          active: true,
+          instructions: "INR check every 2 weeks",
+        },
+        {
+          id: "3",
+          name: "Ibuprofen",
+          dosage: "400mg",
+          frequency: "As needed",
+          start_date: new Date().toISOString(),
+          active: true,
+        },
+        {
+          id: "4",
+          name: "Levothyroxine",
+          dosage: "50mcg",
+          frequency: "Every morning",
+          start_date: new Date().toISOString(),
+          active: true,
+        },
       ];
       
       return mockMedications;
@@ -57,6 +87,18 @@ const Medications = () => {
 
   const activeMedications = medications.filter(med => med.active);
   const inactiveMedications = medications.filter(med => !med.active);
+
+  const graph = useMemo(
+    () => buildInteractionGraph(activeMedications.map((m) => ({ id: m.id, name: m.name }))),
+    [activeMedications],
+  );
+
+  const selectedEdges = selectedNode
+    ? graph.edges.filter((e) => e.source === selectedNode || e.target === selectedNode)
+    : graph.edges;
+
+  const nameOf = (id: string) => graph.nodes.find((n) => n.id === id)?.name ?? id;
+
 
   return (
     <div className="min-h-screen">
