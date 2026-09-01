@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +16,18 @@ import {
   Eye,
   Stethoscope,
   Activity,
-  Clipboard
+  Clipboard,
+  PersonStanding
 } from "lucide-react";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import LocationEmergencySection from "@/components/symptom-checker/LocationEmergencySection";
 import { useDoctors } from "@/hooks/useDoctors";
 import Navbar from "@/components/Navbar";
 import { useNavigate } from "react-router-dom";
+import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
+import type { BodyRegion } from "@/components/three/BodyMap3D";
+
+const BodyMap3D = lazy(() => import("@/components/three/BodyMap3D"));
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
@@ -30,9 +35,22 @@ const SymptomChecker = () => {
   const [selectedSpecialization, setSelectedSpecialization] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [activeTab, setActiveTab] = useState("symptoms");
+  const [selectedRegion, setSelectedRegion] = useState<BodyRegion | undefined>();
   
   const navigate = useNavigate();
   const { data: doctors = [], isLoading } = useDoctors(selectedSpecialization || undefined);
+
+  const handleRegionPick = (region: BodyRegion) => {
+    setSelectedRegion(region);
+    setBodyPart(region.label);
+    setSelectedSpecialization(region.specialization);
+    setSymptoms((prev) => {
+      const base = prev.trim();
+      const hint = region.symptoms.join(", ");
+      return base ? `${base}, ${hint}` : hint;
+    });
+  };
+
 
   const specializations = [
     { name: "Cardiology", icon: Heart, keywords: ["heart", "chest", "cardiac", "blood pressure"] },
