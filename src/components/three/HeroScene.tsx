@@ -1,16 +1,26 @@
-import { Suspense, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshDistortMaterial, Environment, Torus } from "@react-three/drei";
-import type { Mesh, Group } from "three";
+import { Float, MeshDistortMaterial, Environment, Lightformer, Torus } from "@react-three/drei";
+import type { Mesh, Group, Points } from "three";
+
+/** Two-phase cardiac waveform (systole + weaker diastole) in the 0..1 range. */
+const heartbeat = (t: number) => {
+  const cycle = (t % 1) / 1;
+  const spike = Math.exp(-Math.pow((cycle - 0.12) / 0.05, 2));
+  const echo = 0.45 * Math.exp(-Math.pow((cycle - 0.32) / 0.07, 2));
+  return spike + echo;
+};
 
 const PulseCore = () => {
   const mesh = useRef<Mesh>(null);
   useFrame(({ clock }) => {
     if (!mesh.current) return;
     const t = clock.getElapsedTime();
-    const beat = 1 + Math.sin(t * 2.2) * 0.035 + Math.sin(t * 4.4) * 0.015;
+    const beat = 1 + heartbeat(t * 1.2) * 0.09;
     mesh.current.scale.setScalar(beat);
     mesh.current.rotation.y = t * 0.25;
+    const mat = mesh.current.material as { emissiveIntensity?: number };
+    if (mat) mat.emissiveIntensity = 0.2 + heartbeat(t * 1.2) * 0.9;
   });
 
   return (
@@ -22,12 +32,47 @@ const PulseCore = () => {
         emissiveIntensity={0.25}
         roughness={0.12}
         metalness={0.55}
+        clearcoat={1}
+        clearcoatRoughness={0.1}
         distort={0.32}
         speed={1.6}
       />
     </mesh>
   );
 };
+
+const VitalsMotes = () => {
+  const pts = useRef<Points>(null);
+  const positions = useMemo(() => {
+    const arr = new Float32Array(600 * 3);
+    for (let i = 0; i < 600; i++) {
+      const r = 2.6 + Math.random() * 1.8;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      arr[i * 3 + 1] = r * Math.cos(phi) * 0.6;
+      arr[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    return arr;
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (!pts.current) return;
+    const t = clock.getElapsedTime();
+    pts.current.rotation.y = t * 0.05;
+    pts.current.scale.setScalar(1 + heartbeat(t * 1.2) * 0.03);
+  });
+
+  return (
+    <points ref={pts}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial size={0.03} color="#8ED9FF" transparent opacity={0.55} sizeAttenuation />
+    </points>
+  );
+};
+
 
 const OrbitRings = () => {
   const group = useRef<Group>(null);
@@ -100,7 +145,13 @@ const HeroScene = ({ className }: HeroSceneProps) => {
           </Float>
           <OrbitRings />
           <Capsules />
-          <Environment preset="city" />
+          <VitalsMotes />
+          <Environment>
+            <Lightformer intensity={2} position={[0, 5, 2]} scale={[10, 10, 1]} />
+            <Lightformer intensity={1.2} color="#3BD6A0" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 1, 1]} />
+            <Lightformer intensity={1} color="#4C9BFF" position={[5, -1, 1]} rotation-y={-Math.PI / 2} scale={[20, 1, 1]} />
+          </Environment>
+
         </Suspense>
       </Canvas>
     </div>

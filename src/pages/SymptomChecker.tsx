@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +16,18 @@ import {
   Eye,
   Stethoscope,
   Activity,
-  Clipboard
+  Clipboard,
+  PersonStanding
 } from "lucide-react";
 import DoctorList from "@/components/symptom-checker/DoctorList";
 import LocationEmergencySection from "@/components/symptom-checker/LocationEmergencySection";
 import { useDoctors } from "@/hooks/useDoctors";
 import Navbar from "@/components/Navbar";
 import { useNavigate } from "react-router-dom";
+import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
+import type { BodyRegion } from "@/components/three/BodyMap3D";
+
+const BodyMap3D = lazy(() => import("@/components/three/BodyMap3D"));
 
 const SymptomChecker = () => {
   const [symptoms, setSymptoms] = useState("");
@@ -30,9 +35,22 @@ const SymptomChecker = () => {
   const [selectedSpecialization, setSelectedSpecialization] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [activeTab, setActiveTab] = useState("symptoms");
+  const [selectedRegion, setSelectedRegion] = useState<BodyRegion | undefined>();
   
   const navigate = useNavigate();
   const { data: doctors = [], isLoading } = useDoctors(selectedSpecialization || undefined);
+
+  const handleRegionPick = (region: BodyRegion) => {
+    setSelectedRegion(region);
+    setBodyPart(region.label);
+    setSelectedSpecialization(region.specialization);
+    setSymptoms((prev) => {
+      const base = prev.trim();
+      const hint = region.symptoms.join(", ");
+      return base ? `${base}, ${hint}` : hint;
+    });
+  };
+
 
   const specializations = [
     { name: "Cardiology", icon: Heart, keywords: ["heart", "chest", "cardiac", "blood pressure"] },
@@ -78,8 +96,10 @@ const SymptomChecker = () => {
     setSymptoms("");
     setBodyPart("");
     setSelectedSpecialization("");
+    setSelectedRegion(undefined);
     setShowResults(false);
   };
+
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -130,10 +150,14 @@ const SymptomChecker = () => {
                 
                 <div className="relative">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 backdrop-blur-sm">
+                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto mb-8 bg-muted/50 backdrop-blur-sm">
                       <TabsTrigger value="symptoms" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">
                         <Activity className="w-4 h-4 mr-2" />
                         Symptoms
+                      </TabsTrigger>
+                      <TabsTrigger value="body-map" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">
+                        <PersonStanding className="w-4 h-4 mr-2" />
+                        Body Map
                       </TabsTrigger>
                       <TabsTrigger value="specialties" className="data-[state=active]:bg-background/80 data-[state=active]:shadow-md">
                         <Stethoscope className="w-4 h-4 mr-2" />
@@ -144,6 +168,60 @@ const SymptomChecker = () => {
                         Quick Check
                       </TabsTrigger>
                     </TabsList>
+
+                    <TabsContent value="body-map" className="space-y-6">
+                      <div className="text-center mb-2">
+                        <CardTitle className="text-2xl text-foreground">Point To Where It Hurts</CardTitle>
+                        <p className="text-muted-foreground mt-2">
+                          Rotate the model and tap a region — we'll pre-fill your symptoms and match a specialty.
+                        </p>
+                      </div>
+
+                      <div className="relative h-[380px] rounded-2xl border border-border/20 bg-background/30 backdrop-blur-sm overflow-hidden">
+                        {isWebGLAvailable() ? (
+                          <SceneBoundary>
+                            <Suspense fallback={<div className="grid h-full place-items-center text-sm text-muted-foreground">Loading 3D model…</div>}>
+                              <BodyMap3D
+                                className="h-full w-full"
+                                selectedId={selectedRegion?.id}
+                                onPick={handleRegionPick}
+                              />
+                            </Suspense>
+                          </SceneBoundary>
+                        ) : (
+                          <div className="grid h-full place-items-center p-6 text-center text-sm text-muted-foreground">
+                            3D isn't supported on this device — use the Symptoms tab instead.
+                          </div>
+                        )}
+                      </div>
+
+                      {selectedRegion && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3"
+                        >
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge className="bg-primary/15 text-primary border-primary/20">{selectedRegion.label}</Badge>
+                            <Badge variant="secondary">{selectedRegion.specialization}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Common concerns here: {selectedRegion.symptoms.join(", ")}.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <Button className="flex-1" onClick={handleSearch}>
+                              <Search className="mr-2 h-4 w-4" />
+                              Find {selectedRegion.specialization} doctors
+                            </Button>
+                            <Button variant="outline" onClick={() => setActiveTab("symptoms")}>
+                              Refine symptoms
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </TabsContent>
+
+
 
                     <TabsContent value="symptoms" className="space-y-6">
                       <div className="text-center mb-6">
