@@ -42,6 +42,8 @@ interface UseWebRTCOptions {
   /** Join preferences from the pre-join check. */
   startMuted?: boolean;
   startCameraOff?: boolean;
+  /** Voice-only call: never request or publish a camera track. */
+  audioOnly?: boolean;
 }
 
 /**
@@ -57,13 +59,14 @@ export function useWebRTC({
   videoDeviceId,
   startMuted = false,
   startCameraOff = false,
+  audioOnly = false,
 }: UseWebRTCOptions) {
   const [status, setStatus] = useState<CallStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [isMuted, setIsMuted] = useState(startMuted);
-  const [isCameraOff, setIsCameraOff] = useState(startCameraOff);
+  const [isCameraOff, setIsCameraOff] = useState(startCameraOff || audioOnly);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
@@ -77,8 +80,8 @@ export function useWebRTC({
   const recoverRef = useRef<(immediate?: boolean) => void>(() => undefined);
   const politeRef = useRef(polite);
   politeRef.current = polite;
-  const prefsRef = useRef({ audioDeviceId, videoDeviceId, startMuted, startCameraOff });
-  prefsRef.current = { audioDeviceId, videoDeviceId, startMuted, startCameraOff };
+  const prefsRef = useRef({ audioDeviceId, videoDeviceId, startMuted, startCameraOff, audioOnly });
+  prefsRef.current = { audioDeviceId, videoDeviceId, startMuted, startCameraOff, audioOnly };
 
   const send = useCallback((event: string, payload: SignalPayload) => {
     channelRef.current?.send({ type: "broadcast", event, payload });
@@ -298,11 +301,13 @@ export function useWebRTC({
       const prefs = prefsRef.current;
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            ...(prefs.videoDeviceId ? { deviceId: { exact: prefs.videoDeviceId } } : {}),
-          },
+          video: prefs.audioOnly
+            ? false
+            : {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                ...(prefs.videoDeviceId ? { deviceId: { exact: prefs.videoDeviceId } } : {}),
+              },
           audio: {
             echoCancellation: true,
             noiseSuppression: true,
@@ -317,13 +322,17 @@ export function useWebRTC({
         if (prefs.startMuted) stream.getAudioTracks().forEach((t) => (t.enabled = false));
         if (prefs.startCameraOff) stream.getVideoTracks().forEach((t) => (t.enabled = false));
         setIsMuted(prefs.startMuted);
-        setIsCameraOff(prefs.startCameraOff);
+        setIsCameraOff(prefs.startCameraOff || prefs.audioOnly);
         localStreamRef.current = stream;
         setLocalStream(stream);
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
       } catch (err) {
         console.error("Media error", err);
-        setError("We could not access your camera or microphone. Check browser permissions.");
+        setError(
+          prefs.audioOnly
+            ? "We could not access your microphone. Check browser permissions."
+            : "We could not access your camera or microphone. Check browser permissions.",
+        );
         setStatus("failed");
         return;
       }
