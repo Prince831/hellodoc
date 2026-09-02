@@ -121,7 +121,80 @@ const Medications = () => {
         </div>
 
         <div className="grid gap-6">
+          {/* Interaction Network */}
+          {graph.nodes.length > 1 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Network className="h-5 w-5 text-primary" />
+                  Interaction Network
+                  {graph.edges.some((e) => e.level === "severe") && (
+                    <Badge variant="destructive" className="ml-2">Severe interaction detected</Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
+                <div className="relative h-[340px] rounded-2xl border border-border/20 bg-background/30 overflow-hidden">
+                  {isWebGLAvailable() ? (
+                    <SceneBoundary>
+                      <Suspense fallback={<div className="grid h-full place-items-center text-sm text-muted-foreground">Loading network…</div>}>
+                        <MedicationNetwork3D
+                          className="h-full w-full"
+                          nodes={graph.nodes}
+                          edges={graph.edges}
+                          selected={selectedNode}
+                          onSelect={(id) => setSelectedNode((prev) => (prev === id ? undefined : id))}
+                        />
+                      </Suspense>
+                    </SceneBoundary>
+                  ) : (
+                    <div className="grid h-full place-items-center p-6 text-center text-sm text-muted-foreground">
+                      3D isn't supported here — interactions are listed alongside.
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    {selectedNode
+                      ? `Interactions for ${nameOf(selectedNode)}`
+                      : "Tap a medication node to focus its interactions."}
+                  </p>
+                  {selectedEdges.length === 0 ? (
+                    <div className="rounded-lg border border-border/40 p-4 text-sm text-muted-foreground">
+                      No known interactions among your active medications.
+                    </div>
+                  ) : (
+                    selectedEdges.map((e, i) => (
+                      <div
+                        key={i}
+                        className={`rounded-lg border p-3 text-sm ${
+                          e.level === "severe"
+                            ? "border-destructive/40 bg-destructive/5"
+                            : "border-amber-500/40 bg-amber-500/5"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 font-medium">
+                          <AlertTriangle className={`h-4 w-4 ${e.level === "severe" ? "text-destructive" : "text-amber-500"}`} />
+                          {nameOf(e.source)} + {nameOf(e.target)}
+                          <Badge variant={e.level === "severe" ? "destructive" : "secondary"} className="ml-auto capitalize">
+                            {e.level}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 text-muted-foreground">{e.note}</p>
+                      </div>
+                    ))
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Informational only — confirm with your doctor or pharmacist before changing any medication.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Active Medications */}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
