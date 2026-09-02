@@ -117,7 +117,7 @@ const SymptomChecker = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-4xl lg:text-5xl font-bold text-slate-900  mb-4">
+          <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
             What Symptoms Are You Experiencing?
           </h1>
           <p className="text-lg lg:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
