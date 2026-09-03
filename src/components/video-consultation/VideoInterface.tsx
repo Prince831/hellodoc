@@ -187,7 +187,7 @@ const VideoInterface = ({
             </TabsTrigger>
           </TabsList>
           <TabsContent value="chat" className="flex flex-1 flex-col">
-            <VideoChat doctorName={peerName} />
+            <VideoChat doctorName={peerName} roomId={roomId} peerId={peerId} />
           </TabsContent>
           <TabsContent value="notes" className="flex-1">
             <Card className="flex h-full flex-col p-4">
