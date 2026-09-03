@@ -1,7 +1,8 @@
 import { Suspense, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, MeshDistortMaterial, Environment, Lightformer, Torus } from "@react-three/drei";
-import type { Mesh, Group, Points } from "three";
+import { Environment, Lightformer, useTexture } from "@react-three/drei";
+import type { Group, Points } from "three";
+import heartImage from "@/assets/anatomical-heart.png";
 
 /** Two-phase cardiac waveform (systole + weaker diastole) in the 0..1 range. */
 const heartbeat = (t: number) => {
@@ -11,33 +12,38 @@ const heartbeat = (t: number) => {
   return spike + echo;
 };
 
-const PulseCore = () => {
-  const mesh = useRef<Mesh>(null);
+const AnatomicalHeart = () => {
+  const group = useRef<Group>(null);
+  const texture = useTexture(heartImage);
+
   useFrame(({ clock }) => {
-    if (!mesh.current) return;
+    if (!group.current) return;
     const t = clock.getElapsedTime();
-    const beat = 1 + heartbeat(t * 1.2) * 0.09;
-    mesh.current.scale.setScalar(beat);
-    mesh.current.rotation.y = t * 0.25;
-    const mat = mesh.current.material as { emissiveIntensity?: number };
-    if (mat) mat.emissiveIntensity = 0.2 + heartbeat(t * 1.2) * 0.9;
+    const beat = heartbeat(t * 1.15);
+    const scale = 1 + beat * 0.055;
+    group.current.scale.set(scale, scale * (1 + beat * 0.018), scale);
+    group.current.position.y = Math.sin(t * 0.62) * 0.045 - beat * 0.025;
+    group.current.rotation.y = Math.sin(t * 0.28) * 0.045;
+    group.current.rotation.z = Math.sin(t * 0.24) * 0.018;
   });
 
   return (
-    <mesh ref={mesh}>
-      <icosahedronGeometry args={[1.25, 12]} />
-      <MeshDistortMaterial
-        color="#4C9BFF"
-        emissive="#3BD6A0"
-        emissiveIntensity={0.25}
-        roughness={0.12}
-        metalness={0.55}
-        clearcoat={1}
-        clearcoatRoughness={0.1}
-        distort={0.32}
-        speed={1.6}
-      />
-    </mesh>
+    <group ref={group} rotation={[0.015, -0.06, -0.035]}>
+      <mesh position={[0, 0, 0.02]}>
+        <planeGeometry args={[4.2, 4.2]} />
+        <meshBasicMaterial
+          map={texture}
+          transparent
+          alphaTest={0.04}
+          toneMapped={false}
+          depthWrite={false}
+        />
+      </mesh>
+      <mesh position={[0, -0.05, -0.12]} scale={[0.92, 1.08, 1]}>
+        <circleGeometry args={[1.75, 64]} />
+        <meshBasicMaterial color="#ef5c59" transparent opacity={0.075} depthWrite={false} />
+      </mesh>
+    </group>
   );
 };
 
@@ -73,56 +79,6 @@ const VitalsMotes = () => {
   );
 };
 
-
-const OrbitRings = () => {
-  const group = useRef<Group>(null);
-  useFrame(({ clock }) => {
-    if (!group.current) return;
-    const t = clock.getElapsedTime();
-    group.current.rotation.z = t * 0.18;
-    group.current.rotation.x = Math.sin(t * 0.3) * 0.25;
-  });
-
-  return (
-    <group ref={group}>
-      <Torus args={[2.1, 0.025, 16, 128]} rotation={[Math.PI / 2.6, 0, 0]}>
-        <meshStandardMaterial color="#3BD6A0" emissive="#3BD6A0" emissiveIntensity={0.6} roughness={0.3} />
-      </Torus>
-      <Torus args={[2.6, 0.018, 16, 128]} rotation={[Math.PI / 1.9, 0.4, 0]}>
-        <meshStandardMaterial color="#4C9BFF" emissive="#4C9BFF" emissiveIntensity={0.5} roughness={0.3} />
-      </Torus>
-    </group>
-  );
-};
-
-const Capsules = () => {
-  const group = useRef<Group>(null);
-  useFrame(({ clock }) => {
-    if (group.current) group.current.rotation.y = -clock.getElapsedTime() * 0.35;
-  });
-
-  const items = [0, 1, 2, 3];
-  return (
-    <group ref={group}>
-      {items.map((i) => {
-        const angle = (i / items.length) * Math.PI * 2;
-        return (
-          <Float key={i} speed={2} rotationIntensity={1.2} floatIntensity={1.1}>
-            <mesh position={[Math.cos(angle) * 2.4, Math.sin(angle) * 0.9, Math.sin(angle) * 1.4]}>
-              <capsuleGeometry args={[0.12, 0.32, 8, 16]} />
-              <meshStandardMaterial
-                color={i % 2 === 0 ? "#8ED9FF" : "#7DF3C6"}
-                roughness={0.15}
-                metalness={0.4}
-              />
-            </mesh>
-          </Float>
-        );
-      })}
-    </group>
-  );
-};
-
 interface HeroSceneProps {
   className?: string;
 }
@@ -140,11 +96,7 @@ const HeroScene = ({ className }: HeroSceneProps) => {
           <directionalLight position={[4, 5, 4]} intensity={1.4} color="#ffffff" />
           <pointLight position={[-4, -2, 3]} intensity={2.2} color="#3BD6A0" />
           <pointLight position={[3, 3, -4]} intensity={1.8} color="#4C9BFF" />
-          <Float speed={1.4} rotationIntensity={0.5} floatIntensity={1.2}>
-            <PulseCore />
-          </Float>
-          <OrbitRings />
-          <Capsules />
+          <AnatomicalHeart />
           <VitalsMotes />
           <Environment>
             <Lightformer intensity={2} position={[0, 5, 2]} scale={[10, 10, 1]} />
