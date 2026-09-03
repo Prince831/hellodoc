@@ -14,6 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MessageSquare, Phone, Video, MoreVertical, ArrowLeft, Menu } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
+import { useAuth } from "@/hooks/useAuth";
+import { useCallSignaling, type CallType } from "@/hooks/useCallSignaling";
+import IncomingCallDialog from "@/components/messages/IncomingCallDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -21,6 +24,7 @@ const Messages = () => {
   const location = useLocation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { user, isDoctor } = useAuth();
   const { 
     conversations, 
     loading, 
@@ -37,12 +41,38 @@ const Messages = () => {
   // Mobile state management
   const [isMobileConversationListOpen, setIsMobileConversationListOpen] = useState(false);
   
-  // Call state management
+  // Call state management — a live WebRTC session, not a simulation.
   const [activeCall, setActiveCall] = useState<{
-    type: 'voice' | 'video';
-    doctorName: string;
-    doctorAvatar?: string;
+    type: CallType;
+    roomId: string;
+    peerUserId: string;
+    peerName: string;
+    peerAvatar?: string;
+    /** The local user placed the call and is waiting for an answer. */
+    outgoing: boolean;
+    ringing: boolean;
   } | null>(null);
+
+  const {
+    incoming,
+    ring,
+    cancel: cancelRing,
+    accept: acceptRing,
+    decline: declineRing,
+  } = useCallSignaling(user?.id ?? null, {
+    onAccept: (roomId) =>
+      setActiveCall((cur) => (cur?.roomId === roomId ? { ...cur, ringing: false } : cur)),
+    onDecline: (roomId) => {
+      setActiveCall((cur) => {
+        if (cur?.roomId !== roomId) return cur;
+        toast({ title: "Call declined", description: `${cur.peerName} is not available right now.` });
+        return null;
+      });
+    },
+    onCancel: () => {
+      toast({ title: "Missed call", description: "The caller hung up before you answered." });
+    },
+  });
 
   const doctorId = location.state?.doctorId;
   const initiateChat = location.state?.initiateChat;
@@ -100,40 +130,68 @@ const Messages = () => {
     handleSendMessage(content);
   };
 
-  const handleStartVoiceCall = () => {
-    if (!selectedConversation) return;
-    
+  const startCall = (type: CallType) => {
+    if (!selectedConversation || !user) return;
+
+    const roomId = `chat-${selectedConversation.id}`;
+    const peerUserId = selectedConversation.participant.id;
+
     setActiveCall({
-      type: 'voice',
-      doctorName: selectedConversation.participant.full_name,
-      doctorAvatar: selectedConversation.participant.avatar_url
+      type,
+      roomId,
+      peerUserId,
+      peerName: selectedConversation.participant.full_name,
+      peerAvatar: selectedConversation.participant.avatar_url,
+      outgoing: true,
+      ringing: true,
     });
-    
+
+    ring(peerUserId, {
+      roomId,
+      callType: type,
+      conversationId: selectedConversation.id,
+      from: {
+        id: user.id,
+        name: isDoctor ? "Your doctor" : "Patient",
+        avatar: undefined,
+      },
+    });
+
     toast({
-      title: "Voice Call Started",
-      description: `Connecting voice call with ${selectedConversation.participant.full_name}...`,
+      title: type === "video" ? "Video call started" : "Voice call started",
+      description: `Ringing ${selectedConversation.participant.full_name}…`,
     });
   };
 
-  const handleStartVideoCall = () => {
-    if (!selectedConversation) return;
-    
+  const handleStartVoiceCall = () => startCall("voice");
+  const handleStartVideoCall = () => startCall("video");
+
+  const handleAcceptIncoming = () => {
+    if (!incoming) return;
+    acceptRing(incoming.from.id, incoming.roomId);
     setActiveCall({
-      type: 'video',
-      doctorName: selectedConversation.participant.full_name,
-      doctorAvatar: selectedConversation.participant.avatar_url
+      type: incoming.callType,
+      roomId: incoming.roomId,
+      peerUserId: incoming.from.id,
+      peerName: incoming.from.name,
+      peerAvatar: incoming.from.avatar,
+      outgoing: false,
+      ringing: false,
     });
-    
-    toast({
-      title: "Video Call Started",
-      description: `Connecting video call with ${selectedConversation.participant.full_name}...`,
-    });
+  };
+
+  const handleDeclineIncoming = () => {
+    if (!incoming) return;
+    declineRing(incoming.from.id, incoming.roomId);
   };
 
   const handleEndCall = () => {
+    if (activeCall?.outgoing && activeCall.ringing) {
+      cancelRing(activeCall.peerUserId, activeCall.roomId);
+    }
     setActiveCall(null);
     toast({
-      title: "Call Ended",
+      title: "Call ended",
       description: "The call has been disconnected.",
     });
   };
@@ -280,16 +338,25 @@ const Messages = () => {
         </div>
       </div>
 
-      {/* Call Interface Overlay */}
-      <CallInterface
-        isActive={!!activeCall}
-        callType={activeCall?.type || 'voice'}
-        doctorName={activeCall?.doctorName || ''}
-        doctorAvatar={activeCall?.doctorAvatar}
-        onEndCall={handleEndCall}
-        onToggleMute={(muted) => console.log('Mute toggled:', muted)}
-        onToggleVideo={(enabled) => console.log('Video toggled:', enabled)}
-        onToggleSpeaker={(enabled) => console.log('Speaker toggled:', enabled)}
+      {/* Live call overlay */}
+      {activeCall && user && (
+        <CallInterface
+          isActive
+          callType={activeCall.type}
+          roomId={activeCall.roomId}
+          peerId={user.id}
+          polite={!activeCall.outgoing}
+          doctorName={activeCall.peerName}
+          doctorAvatar={activeCall.peerAvatar}
+          ringing={activeCall.ringing}
+          onEndCall={handleEndCall}
+        />
+      )}
+
+      <IncomingCallDialog
+        invite={activeCall ? null : incoming}
+        onAccept={handleAcceptIncoming}
+        onDecline={handleDeclineIncoming}
       />
     </div>
   );
