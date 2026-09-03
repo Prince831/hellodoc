@@ -1,124 +1,100 @@
-
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send } from "lucide-react";
+import { useRoomChat } from "@/hooks/useRoomChat";
 
 interface VideoChatProps {
+  /** Display name of the remote participant. */
   doctorName: string;
+  /** Shared consultation room id — chat rides the same room. */
+  roomId: string;
+  /** Auth user id of the local participant. */
+  peerId: string;
+  /** Display name used for messages this user sends. */
+  selfName?: string;
 }
 
-interface ChatMessage {
-  id: string;
-  sender: "user" | "doctor";
-  content: string;
-  timestamp: Date;
-}
-
-const VideoChat = ({ doctorName }: VideoChatProps) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      sender: 'doctor',
-      content: `Hello! I'm Dr. ${doctorName}. How can I help you today?`,
-      timestamp: new Date()
-    }
-  ]);
+const VideoChat = ({ doctorName, roomId, peerId, selfName = "You" }: VideoChatProps) => {
+  const { messages, send } = useRoomChat(roomId, peerId, selfName);
   const [newMessage, setNewMessage] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollToBottom();
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (newMessage.trim() === "") return;
-    
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      sender: "user",
-      content: newMessage,
-      timestamp: new Date()
-    };
-    
-    setMessages([...messages, userMessage]);
+    if (!newMessage.trim()) return;
+    send(newMessage);
     setNewMessage("");
-    
-    // Simulate doctor response after a short delay
-    setTimeout(() => {
-      const doctorResponse: ChatMessage = {
-        id: `doctor-${Date.now()}`,
-        sender: "doctor",
-        content: `I understand your concern about "${newMessage}". Let me help you with that.`,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, doctorResponse]);
-    }, 1500);
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const formatTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex h-full flex-col">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        {messages.length === 0 && (
+          <p className="pt-6 text-center text-sm text-muted-foreground">
+            Messages sent here stay in this consultation only.
+          </p>
+        )}
         <AnimatePresence>
-          {messages.map(message => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div className={`flex items-start gap-2 max-w-[75%] ${message.sender === "user" ? "flex-row-reverse" : ""}`}>
-                {message.sender === "doctor" && (
-                  <Avatar className="h-8 w-8 border border-primary/20">
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {doctorName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-                <div>
-                  <div 
-                    className={`p-3 rounded-lg text-sm ${
-                      message.sender === "user" 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-muted"
-                    }`}
-                  >
-                    {message.content}
+          {messages.map((message) => {
+            const isSelf = message.senderId === peerId;
+            return (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className={`flex ${isSelf ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`flex max-w-[75%] items-start gap-2 ${isSelf ? "flex-row-reverse" : ""}`}
+                >
+                  {!isSelf && (
+                    <Avatar className="h-8 w-8 border border-primary/20">
+                      <AvatarFallback className="bg-primary/10 text-xs text-primary">
+                        {doctorName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                  <div>
+                    <div
+                      className={`rounded-lg p-3 text-sm ${
+                        isSelf ? "bg-primary text-primary-foreground" : "bg-muted"
+                      }`}
+                    >
+                      {message.content}
+                    </div>
+                    <p
+                      className={`mt-1 text-xs text-muted-foreground ${isSelf ? "text-right" : "text-left"}`}
+                    >
+                      {formatTime(message.timestamp)}
+                    </p>
                   </div>
-                  <p className={`text-xs mt-1 text-muted-foreground ${message.sender === "user" ? "text-right" : "text-left"}`}>
-                    {formatTime(message.timestamp)}
-                  </p>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-          <div ref={messagesEndRef} />
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
+        <div ref={endRef} />
       </div>
 
-      <form onSubmit={handleSendMessage} className="border-t p-4 flex gap-2">
+      <form onSubmit={handleSendMessage} className="flex gap-2 border-t p-4">
         <Input
           placeholder="Type your message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           className="flex-1"
         />
-        <Button type="submit" size="icon">
+        <Button type="submit" size="icon" disabled={!newMessage.trim()}>
           <Send className="h-4 w-4" />
         </Button>
       </form>
