@@ -11,20 +11,22 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const publicLinks = [
+type NavLink = { to: string; label: string; icon?: typeof Video };
+
+const publicLinks: NavLink[] = [
   { to: "/", label: "Home" },
   { to: "/doctors", label: "Find Doctors" },
   { to: "/symptom-checker", label: "Symptom Checker" },
 ];
 
-const doctorLinks = [
+const doctorLinks: NavLink[] = [
   { to: "/doctor", label: "Doctor Dashboard", icon: LayoutDashboard },
   { to: "/doctor/schedule", label: "My Schedule", icon: CalendarDays },
   { to: "/messages", label: "Messages" },
   { to: "/video-consultation", label: "Video Call", icon: Video },
 ];
 
-const patientLinks = [
+const patientLinks: NavLink[] = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/doctors", label: "Find Doctors" },
