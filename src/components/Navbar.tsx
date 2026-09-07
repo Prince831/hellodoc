@@ -4,13 +4,27 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import NotificationsPopover from "@/components/navbar/NotificationsPopover";
 import UserDropdown from "@/components/navbar/UserDropdown";
 import { Link, useLocation } from "react-router-dom";
-import { Video, Menu, X } from "lucide-react";
+import { Video, Menu, X, Stethoscope, CalendarDays, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const navigationLinks = [
+const publicLinks = [
+  { to: "/", label: "Home" },
+  { to: "/doctors", label: "Find Doctors" },
+  { to: "/symptom-checker", label: "Symptom Checker" },
+];
+
+const doctorLinks = [
+  { to: "/doctor", label: "Doctor Dashboard", icon: LayoutDashboard },
+  { to: "/doctor/schedule", label: "My Schedule", icon: CalendarDays },
+  { to: "/messages", label: "Messages" },
+  { to: "/video-consultation", label: "Video Call", icon: Video },
+];
+
+const patientLinks = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/doctors", label: "Find Doctors" },
@@ -25,6 +39,8 @@ const navigationLinks = [
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isDoctor } = useAuth();
+  const navigationLinks = !user ? publicLinks : isDoctor ? doctorLinks : patientLinks;
 
   const toggleMenu = () => setIsMenuOpen((o) => !o);
   const closeMenu = () => setIsMenuOpen(false);
@@ -56,7 +72,7 @@ const Navbar = () => {
             </Button>
           ))}
           <Button variant="ghost" size="lg" asChild className="h-12 justify-start text-base" onClick={closeMenu}>
-            <Link to="/profile">Profile</Link>
+            <Link to={user ? "/profile" : "/auth"}>{user ? "Profile" : "Sign in"}</Link>
           </Button>
           <Button variant="ghost" size="lg" asChild className="h-12 justify-start text-base" onClick={closeMenu}>
             <Link to="/settings">Settings</Link>
@@ -112,9 +128,9 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <div className="hidden items-center gap-2 md:flex">
               <Button variant="ghost" size="icon" asChild>
-                <Link to="/video-consultation">
-                  <Video className="h-4 w-4" />
-                  <span className="sr-only">Video Call</span>
+                <Link to={isDoctor ? "/doctor" : "/video-consultation"}>
+                  {isDoctor ? <Stethoscope className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+                  <span className="sr-only">{isDoctor ? "Doctor portal" : "Video Call"}</span>
                 </Link>
               </Button>
               <NotificationsPopover />
