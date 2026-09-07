@@ -1,6 +1,5 @@
-
-import { Link } from "react-router-dom";
-import { User, Settings, Pill, Activity, Video, LayoutDashboard, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { User, Settings, Pill, Activity, Video, Stethoscope, CalendarDays, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -11,17 +10,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
 
 const UserDropdown = () => {
   const { toast } = useToast();
-  const user = null; // No authentication
-  
+  const navigate = useNavigate();
+  const { user, roles, isDoctor, signOut } = useAuth();
+
+  if (!user) {
+    return (
+      <Button asChild variant="default" size="sm" className="rounded-full">
+        <Link to="/auth">
+          <LogIn className="mr-2 h-4 w-4" />
+          Sign in
+        </Link>
+      </Button>
+    );
+  }
+
+  const email = user.email ?? "";
+  const initials = email.slice(0, 2).toUpperCase() || "U";
+  const roleLabel = isDoctor ? "doctor" : roles[0] ?? "patient";
+
   const handleSignOut = async () => {
-    toast({
-      title: "Not implemented",
-      description: "Authentication is disabled",
-    });
+    await signOut();
+    toast({ title: "Signed out", description: "You have been signed out." });
+    navigate("/", { replace: true });
   };
 
   return (
@@ -29,57 +44,74 @@ const UserDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt="User" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">Demo User</p>
-            <p className="text-xs text-muted-foreground">user@example.com</p>
-            <p className="text-xs text-primary capitalize">patient</p>
+            <p className="truncate text-sm font-medium">{email}</p>
+            <p className="text-xs capitalize text-primary">{roleLabel}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="cursor-pointer w-full">
+          <Link to="/profile" className="w-full cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        
-        <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="cursor-pointer w-full">
-            <Activity className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/medications" className="cursor-pointer w-full">
-            <Pill className="mr-2 h-4 w-4" />
-            <span>Medications</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/video-consultation" className="cursor-pointer w-full">
-            <Video className="mr-2 h-4 w-4" />
-            <span>Video Consultation</span>
-          </Link>
-        </DropdownMenuItem>
+
+        {isDoctor ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/doctor" className="w-full cursor-pointer">
+                <Stethoscope className="mr-2 h-4 w-4" />
+                <span>Doctor dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/doctor/schedule" className="w-full cursor-pointer">
+                <CalendarDays className="mr-2 h-4 w-4" />
+                <span>My schedule</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard" className="w-full cursor-pointer">
+                <Activity className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/medications" className="w-full cursor-pointer">
+                <Pill className="mr-2 h-4 w-4" />
+                <span>Medications</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/video-consultation" className="w-full cursor-pointer">
+                <Video className="mr-2 h-4 w-4" />
+                <span>Video consultation</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
 
         <DropdownMenuItem asChild>
-          <Link to="/settings" className="cursor-pointer w-full">
+          <Link to="/settings" className="w-full cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Demo Mode</span>
+          <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

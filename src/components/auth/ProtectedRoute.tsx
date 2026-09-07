@@ -9,10 +9,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireDoctor = false }: ProtectedRouteProps) => {
-  const { user, loading, isDoctor, roles } = useAuth();
+  const { user, loading, rolesLoading, isDoctor } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading || (user && rolesLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" aria-label="Loading" />
@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children, requireDoctor = false }: ProtectedRouteProps
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 
-  if (requireDoctor && roles.length > 0 && !isDoctor) {
+  if (requireDoctor && !isDoctor) {
     return <Navigate to="/dashboard" replace />;
   }
 

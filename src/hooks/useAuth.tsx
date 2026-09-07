@@ -12,6 +12,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   doctorId: string | null;
   loading: boolean;
+  rolesLoading: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextValue>({
   isAdmin: false,
   doctorId: null,
   loading: true,
+  rolesLoading: true,
   signOut: async () => {},
 });
 
@@ -32,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(true);
 
   useEffect(() => {
     // Register the listener first so no auth event is missed.
@@ -41,6 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!nextSession?.user) {
         setRoles([]);
         setDoctorId(null);
+        setRolesLoading(false);
+      } else {
+        setRolesLoading(true);
       }
       setLoading(false);
     });
@@ -55,7 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setRolesLoading(false);
+      return;
+    }
+    setRolesLoading(true);
     let cancelled = false;
 
     // Deferred so we never call Supabase from inside the auth callback.
@@ -67,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
       setRoles(((roleRows ?? []) as { role: AppRole }[]).map((r) => r.role));
       setDoctorId(doctorRow?.id ?? null);
+      setRolesLoading(false);
     }, 0);
 
     return () => {
@@ -80,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setRoles([]);
     setDoctorId(null);
+    setRolesLoading(false);
   };
 
   return (
@@ -92,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: roles.includes("admin"),
         doctorId,
         loading,
+        rolesLoading,
         signOut,
       }}
     >

@@ -20,7 +20,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { user, isDoctor, loading } = useAuth();
+  const { user, isDoctor, loading, rolesLoading } = useAuth();
 
   const [submitting, setSubmitting] = useState(false);
   const [email, setEmail] = useState("");
@@ -32,11 +32,11 @@ const Auth = () => {
   const [checkEmail, setCheckEmail] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && !rolesLoading && user) {
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from ?? (isDoctor ? "/doctor" : "/dashboard"), { replace: true });
     }
-  }, [user, isDoctor, loading, navigate, location.state]);
+  }, [user, isDoctor, loading, rolesLoading, navigate, location.state]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
