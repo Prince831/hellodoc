@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ResponsiveGrid from "@/components/ui/responsive-grid";
 import MobileCard from "@/components/ui/mobile-card";
+import ConsultationRooms from "@/components/consultations/ConsultationRooms";
 
 // Mock health metrics data
 const healthMetrics = {
@@ -194,6 +195,7 @@ const Dashboard = () => {
                         </CardContent>
                       </Card>
                         </div>
+                        <ConsultationRooms side="patient" className="mt-6" />
                       </div>
                     </div>
                   </TabsContent>

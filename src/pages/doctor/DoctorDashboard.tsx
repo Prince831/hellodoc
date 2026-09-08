@@ -9,6 +9,7 @@ import { CalendarClock, CheckCircle2, Users, XCircle, CalendarCog, Video } from 
 import { useDoctorAppointments, useUpdateAppointment } from "@/hooks/useAppointments";
 import { useAuth } from "@/hooks/useAuth";
 import { useStartVideoConsultation } from "@/hooks/useVideoConsultations";
+import ConsultationRooms from "@/components/consultations/ConsultationRooms";
 
 const DoctorDashboard = () => {
   const { data: appointments = [], isLoading } = useDoctorAppointments();
@@ -83,6 +84,8 @@ const DoctorDashboard = () => {
             <CardContent><Users className="h-5 w-5 text-primary" /></CardContent>
           </Card>
         </section>
+
+        <ConsultationRooms side="doctor" className="mb-8" />
 
         <section className="mb-8">
           <h2 className="mb-4 text-xl font-semibold">Pending requests</h2>
