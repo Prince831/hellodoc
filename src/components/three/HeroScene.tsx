@@ -86,7 +86,7 @@ const VitalsMotes = ({ bpm, oxygen }: { bpm: number; oxygen: number | null }) =>
   // Well-oxygenated blood reads brighter/cooler; low saturation shifts warm.
   const color = useMemo(() => {
     const sat = oxygen ?? 98;
-    constox = Math.min(1, Math.max(0, (sat - 88) / 10));
+    const ox = Math.min(1, Math.max(0, (sat - 88) / 10));
     return new THREE.Color().setHSL(0.02 + 0.53 * ox, 0.85, 0.62);
   }, [oxygen]);
 
