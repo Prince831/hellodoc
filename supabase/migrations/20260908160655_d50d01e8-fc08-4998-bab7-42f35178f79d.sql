@@ -1,0 +1,1 @@
+ALTER TABLE public.vitals ADD COLUMN IF NOT EXISTS sleep_hours numeric;

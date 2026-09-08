@@ -914,6 +914,7 @@ export type Database = {
           recorded_at: string | null
           recorded_by: string | null
           respiratory_rate: number | null
+          sleep_hours: number | null
           temperature: number | null
           user_id: string
           weight: number | null
@@ -930,6 +931,7 @@ export type Database = {
           recorded_at?: string | null
           recorded_by?: string | null
           respiratory_rate?: number | null
+          sleep_hours?: number | null
           temperature?: number | null
           user_id: string
           weight?: number | null
@@ -946,6 +948,7 @@ export type Database = {
           recorded_at?: string | null
           recorded_by?: string | null
           respiratory_rate?: number | null
+          sleep_hours?: number | null
           temperature?: number | null
           user_id?: string
           weight?: number | null
