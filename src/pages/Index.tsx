@@ -10,6 +10,7 @@ import Aurora from "@/components/layout/Aurora";
 import PageTransition from "@/components/layout/PageTransition";
 import TiltCard from "@/components/ui/tilt-card";
 import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
+import { useHeartRate } from "@/hooks/useVitals";
 
 const HeroScene = lazy(() => import("@/components/three/HeroScene"));
 
@@ -75,6 +76,7 @@ const stats = [
 ];
 
 const Index = () => {
+  const { bpm, oxygen, isReal } = useHeartRate();
   return (
     <div className="relative min-h-screen">
       <Aurora />
@@ -136,7 +138,7 @@ const Index = () => {
                       </div>
                     }
                   >
-                    <HeroScene className="h-full w-full" />
+                    <HeroScene className="h-full w-full" bpm={bpm} oxygen={oxygen} />
                   </Suspense>
                 </SceneBoundary>
               ) : (
@@ -145,6 +147,10 @@ const Index = () => {
                 </div>
               )}
 
+              <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
+                {isReal ? "Your latest heart rate" : "Resting reference"} · {bpm} bpm
+                {oxygen ? ` · SpO₂ ${oxygen}%` : ""}
+              </div>
             </motion.div>
           </motion.section>
 
