@@ -117,10 +117,14 @@ interface HeroSceneProps {
   bpm?: number;
   /** Blood oxygen saturation, used to tint the particle field. */
   oxygen?: number | null;
+  /** Last night's sleep in hours; well-rested reads calmer and brighter. */
+  sleepHours?: number | null;
 }
 
-const HeroScene = ({ className, bpm = 72, oxygen = null }: HeroSceneProps) => {
+const HeroScene = ({ className, bpm = 72, oxygen = null, sleepHours = null }: HeroSceneProps) => {
   const rate = Math.min(180, Math.max(40, bpm));
+  // 0 = poorly rested, 1 = fully rested (8h). Well-rested light reads softer/cooler.
+  const rested = sleepHours == null ? 0.7 : Math.min(1, Math.max(0, sleepHours / 8));
 
   return (
     <div className={className} aria-hidden="true">
@@ -130,10 +134,10 @@ const HeroScene = ({ className, bpm = 72, oxygen = null }: HeroSceneProps) => {
         gl={{ antialias: true, alpha: true }}
       >
         <Suspense fallback={null}>
-          <ambientLight intensity={0.7} />
+          <ambientLight intensity={0.55 + rested * 0.35} />
           <directionalLight position={[4, 5, 4]} intensity={1.6} color="#ffffff" />
-          <pointLight position={[-4, -2, 3]} intensity={2.4} color="#3BD6A0" />
-          <pointLight position={[3, 3, -4]} intensity={1.9} color="#4C9BFF" />
+          <pointLight position={[-4, -2, 3]} intensity={1.4 + rested * 1.6} color="#3BD6A0" />
+          <pointLight position={[3, 3, -4]} intensity={2.4 - rested * 0.7} color="#4C9BFF" />
           <AnatomicalHeart bpm={rate} />
           <VitalsMotes bpm={rate} oxygen={oxygen} />
           <Environment>
