@@ -151,6 +151,7 @@ const Index = () => {
               <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs text-muted-foreground backdrop-blur">
                 {isReal ? "Your latest heart rate" : "Resting reference"} · {bpm} bpm
                 {oxygen ? ` · SpO₂ ${oxygen}%` : ""}
+                {sleepHours ? ` · ${sleepHours} h sleep` : ""}
               </div>
             </motion.div>
           </motion.section>

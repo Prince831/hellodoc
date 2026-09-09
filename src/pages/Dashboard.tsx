@@ -11,11 +11,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ResponsiveGrid from "@/components/ui/responsive-grid";
 import MobileCard from "@/components/ui/mobile-card";
 import ConsultationRooms from "@/components/consultations/ConsultationRooms";
+import VitalsTracker from "@/components/health/VitalsTracker";
+import { useLatestVitals } from "@/hooks/useVitals";
 
-// Mock health metrics data
+// Placeholder metrics still awaiting real data sources
 const healthMetrics = {
-  heartRate: { current: 72, min: 68, max: 75, unit: "bpm" },
-  bloodPressure: { systolic: 120, diastolic: 80, unit: "mmHg" },
   bloodGlucose: { current: 95, min: 90, max: 110, unit: "mg/dL" },
   weight: { current: 165, previous: 168, unit: "lbs" },
   steps: { current: 7500, goal: 10000 }
