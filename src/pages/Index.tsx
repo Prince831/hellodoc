@@ -76,7 +76,7 @@ const stats = [
 ];
 
 const Index = () => {
-  const { bpm, oxygen, isReal } = useHeartRate();
+  const { bpm, oxygen, isReal, sleepHours } = useHeartRate();
   return (
     <div className="relative min-h-screen">
       <Aurora />
@@ -138,7 +138,8 @@ const Index = () => {
                       </div>
                     }
                   >
-                    <HeroScene className="h-full w-full" bpm={bpm} oxygen={oxygen} />
+                    <HeroScene className="h-full w-full" bpm={bpm} oxygen={oxygen} sleepHours={sleepHours} />
+
                   </Suspense>
                 </SceneBoundary>
               ) : (
