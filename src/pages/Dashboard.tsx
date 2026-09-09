@@ -11,11 +11,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ResponsiveGrid from "@/components/ui/responsive-grid";
 import MobileCard from "@/components/ui/mobile-card";
 import ConsultationRooms from "@/components/consultations/ConsultationRooms";
+import VitalsTracker from "@/components/health/VitalsTracker";
+import { useLatestVitals } from "@/hooks/useVitals";
 
-// Mock health metrics data
+// Placeholder metrics still awaiting real data sources
 const healthMetrics = {
-  heartRate: { current: 72, min: 68, max: 75, unit: "bpm" },
-  bloodPressure: { systolic: 120, diastolic: 80, unit: "mmHg" },
   bloodGlucose: { current: 95, min: 90, max: 110, unit: "mg/dL" },
   weight: { current: 165, previous: 168, unit: "lbs" },
   steps: { current: 7500, goal: 10000 }
@@ -24,6 +24,7 @@ const healthMetrics = {
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const isMobile = useIsMobile();
+  const { data: latestVitals } = useLatestVitals();
   
   return (
     <div className="min-h-screen ">
@@ -123,9 +124,11 @@ const Dashboard = () => {
                           <HeartPulse className="h-4 w-4 text-primary" />
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold">{healthMetrics.heartRate.current} {healthMetrics.heartRate.unit}</div>
+                          <div className="text-2xl font-bold">{latestVitals?.heart_rate ?? "—"} bpm</div>
                           <p className="text-xs text-muted-foreground">
-                            Range: {healthMetrics.heartRate.min}-{healthMetrics.heartRate.max} {healthMetrics.heartRate.unit}
+                            {latestVitals?.sleep_hours != null
+                              ? `After ${latestVitals.sleep_hours} h of sleep`
+                              : "Log a reading to track it"}
                           </p>
                         </CardContent>
                       </Card>
@@ -137,11 +140,12 @@ const Dashboard = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold">
-                            {healthMetrics.bloodPressure.systolic}/{healthMetrics.bloodPressure.diastolic} {healthMetrics.bloodPressure.unit}
+                            {latestVitals?.blood_pressure_systolic ?? "—"}/{latestVitals?.blood_pressure_diastolic ?? "—"} mmHg
                           </div>
-                          <p className="text-xs text-muted-foreground">Normal range</p>
+                          <p className="text-xs text-muted-foreground">Your latest recorded reading</p>
                         </CardContent>
                       </Card>
+                      
                       
                       <Card className="bg-background/50 backdrop-blur-sm border-border/20">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -195,6 +199,7 @@ const Dashboard = () => {
                         </CardContent>
                       </Card>
                         </div>
+                        <VitalsTracker className="mt-6" />
                         <ConsultationRooms side="patient" className="mt-6" />
                       </div>
                     </div>
@@ -209,7 +214,8 @@ const Dashboard = () => {
                         </h2>
                         <p className="text-muted-foreground text-sm mt-1">Monitor your vital signs and wellness data</p>
                       </div>
-                      <div className="p-6">
+                      <div className="p-6 space-y-6">
+                        <VitalsTracker />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <Card>
                             <CardHeader>
