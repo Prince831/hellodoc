@@ -199,6 +199,7 @@ const Dashboard = () => {
                         </CardContent>
                       </Card>
                         </div>
+                        <VitalsTracker className="mt-6" />
                         <ConsultationRooms side="patient" className="mt-6" />
                       </div>
                     </div>
@@ -213,7 +214,8 @@ const Dashboard = () => {
                         </h2>
                         <p className="text-muted-foreground text-sm mt-1">Monitor your vital signs and wellness data</p>
                       </div>
-                      <div className="p-6">
+                      <div className="p-6 space-y-6">
+                        <VitalsTracker />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <Card>
                             <CardHeader>
