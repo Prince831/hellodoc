@@ -24,6 +24,7 @@ const healthMetrics = {
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const isMobile = useIsMobile();
+  const { data: latestVitals } = useLatestVitals();
   
   return (
     <div className="min-h-screen ">
@@ -123,9 +124,11 @@ const Dashboard = () => {
                           <HeartPulse className="h-4 w-4 text-primary" />
                         </CardHeader>
                         <CardContent>
-                          <div className="text-2xl font-bold">{healthMetrics.heartRate.current} {healthMetrics.heartRate.unit}</div>
+                          <div className="text-2xl font-bold">{latestVitals?.heart_rate ?? "—"} bpm</div>
                           <p className="text-xs text-muted-foreground">
-                            Range: {healthMetrics.heartRate.min}-{healthMetrics.heartRate.max} {healthMetrics.heartRate.unit}
+                            {latestVitals?.sleep_hours != null
+                              ? `After ${latestVitals.sleep_hours} h of sleep`
+                              : "Log a reading to track it"}
                           </p>
                         </CardContent>
                       </Card>
@@ -137,11 +140,12 @@ const Dashboard = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="text-2xl font-bold">
-                            {healthMetrics.bloodPressure.systolic}/{healthMetrics.bloodPressure.diastolic} {healthMetrics.bloodPressure.unit}
+                            {latestVitals?.blood_pressure_systolic ?? "—"}/{latestVitals?.blood_pressure_diastolic ?? "—"} mmHg
                           </div>
-                          <p className="text-xs text-muted-foreground">Normal range</p>
+                          <p className="text-xs text-muted-foreground">Your latest recorded reading</p>
                         </CardContent>
                       </Card>
+                      
                       
                       <Card className="bg-background/50 backdrop-blur-sm border-border/20">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
