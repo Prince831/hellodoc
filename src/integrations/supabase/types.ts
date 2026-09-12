@@ -860,6 +860,71 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          appointment_reminders: boolean
+          color_scheme: string
+          compact_layout: boolean
+          created_at: string
+          email_notifications: boolean
+          font_size: string
+          marketing_emails: boolean
+          medication_reminders: boolean
+          message_notifications: boolean
+          push_notifications: boolean
+          reduced_motion: boolean
+          share_records_with_doctors: boolean
+          show_profile_to_doctors: boolean
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appointment_reminders?: boolean
+          color_scheme?: string
+          compact_layout?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          font_size?: string
+          marketing_emails?: boolean
+          medication_reminders?: boolean
+          message_notifications?: boolean
+          push_notifications?: boolean
+          reduced_motion?: boolean
+          share_records_with_doctors?: boolean
+          show_profile_to_doctors?: boolean
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appointment_reminders?: boolean
+          color_scheme?: string
+          compact_layout?: boolean
+          created_at?: string
+          email_notifications?: boolean
+          font_size?: string
+          marketing_emails?: boolean
+          medication_reminders?: boolean
+          message_notifications?: boolean
+          push_notifications?: boolean
+          reduced_motion?: boolean
+          share_records_with_doctors?: boolean
+          show_profile_to_doctors?: boolean
+          theme?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_consultations: {
         Row: {
           appointment_id: string
