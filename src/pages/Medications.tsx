@@ -1,92 +1,35 @@
-
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Plus, Pill, Calendar, Clock, User, Network, AlertTriangle } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Plus, Pill, Calendar, Clock, User, Network, AlertTriangle, RefreshCw, CheckCircle2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import AddMedicationDialog from "@/components/medications/AddMedicationDialog";
 import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
 import { buildInteractionGraph } from "@/data/medicationInteractions";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  useMedications,
+  useRequestRefill,
+  useSetMedicationActive,
+  type MedicationRecord,
+} from "@/hooks/useMedications";
 
 const MedicationNetwork3D = lazy(() => import("@/components/three/MedicationNetwork3D"));
 
-interface Medication {
-  id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  start_date: string;
-  end_date?: string;
-  instructions?: string;
-  active: boolean;
-  prescribed_by?: string;
-  doctors?: {
-    name: string;
-    specialization: string;
-  };
-}
-
 const Medications = () => {
-  const user = null; // No authentication
+  const { user } = useAuth();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedNode, setSelectedNode] = useState<string | undefined>();
 
-  const { data: medications = [], isLoading } = useQuery({
-    queryKey: ['medications'],
-    queryFn: async () => {
-      // Mock medications data
-      const mockMedications: Medication[] = [
-        {
-          id: "1",
-          name: "Aspirin",
-          dosage: "81mg",
-          frequency: "Once daily",
-          start_date: new Date().toISOString(),
-          active: true,
-          prescribed_by: "doctor1",
-          instructions: "Take with food",
-          doctors: {
-            name: "Dr. Smith",
-            specialization: "Cardiology"
-          }
-        },
-        {
-          id: "2",
-          name: "Warfarin",
-          dosage: "5mg",
-          frequency: "Once daily",
-          start_date: new Date().toISOString(),
-          active: true,
-          instructions: "INR check every 2 weeks",
-        },
-        {
-          id: "3",
-          name: "Ibuprofen",
-          dosage: "400mg",
-          frequency: "As needed",
-          start_date: new Date().toISOString(),
-          active: true,
-        },
-        {
-          id: "4",
-          name: "Levothyroxine",
-          dosage: "50mcg",
-          frequency: "Every morning",
-          start_date: new Date().toISOString(),
-          active: true,
-        },
-      ];
-      
-      return mockMedications;
-    },
-  });
+  const { data: medications = [], isLoading } = useMedications();
+  const setActive = useSetMedicationActive();
+  const requestRefill = useRequestRefill();
 
-  const activeMedications = medications.filter(med => med.active);
-  const inactiveMedications = medications.filter(med => !med.active);
+  const activeMedications = medications.filter((med) => med.active);
+  const inactiveMedications = medications.filter((med) => !med.active);
 
   const graph = useMemo(
     () => buildInteractionGraph(activeMedications.map((m) => ({ id: m.id, name: m.name }))),
@@ -99,6 +42,8 @@ const Medications = () => {
 
   const nameOf = (id: string) => graph.nodes.find((n) => n.id === id)?.name ?? id;
 
+  const refillsLeft = (medication: MedicationRecord) =>
+    medication.prescription_items?.[0]?.refills_remaining ?? null;
 
   return (
     <div className="min-h-screen">
@@ -111,15 +56,25 @@ const Medications = () => {
               Track and manage your current and past medications
             </p>
           </div>
-          <Button 
-            onClick={() => setShowAddDialog(true)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Medication
-          </Button>
+          {user && (
+            <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Medication
+            </Button>
+          )}
         </div>
 
+        {!user ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Pill className="mx-auto mb-4 h-12 w-12 opacity-50" />
+              <p className="mb-4 text-muted-foreground">Sign in to see your medications and prescriptions.</p>
+              <Button asChild>
+                <Link to="/auth">Sign in</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
         <div className="grid gap-6">
           {/* Interaction Network */}
           {graph.nodes.length > 1 && (
@@ -194,7 +149,6 @@ const Medications = () => {
           )}
 
           {/* Active Medications */}
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -221,43 +175,70 @@ const Medications = () => {
                               {medication.dosage} • {medication.frequency}
                             </p>
                           </div>
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            Active
-                          </Badge>
+                          <Badge>Active</Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>Started: {format(new Date(medication.start_date), 'MMM dd, yyyy')}</span>
+                          <span>Started: {format(new Date(medication.start_date), "MMM dd, yyyy")}</span>
                         </div>
-                        
+
                         {medication.end_date && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="h-4 w-4" />
-                            <span>Until: {format(new Date(medication.end_date), 'MMM dd, yyyy')}</span>
+                            <span>Until: {format(new Date(medication.end_date), "MMM dd, yyyy")}</span>
                           </div>
                         )}
 
                         {medication.doctors && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <User className="h-4 w-4" />
-                            <span>Dr. {medication.doctors.name}</span>
+                            <span>Prescribed by {medication.doctors.name}</span>
                           </div>
                         )}
 
+                        {refillsLeft(medication) !== null && (
+                          <p className="text-sm text-muted-foreground">
+                            Refills remaining: {refillsLeft(medication)}
+                          </p>
+                        )}
+
                         {medication.instructions && (
-                          <p className="text-sm text-muted-foreground mt-2 p-2 bg-muted rounded">
+                          <p className="mt-2 rounded bg-muted p-2 text-sm text-muted-foreground">
                             {medication.instructions}
                           </p>
                         )}
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {medication.doctors?.user_id && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={requestRefill.isPending}
+                              onClick={() => requestRefill.mutate(medication)}
+                            >
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              Request refill
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={setActive.isPending}
+                            onClick={() => setActive.mutate({ id: medication.id, active: false })}
+                          >
+                            <CheckCircle2 className="mr-2 h-4 w-4" />
+                            Mark finished
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Pill className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <div className="py-8 text-center text-muted-foreground">
+                  <Pill className="mx-auto mb-4 h-12 w-12 opacity-50" />
                   <p>No active medications</p>
                   <p className="text-sm">Add your first medication to start tracking</p>
                 </div>
@@ -286,30 +267,37 @@ const Medications = () => {
                               {medication.dosage} • {medication.frequency}
                             </p>
                           </div>
-                          <Badge variant="secondary">
-                            Inactive
-                          </Badge>
+                          <Badge variant="secondary">Inactive</Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="h-4 w-4" />
-                          <span>Started: {format(new Date(medication.start_date), 'MMM dd, yyyy')}</span>
+                          <span>Started: {format(new Date(medication.start_date), "MMM dd, yyyy")}</span>
                         </div>
-                        
+
                         {medication.end_date && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="h-4 w-4" />
-                            <span>Ended: {format(new Date(medication.end_date), 'MMM dd, yyyy')}</span>
+                            <span>Ended: {format(new Date(medication.end_date), "MMM dd, yyyy")}</span>
                           </div>
                         )}
 
                         {medication.doctors && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <User className="h-4 w-4" />
-                            <span>Dr. {medication.doctors.name}</span>
+                            <span>Prescribed by {medication.doctors.name}</span>
                           </div>
                         )}
+
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={setActive.isPending}
+                          onClick={() => setActive.mutate({ id: medication.id, active: true })}
+                        >
+                          Restart
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
@@ -318,11 +306,9 @@ const Medications = () => {
             </Card>
           )}
         </div>
+        )}
 
-        <AddMedicationDialog 
-          open={showAddDialog} 
-          onOpenChange={setShowAddDialog} 
-        />
+        <AddMedicationDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
       </div>
     </div>
   );

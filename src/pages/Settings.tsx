@@ -28,22 +28,8 @@ const itemVariants = {
 };
 
 const Settings = () => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState("account");
-
-  const handleSaveSettings = () => {
-    setIsLoading(true);
-    // Simulate saving settings
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Settings saved",
-        description: "Your settings have been saved successfully",
-      });
-    }, 1000);
-  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -73,26 +59,10 @@ const Settings = () => {
             >
               <div>
                 <h1 className="text-3xl font-semibold">Settings</h1>
-                <p className="text-muted-foreground">Configure your app preferences and account settings</p>
+                <p className="text-muted-foreground">Configure your app preferences and account settings — changes save automatically</p>
               </div>
-              <Button 
-                onClick={handleSaveSettings} 
-                disabled={isLoading}
-                className="min-w-[120px]"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
             </motion.div>
+
 
             <motion.div variants={itemVariants}>
               {/* Floating Tabs Container */}
