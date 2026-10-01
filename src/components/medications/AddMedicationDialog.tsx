@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useAddMedication } from "@/hooks/useMedications";
 
 interface AddMedicationDialogProps {
   open: boolean;
@@ -33,10 +31,8 @@ const AddMedicationDialog: React.FC<AddMedicationDialogProps> = ({
   open, 
   onOpenChange 
 }) => {
-  const user = null; // No authentication
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
+  const addMedicationMutation = useAddMedication();
+
   const {
     register,
     handleSubmit,
@@ -49,34 +45,25 @@ const AddMedicationDialog: React.FC<AddMedicationDialogProps> = ({
   const startDate = watch('start_date');
   const endDate = watch('end_date');
 
-  const addMedicationMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      // Mock medication addition
-      console.log('Adding medication:', data);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['medications'] });
-      toast({
-        title: "Medication Added",
-        description: "Your medication has been added successfully.",
-      });
-      reset();
-      onOpenChange(false);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add medication. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const onSubmit = (data: FormData) => {
-    addMedicationMutation.mutate(data);
+    addMedicationMutation.mutate(
+      {
+        name: data.name.trim(),
+        dosage: data.dosage.trim(),
+        frequency: data.frequency.trim(),
+        start_date: format(data.start_date ?? new Date(), "yyyy-MM-dd"),
+        end_date: data.end_date ? format(data.end_date, "yyyy-MM-dd") : null,
+        instructions: data.instructions?.trim() || null,
+      },
+      {
+        onSuccess: () => {
+          reset();
+          onOpenChange(false);
+        },
+      },
+    );
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
