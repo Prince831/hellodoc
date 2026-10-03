@@ -51,7 +51,7 @@ export const useUserSettings = () => {
         .eq("user_id", user!.id)
         .maybeSingle();
       if (error) throw error;
-      return { ...DEFAULT_SETTINGS, ...(data ?? {}) } as UserSettings;
+      return { ...DEFAULT_SETTINGS, ...((data as Partial<UserSettings> | null) ?? {}) } as UserSettings;
     },
   });
 
