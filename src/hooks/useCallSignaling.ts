@@ -25,7 +25,7 @@ const userChannel = (userId: string) => `calls:${userId}`;
  */
 async function emit(toUserId: string, event: CallEvent, payload: unknown) {
   const channel = supabase.channel(userChannel(toUserId), {
-    config: { broadcast: { self: false, ack: true } },
+    config: { private: true, broadcast: { self: false, ack: true } },
   });
 
   await new Promise<void>((resolve) => {
@@ -61,7 +61,7 @@ export function useCallSignaling(currentUserId: string | null, handlers: Handler
     if (!currentUserId) return;
 
     const channel = supabase
-      .channel(userChannel(currentUserId), { config: { broadcast: { self: false } } })
+      .channel(userChannel(currentUserId), { config: { private: true, broadcast: { self: false } } })
       .on("broadcast", { event: "invite" }, ({ payload }) => {
         setIncoming(payload as CallInvite);
       })

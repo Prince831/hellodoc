@@ -25,7 +25,7 @@ export function useRoomChat(roomId: string | null, peerId: string | null, sender
     setMessages([]);
 
     const channel = supabase
-      .channel(`room-chat:${roomId}`, { config: { broadcast: { self: false } } })
+      .channel(`room-chat:${roomId}`, { config: { private: true, broadcast: { self: false } } })
       .on("broadcast", { event: "message" }, ({ payload }) => {
         setMessages((prev) => [...prev, payload as RoomChatMessage]);
       })
