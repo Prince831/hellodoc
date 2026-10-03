@@ -216,7 +216,7 @@ export function useWebRTC({
     };
 
     const channel = supabase.channel(`webrtc:${roomId}`, {
-      config: { broadcast: { self: false } },
+      config: { private: true, broadcast: { self: false } },
     });
     channelRef.current = channel;
 

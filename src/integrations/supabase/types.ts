@@ -1103,6 +1103,8 @@ export type Database = {
       }
     }
     Functions: {
+      can_reach_user: { Args: { _user_id: string }; Returns: boolean }
+      can_use_realtime_topic: { Args: { _topic: string }; Returns: boolean }
       can_view_doctor_contact_info: { Args: never; Returns: boolean }
       current_doctor_id: { Args: never; Returns: string }
       has_role: {
@@ -1112,6 +1114,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_room_participant: { Args: { _room_id: string }; Returns: boolean }
       is_treating_doctor: { Args: { _patient_id: string }; Returns: boolean }
     }
     Enums: {
