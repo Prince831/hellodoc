@@ -88,32 +88,44 @@ export type Database = {
       }
       appointments: {
         Row: {
+          ai_visit_note: string | null
+          consultation_type: string | null
           created_at: string
           date: string
           doctor_id: string
           id: string
           notes: string | null
           reason: string
+          reminder_1h_sent_at: string | null
+          reminder_24h_sent_at: string | null
           status: string
           user_id: string
         }
         Insert: {
+          ai_visit_note?: string | null
+          consultation_type?: string | null
           created_at?: string
           date: string
           doctor_id: string
           id?: string
           notes?: string | null
           reason: string
+          reminder_1h_sent_at?: string | null
+          reminder_24h_sent_at?: string | null
           status: string
           user_id: string
         }
         Update: {
+          ai_visit_note?: string | null
+          consultation_type?: string | null
           created_at?: string
           date?: string
           doctor_id?: string
           id?: string
           notes?: string | null
           reason?: string
+          reminder_1h_sent_at?: string | null
+          reminder_24h_sent_at?: string | null
           status?: string
           user_id?: string
         }
@@ -1107,6 +1119,12 @@ export type Database = {
       can_use_realtime_topic: { Args: { _topic: string }; Returns: boolean }
       can_view_doctor_contact_info: { Args: never; Returns: boolean }
       current_doctor_id: { Args: never; Returns: string }
+      get_available_slots: {
+        Args: { _day: string; _doctor_id: string; _slot_minutes?: number }
+        Returns: {
+          slot_start: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
