@@ -1,11 +1,13 @@
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, X, FileText, Video } from "lucide-react";
+import { Calendar, Clock, X, FileText, Video, CalendarClock } from "lucide-react";
 import { Appointment } from "@/types/appointments";
 import { useStartVideoConsultation } from "@/hooks/useVideoConsultations";
 import { getStatusColor, getStatusBorderColor } from "@/utils/appointmentUtils";
+import RescheduleDialog from "./RescheduleDialog";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +27,10 @@ export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps)
   const isPast = appointmentDate < new Date();
   const navigate = useNavigate();
   const startCall = useStartVideoConsultation();
+  const [rescheduling, setRescheduling] = useState(false);
   const canJoinCall = appointment.status === "approved" && !isPast;
+  const canChange = !isPast && (appointment.status === "pending" || appointment.status === "approved");
+  const aiNote = (appointment as Appointment & { ai_visit_note?: string | null }).ai_visit_note;
 
   const joinCall = () =>
     startCall.mutate(appointment.id, {
@@ -83,6 +88,13 @@ export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps)
         </div>
       )}
 
+      {aiNote && (
+        <div className="mt-4 bg-muted/40 rounded-lg p-4">
+          <h4 className="font-semibold text-foreground">Note shared with your doctor</h4>
+          <p className="text-muted-foreground mt-1 whitespace-pre-line text-sm">{aiNote}</p>
+        </div>
+      )}
+
       <div className="mt-4 flex justify-between">
         <Dialog>
           <DialogTrigger asChild>
@@ -134,11 +146,18 @@ export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps)
           </DialogContent>
         </Dialog>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {canJoinCall && (
             <Button size="sm" onClick={joinCall} disabled={startCall.isPending}>
               <Video className="h-4 w-4 mr-2" />
               Join video call
+            </Button>
+          )}
+
+          {canChange && (
+            <Button variant="outline" size="sm" onClick={() => setRescheduling(true)}>
+              <CalendarClock className="h-4 w-4 mr-2" />
+              Reschedule
             </Button>
           )}
 
@@ -155,6 +174,15 @@ export const AppointmentCard = ({ appointment, onCancel }: AppointmentCardProps)
         </div>
       </div>
 
+      {canChange && (
+        <RescheduleDialog
+          open={rescheduling}
+          onOpenChange={setRescheduling}
+          appointmentId={appointment.id}
+          doctorId={appointment.doctor_id}
+          currentDate={appointment.date}
+        />
+      )}
     </Card>
   );
 };
