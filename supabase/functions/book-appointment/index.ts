@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
     if (!isDoctor) return forbidden("Only the doctor can confirm or decline");
     const { error } = await db.from("appointments").update({ status: input.decision }).eq("id", appt.id);
     if (error) return json({ error: error.message }, 500);
-    const label = { confirmed: "approved", declined: "declined", completed: "marked as completed" }[input.decision];
+    const label = { approved: "approved", declined: "declined", completed: "marked as completed" }[input.decision];
     await notify(appt.user_id, `Appointment ${label}`, `Your appointment on ${when(appt.date)} was ${label}.`, "/appointments");
     return json({ success: true });
   } catch (error) {
