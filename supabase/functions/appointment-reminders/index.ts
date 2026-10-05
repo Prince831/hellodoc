@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const { data: appts, error } = await db
       .from("appointments")
       .select("id, user_id, date, reason, doctor:doctors(name, user_id)")
-      .in("status", ["pending", "confirmed"])
+      .in("status", ["pending", "approved"])
       .is(w.column, null)
       .gt("date", new Date(now + w.fromMin * 60000).toISOString())
       .lte("date", new Date(now + w.toMin * 60000).toISOString())
