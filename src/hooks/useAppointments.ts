@@ -182,7 +182,7 @@ export const useRespondToAppointment = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, decision }: { id: string; decision: "confirmed" | "declined" | "completed" }) =>
+    mutationFn: ({ id, decision }: { id: string; decision: "approved" | "declined" | "completed" }) =>
       callBooking({ action: "respond", appointmentId: id, decision }),
     onSuccess: (_d, v) => {
       invalidateAll(queryClient);

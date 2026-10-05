@@ -27,7 +27,7 @@ const Cancel = z.object({ action: z.literal("cancel"), appointmentId: z.string()
 const Respond = z.object({
   action: z.literal("respond"),
   appointmentId: z.string().uuid(),
-  decision: z.enum(["confirmed", "declined", "completed"]),
+  decision: z.enum(["approved", "declined", "completed"]),
 });
 const Body = z.union([Reschedule, Cancel, Respond, Book]);
 
@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
       }
       const { error } = await db.from("appointments").update({
         date: input.date,
-        status: isDoctor ? "confirmed" : "pending",
+        status: isDoctor ? "approved" : "pending",
         reminder_24h_sent_at: null,
         reminder_1h_sent_at: null,
       }).eq("id", appt.id);
@@ -134,7 +134,7 @@ Deno.serve(async (req) => {
     if (!isDoctor) return forbidden("Only the doctor can confirm or decline");
     const { error } = await db.from("appointments").update({ status: input.decision }).eq("id", appt.id);
     if (error) return json({ error: error.message }, 500);
-    const label = { confirmed: "confirmed", declined: "declined", completed: "marked as completed" }[input.decision];
+    const label = { approved: "approved", declined: "declined", completed: "marked as completed" }[input.decision];
     await notify(appt.user_id, `Appointment ${label}`, `Your appointment on ${when(appt.date)} was ${label}.`, "/appointments");
     return json({ success: true });
   } catch (error) {

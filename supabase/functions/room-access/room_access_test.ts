@@ -79,7 +79,7 @@ Deno.test({
             user_id: patient.id,
             doctor_id: doctor.id,
             date: new Date(Date.now() + offsetDays * 86400000).toISOString(),
-            status: "confirmed",
+            status: "approved",
             reason: "Room access test",
           })
           .select("id")
