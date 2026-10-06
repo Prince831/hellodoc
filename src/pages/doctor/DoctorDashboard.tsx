@@ -6,14 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarClock, CheckCircle2, Users, XCircle, CalendarCog, Video } from "lucide-react";
-import { useDoctorAppointments, useUpdateAppointment } from "@/hooks/useAppointments";
+import { useState } from "react";
+import { useDoctorAppointments, useRespondToAppointment } from "@/hooks/useAppointments";
+import RescheduleDialog from "@/components/appointments/RescheduleDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useStartVideoConsultation } from "@/hooks/useVideoConsultations";
 import ConsultationRooms from "@/components/consultations/ConsultationRooms";
 
 const DoctorDashboard = () => {
   const { data: appointments = [], isLoading } = useDoctorAppointments();
-  const updateAppointment = useUpdateAppointment();
+  const respond = useRespondToAppointment();
+  const [rescheduling, setRescheduling] = useState<{ id: string; date: string } | null>(null);
   const { doctorId } = useAuth();
   const navigate = useNavigate();
   const startCall = useStartVideoConsultation();
@@ -27,8 +30,9 @@ const DoctorDashboard = () => {
   const today = appointments.filter((a) => isToday(parseISO(a.date)) && a.status === "approved");
   const patients = new Map(appointments.map((a) => [a.user_id, a.patient?.full_name ?? "Patient"]));
 
-  const setStatus = (id: string, status: string) =>
-    updateAppointment.mutate({ id, updates: { status } });
+  const setStatus = (id: string, decision: "approved" | "declined" | "completed") =>
+    respond.mutate({ id, decision });
+  const noteOf = (a: unknown) => (a as { ai_visit_note?: string | null }).ai_visit_note;
 
   if (!doctorId) {
     return (
@@ -103,12 +107,18 @@ const DoctorDashboard = () => {
                       <p className="text-sm text-muted-foreground">
                         {format(parseISO(a.date), "PPp")} — {a.reason}
                       </p>
+                      {noteOf(a) && (
+                        <p className="mt-2 max-w-xl whitespace-pre-line rounded-md bg-muted/40 p-2 text-xs text-muted-foreground">{noteOf(a)}</p>
+                      )}
                     </div>
                     <div className="flex gap-2">
+                      <Button size="sm" variant="ghost" onClick={() => setRescheduling({ id: a.id, date: a.date })}>
+                        Reschedule
+                      </Button>
                       <Button size="sm" onClick={() => setStatus(a.id, "approved")}>
                         <CheckCircle2 className="mr-1 h-4 w-4" /> Approve
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setStatus(a.id, "cancelled")}>
+                      <Button size="sm" variant="outline" onClick={() => setStatus(a.id, "declined")}>
                         <XCircle className="mr-1 h-4 w-4" /> Decline
                       </Button>
                     </div>
@@ -145,6 +155,9 @@ const DoctorDashboard = () => {
                         <Button size="sm" onClick={() => joinCall(a.id)} disabled={startCall.isPending}>
                           <Video className="mr-1 h-4 w-4" /> Start video call
                         </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setRescheduling({ id: a.id, date: a.date })}>
+                          Reschedule
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => setStatus(a.id, "completed")}>
                           Mark complete
                         </Button>
@@ -155,6 +168,15 @@ const DoctorDashboard = () => {
             </div>
           )}
         </section>
+        {rescheduling && doctorId && (
+          <RescheduleDialog
+            open
+            onOpenChange={(o) => !o && setRescheduling(null)}
+            appointmentId={rescheduling.id}
+            doctorId={doctorId}
+            currentDate={rescheduling.date}
+          />
+        )}
       </main>
     </div>
   );
