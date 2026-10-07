@@ -23,6 +23,7 @@ import DoctorList from "@/components/symptom-checker/DoctorList";
 import LocationEmergencySection from "@/components/symptom-checker/LocationEmergencySection";
 import { useDoctors } from "@/hooks/useDoctors";
 import Navbar from "@/components/Navbar";
+import SymptomGuideAssistant from "@/components/symptom-checker/SymptomGuideAssistant";
 import { useNavigate } from "react-router-dom";
 import SceneBoundary, { isWebGLAvailable } from "@/components/three/SceneBoundary";
 import type { BodyRegion } from "@/components/three/BodyMap3D";
@@ -148,6 +149,7 @@ const SymptomChecker = () => {
                 {/* Ambient lighting effect */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl blur-lg opacity-50" />
                 
+                <div className="mb-8"><SymptomGuideAssistant /></div>
                 <div className="relative">
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 h-auto mb-8 bg-muted/50 backdrop-blur-sm">

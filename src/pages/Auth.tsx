@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Stethoscope } from "lucide-react";
+import { friendlyAuthError } from "@/lib/authErrors";
 
 const emailSchema = z.string().trim().email("Enter a valid email address").max(255);
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
@@ -76,7 +77,7 @@ const Auth = () => {
     });
     setSubmitting(false);
 
-    if (signUpError) return setError(signUpError.message);
+    if (signUpError) return setError(friendlyAuthError(signUpError));
 
     if (role === "doctor" && data.session && data.user) {
       await supabase.from("doctors").insert({
