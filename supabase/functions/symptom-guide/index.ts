@@ -22,25 +22,23 @@ const Input = z.object({
 });
 
 const Output = z.object({
-  consultation_type: z.enum(["video", "voice", "in_person", "urgent_care"]),
-  reason: z.string().min(1).max(400),
-  red_flags: z.array(z.string().max(200)).max(6),
-  doctor_note: z.string().min(1).max(2500),
+  urgency: z.enum(["emergency", "urgent", "soon", "routine"]),
+  urgency_explanation: z.string().min(1).max(600),
+  warning_signs: z.array(z.string().max(200)).max(6),
+  share_with_doctor: z.array(z.string().max(200)).min(1).max(8),
+  questions_to_ask: z.array(z.string().max(200)).max(5),
 });
 
-const SYSTEM = `You help patients prepare for a doctor's appointment. You do not diagnose.
-Given the patient's own description, choose the most suitable consultation type:
-- "urgent_care" if any emergency warning sign is present (chest pain, trouble breathing, stroke signs, severe bleeding, suicidal thoughts, fainting, severe allergic reaction, high fever in an infant, etc.)
-- "in_person" if a physical examination, test or procedure is clearly needed
-- "video" if the doctor needs to see something (rash, swelling, wound, eye) but not touch it
-- "voice" for simple follow-ups, medication questions or mild issues that can be discussed
-
-Then write a concise clinical-style note for the doctor (max ~120 words) with these labelled lines:
-Main complaint:, Duration:, Severity:, Associated symptoms:, Relevant history:, Patient's questions:
-Use "Not mentioned" when unknown. Never invent facts.
-
-Respond with ONLY a JSON object, no markdown, exactly:
-{"consultation_type":"video|voice|in_person|urgent_care","reason":"one or two plain-language sentences for the patient","red_flags":["..."],"doctor_note":"..."}`;
+const SYSTEM = `You help patients understand how urgently they should seek care. You do not diagnose.
+Classify urgency from the patient's own description:
+- "emergency": any emergency sign (chest pain, trouble breathing, stroke signs, severe bleeding, suicidal thoughts, fainting, severe allergic reaction, high fever in an infant) — tell them to call emergency services now.
+- "urgent": should see a doctor today.
+- "soon": book an appointment within a few days.
+- "routine": can be handled at a regular appointment or with self-care.
+Explain the urgency in 2-3 plain-language sentences. List warning signs that would make it more urgent.
+List the specific information the patient should share with a doctor (onset, duration, severity, triggers, medications, history etc., tailored to these symptoms). Suggest up to 5 questions to ask.
+Never invent facts. Respond with ONLY a JSON object, no markdown, exactly:
+{"urgency":"emergency|urgent|soon|routine","urgency_explanation":"...","warning_signs":["..."],"share_with_doctor":["..."],"questions_to_ask":["..."]}`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -70,7 +68,7 @@ Deno.serve(async (req) => {
     const result = streamText({
       model: provider.responses("openai/gpt-6-astra"),
       system: SYSTEM,
-      prompt: `Patient description:\n${parsed.data.symptoms}${parsed.data.context ? `\n\nBooking context: ${parsed.data.context}` : ""}`,
+      prompt: `Patient description:\n${parsed.data.symptoms}${parsed.data.context ? `\n\nExtra context: ${parsed.data.context}` : ""}`,
       abortSignal: req.signal,
       providerOptions: {
         openai: {
@@ -95,7 +93,7 @@ Deno.serve(async (req) => {
     if (runId) runHeaders["X-Lovable-AIG-Run-ID"] = runId;
 
     if (!text.trim()) {
-      return json({ error: "The assistant couldn't help with this description. You can still book normally." }, 422, runHeaders);
+      return json({ error: "The assistant couldn't help with this description." }, 422, runHeaders);
     }
 
     const match = text.match(/\{[\s\S]*\}/);
@@ -110,10 +108,10 @@ Deno.serve(async (req) => {
     const status = e.statusCode ?? e.status ?? 500;
     const message =
       status === 429 ? "The assistant is busy right now. Please try again in a minute."
-      : status === 402 ? "AI credits have run out for this app. You can still book without the assistant."
-      : status === 403 ? "The assistant isn't available for this request. You can still book without it."
-      : "The assistant is unavailable right now. You can still book without it.";
-    console.error("visit-prep error", status, e.message);
+      : status === 402 ? "AI credits have run out for this app."
+      : status === 403 ? "The assistant isn't available for this request."
+      : "The assistant is unavailable right now.";
+    console.error("symptom-guide error", status, e.message);
     return json({ error: message }, [402, 403, 429].includes(status) ? status : 500);
   }
 });
