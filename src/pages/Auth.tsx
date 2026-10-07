@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, Stethoscope } from "lucide-react";
 import { friendlyAuthError } from "@/lib/authErrors";
+import { PasswordStrength } from "@/components/PasswordStrength";
 
 const emailSchema = z.string().trim().email("Enter a valid email address").max(255);
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
@@ -185,6 +186,7 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <Input id="signup-password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <PasswordStrength password={password} />
                   </div>
                   <div className="space-y-2">
                     <Label>I am a</Label>
