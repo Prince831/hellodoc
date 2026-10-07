@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { friendlyAuthError } from "@/lib/authErrors";
 
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
 
@@ -29,7 +30,7 @@ const ResetPassword = () => {
     setSubmitting(true);
     const { error: updateError } = await supabase.auth.updateUser({ password });
     setSubmitting(false);
-    if (updateError) return setError(updateError.message);
+    if (updateError) return setError(friendlyAuthError(updateError));
 
     toast({ title: "Password updated", description: "You can now use your new password." });
     navigate("/dashboard", { replace: true });
