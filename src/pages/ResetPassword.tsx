@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { friendlyAuthError } from "@/lib/authErrors";
+import { PasswordStrength } from "@/components/PasswordStrength";
 
 const passwordSchema = z.string().min(8, "Password must be at least 8 characters").max(72);
 
@@ -48,6 +49,7 @@ const ResetPassword = () => {
             <div className="space-y-2">
               <Label htmlFor="new-password">New password</Label>
               <Input id="new-password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <PasswordStrength password={password} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm password</Label>
