@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSaveUserSettings, useUserSettings, type UserSettings } from "@/hooks/useUserSettings";
+import { Button } from "@/components/ui/button";
+import { REMINDER_OPTIONS, useSaveUserSettings, useUserSettings, type UserSettings } from "@/hooks/useUserSettings";
 
 type ToggleKey = Extract<
   keyof UserSettings,
@@ -76,6 +77,38 @@ const NotificationSettings = () => {
             />
           </div>
         ))}
+        {settings.appointment_reminders && (
+          <div className="rounded-lg border border-border/60 p-4 space-y-3">
+            <div>
+              <Label>When to remind me</Label>
+              <p className="text-sm text-muted-foreground">Pick one or more times before each consultation.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {REMINDER_OPTIONS.map((opt) => {
+                const active = settings.reminder_offsets.includes(opt.minutes);
+                return (
+                  <Button
+                    key={opt.minutes}
+                    type="button"
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    aria-pressed={active}
+                    disabled={save.isPending || (active && settings.reminder_offsets.length === 1)}
+                    onClick={() =>
+                      save.mutate({
+                        reminder_offsets: active
+                          ? settings.reminder_offsets.filter((m) => m !== opt.minutes)
+                          : [...settings.reminder_offsets, opt.minutes].sort((a, b) => b - a),
+                      })
+                    }
+                  >
+                    {opt.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -98,6 +98,7 @@ export type Database = {
           reason: string
           reminder_1h_sent_at: string | null
           reminder_24h_sent_at: string | null
+          reminders_sent: Json
           status: string
           user_id: string
         }
@@ -112,6 +113,7 @@ export type Database = {
           reason: string
           reminder_1h_sent_at?: string | null
           reminder_24h_sent_at?: string | null
+          reminders_sent?: Json
           status: string
           user_id: string
         }
@@ -126,6 +128,7 @@ export type Database = {
           reason?: string
           reminder_1h_sent_at?: string | null
           reminder_24h_sent_at?: string | null
+          reminders_sent?: Json
           status?: string
           user_id?: string
         }
@@ -885,6 +888,7 @@ export type Database = {
           message_notifications: boolean
           push_notifications: boolean
           reduced_motion: boolean
+          reminder_offsets: number[]
           share_records_with_doctors: boolean
           show_profile_to_doctors: boolean
           theme: string
@@ -903,6 +907,7 @@ export type Database = {
           message_notifications?: boolean
           push_notifications?: boolean
           reduced_motion?: boolean
+          reminder_offsets?: number[]
           share_records_with_doctors?: boolean
           show_profile_to_doctors?: boolean
           theme?: string
@@ -921,6 +926,7 @@ export type Database = {
           message_notifications?: boolean
           push_notifications?: boolean
           reduced_motion?: boolean
+          reminder_offsets?: number[]
           share_records_with_doctors?: boolean
           show_profile_to_doctors?: boolean
           theme?: string
