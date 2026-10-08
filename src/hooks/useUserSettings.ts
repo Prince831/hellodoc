@@ -17,7 +17,18 @@ export interface UserSettings {
   reduced_motion: boolean;
   compact_layout: boolean;
   font_size: string;
+  reminder_offsets: number[];
 }
+
+/** Lead times (minutes before a consultation) patients can pick for reminders. */
+export const REMINDER_OPTIONS = [
+  { minutes: 10080, label: "1 week" },
+  { minutes: 2880, label: "2 days" },
+  { minutes: 1440, label: "1 day" },
+  { minutes: 180, label: "3 hours" },
+  { minutes: 60, label: "1 hour" },
+  { minutes: 15, label: "15 minutes" },
+];
 
 export const DEFAULT_SETTINGS: UserSettings = {
   email_notifications: true,
@@ -33,6 +44,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   reduced_motion: false,
   compact_layout: false,
   font_size: "medium",
+  reminder_offsets: [1440, 60],
 };
 
 const COLUMNS = Object.keys(DEFAULT_SETTINGS).join(", ");
