@@ -1,0 +1,2 @@
+ALTER TABLE public.user_settings ADD COLUMN IF NOT EXISTS reminder_offsets integer[] NOT NULL DEFAULT '{1440,60}';
+ALTER TABLE public.appointments ADD COLUMN IF NOT EXISTS reminders_sent jsonb NOT NULL DEFAULT '{}'::jsonb;
